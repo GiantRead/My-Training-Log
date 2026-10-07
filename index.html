@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<link rel="manifest" href="manifest.webmanifest">
+<title>My Training Log</title>
+<style>
+:root{--bg:#f4f5f7;--card:#fff;--ink:#111827;--muted:#6b7280;--line:#e5e7eb;--accent:#111827;--good:#166534;--goodbg:#dcfce7;--danger:#991b1b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+header{position:sticky;top:0;z-index:5;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:12px max(14px,calc((100vw - 900px)/2))}
+main{max-width:900px;margin:auto;padding:14px 14px 60px}.brand{display:flex;align-items:center;justify-content:space-between}.brand h1{font-size:20px;margin:0}.quote{font-size:12px;color:var(--muted);margin-top:3px}.days{display:flex;gap:7px;overflow:auto;padding:12px 0 4px}.days button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 13px;white-space:nowrap;font-weight:700}.days button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0;box-shadow:0 1px 2px #00000008}.row{display:flex;gap:8px;align-items:center}.between{justify-content:space-between}.muted{color:var(--muted)}.small{font-size:12px}.progress{height:8px;background:#e5e7eb;border-radius:99px;overflow:hidden}.progress>div{height:100%;background:#111827;width:0;transition:.2s}
+.timer{font-variant-numeric:tabular-nums;font-size:28px;font-weight:800}.timer button,.btn{border:1px solid var(--line);background:#fff;border-radius:9px;padding:8px 11px;font-weight:700}.btn.primary{background:#111827;color:#fff;border-color:#111827}.btn.danger{color:var(--danger)}button{cursor:pointer}
+.exercise h3{margin:0;font-size:16px}.exercise.skipped{opacity:.48}.tag{font-size:11px;background:#f3f4f6;border-radius:6px;padding:3px 6px}.sets{margin-top:10px}.set{display:grid;grid-template-columns:34px 1fr 1fr 64px 48px;gap:6px;align-items:center;margin:6px 0}.set input,.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px;background:#fff;font:inherit}.set input{text-align:center;padding:8px}.done{height:38px;border:1px solid var(--line);border-radius:8px;background:#fff;font-weight:800}.done.yes{background:var(--goodbg);color:var(--good);border-color:#86efac}.setnum{font-size:12px;color:var(--muted);text-align:center}.sethead{display:grid;grid-template-columns:34px 1fr 1fr 64px 48px;gap:6px;color:var(--muted);font-size:10px;text-align:center}.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.field{margin:9px 0}.field label{display:block;font-size:12px;font-weight:700;margin-bottom:4px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.history-item{border-top:1px solid var(--line);padding:10px 0}.history-item:first-child{border-top:0}.modal{position:fixed;inset:0;background:#0007;z-index:20;display:none;align-items:flex-end}.modal.open{display:flex}.sheet{background:#fff;width:100%;max-height:85vh;overflow:auto;border-radius:18px 18px 0 0;padding:18px}.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 14px;border-radius:10px;display:none;z-index:30}.toast.show{display:block}
+@media(min-width:700px){.modal{align-items:center}.sheet{max-width:650px;border-radius:18px}}
+</style>
+</head>
+<body>
+<header><div class="brand"><div><h1>My Training Log</h1><div class="quote" id="quote"></div></div><button class="btn" onclick="openHistory()">History</button></div><div class="days" id="days"></div></header>
+<main>
+<div class="card"><div class="row between"><strong id="dayTitle"></strong><span id="count" class="small muted"></span></div><div class="progress" style="margin-top:9px"><div id="bar"></div></div></div>
+<div class="card"><div class="row between"><div><div class="small muted">Session timer</div><div class="timer" id="timer">60:00</div></div><div class="actions"><button class="btn primary" onclick="startTimer()">Start</button><button class="btn" onclick="pauseTimer()">Pause</button><button class="btn" onclick="resetTimer()">Reset</button></div></div></div>
+<div id="workout"></div>
+<div class="card"><div class="field"><label>Session comments</label><textarea id="sessionNotes" rows="3" placeholder="How did the session feel?"></textarea></div><div class="field"><label>Conditioning notes</label><textarea id="conditioningNotes" rows="2" placeholder="Intervals, pace, distance, effort..."></textarea></div><button class="btn primary" onclick="saveSession()">Save session</button></div>
+<div class="card"><strong>Body & goals</strong><div class="grid2"><div class="field"><label>Body weight (kg)</label><input id="bodyWeight" type="number" step="0.1"></div><div class="field"><label>Waist (cm)</label><input id="waist" type="number" step="0.1"></div><div class="field"><label>Protein target (g)</label><input id="protein" type="number" value="190"></div><div class="field"><label>Goal weight (kg)</label><input id="goalWeight" type="number" step="0.1"></div></div></div>
+<div class="card"><div class="row between"><strong>Backup</strong><div class="actions"><button class="btn" onclick="exportData()">Export</button><label class="btn">Import<input id="importFile" type="file" accept=".json" style="display:none" onchange="importData(event)"></label></div></div><div class="small muted" style="margin-top:7px">Your log is stored locally in this browser. Export a backup before changing phones or clearing browser data.</div></div>
+</main>
+<div class="modal" id="historyModal"><div class="sheet"><div class="row between"><h2 style="margin:0">Training history</h2><button class="btn" onclick="closeHistory()">Close</button></div><div id="history"></div></div></div>
+<div class="toast" id="toast"></div>
+<script>
+const DAYS=[
+{name:"Monday",focus:"Chest + upper-body strength",conditioning:"Rower: 6 × 20s hard / 40s easy",ex:[
+["Machine chest fly",5,12,15,"Isolation"],["Barbell bench press",3,4,6,"Compound"],["Incline DB press",3,8,10,"Secondary"],["Chest-supported row",3,8,12,"Secondary"],["Cable lateral raise",2,12,15,"Accessory"]]},
+{name:"Tuesday",focus:"Quads + squat strength",conditioning:"Incline treadmill: 8 min",ex:[
+["Leg extension",5,12,15,"Isolation"],["High-bar back squat",3,4,6,"Compound"],["Bulgarian split squat",3,8,8,"Secondary"],["Seated leg curl",3,10,12,"Secondary"],["Standing calf raise",2,12,15,"Accessory"]]},
+{name:"Wednesday",focus:"Back + pulling strength",conditioning:"Bike: 6 × 15s hard / 45s easy",ex:[
+["Straight-arm cable pulldown / machine pullover",5,12,15,"Isolation"],["Weighted pull-up / neutral lat pulldown",3,4,6,"Compound"],["Chest-supported row",3,6,10,"Secondary"],["Neutral-grip pulldown",3,8,12,"Secondary"],["Reverse pec deck",2,12,15,"Accessory"],["DB curl",2,10,12,"Accessory"]]},
+{name:"Thursday",focus:"Shoulders + arms",conditioning:"Stair machine: 8 min",ex:[
+["Cable lateral raise",5,12,15,"Isolation"],["Seated DB overhead press",3,5,8,"Compound"],["Machine shoulder press",3,8,10,"Secondary"],["Reverse pec deck",3,12,15,"Secondary"],["Rope pressdown",3,10,15,"Accessory"],["Cable curl",3,10,15,"Accessory"],["Overhead cable triceps extension",2,10,12,"Accessory"],["Hammer curl",2,10,12,"Accessory"]]},
+{name:"Friday",focus:"Posterior chain + full-body conditioning",conditioning:"Sled circuit: 6–8 min",ex:[
+["Seated / lying leg curl",5,10,15,"Isolation"],["Trap-bar deadlift",3,4,6,"Compound"],["Hip thrust",3,8,10,"Secondary"],["Reverse lunge",2,8,8,"Secondary"],["Cable crunch",2,12,15,"Accessory"]]}
+];
+const quotes=["Fall in love with the grind.","Small improvements. Repeated.","Do the work. Then do it again.","Strong is built, not wished for."];
+let state=JSON.parse(localStorage.getItem("mtl-v1")||"null")||{day:0,workouts:{},history:[],body:[]};
+let timer=3600,timerId=null;
+const key=()=>DAYS[state.day].name;
+function init(){document.getElementById("quote").textContent=quotes[new Date().getDate()%quotes.length];renderDays();loadDay();loadBody()}
+function renderDays(){document.getElementById("days").innerHTML=DAYS.map((d,i)=>'<button class="'+(i===state.day?'active':'')+'" onclick="switchDay('+i+')">'+d.name.slice(0,3)+'</button>').join("")}
+function switchDay(i){state.day=i;save();renderDays();loadDay();resetTimer()}
+function defaultEx(){return DAYS[state.day].ex.map(x=>({name:x[0],sets:x[1],min:x[2],max:x[3],type:x[4],skipped:false,comments:"",data:Array.from({length:x[1]},()=>({weight:"",reps:"",rir:"",done:false}))}))}
+function loadDay(){let d=state.workouts[key()];if(!d){d={ex:defaultEx(),sessionNotes:"",conditioningNotes:""};state.workouts[key()]=d;save()}document.getElementById("dayTitle").textContent=key()+" — "+DAYS[state.day].focus;document.getElementById("sessionNotes").value=d.sessionNotes||"";document.getElementById("conditioningNotes").value=d.conditioningNotes||"";renderWorkout()}
+function renderWorkout(){const d=state.workouts[key()];let total=0,done=0;d.ex.forEach(e=>{if(!e.skipped){total+=e.data.length;done+=e.data.filter(s=>s.done).length}});
+document.getElementById("count").textContent=done+" / "+total+" sets";document.getElementById("bar").style.width=(total?done/total*100:0)+"%";
+document.getElementById("workout").innerHTML=d.ex.map((e,ei)=>'<div class="card exercise '+(e.skipped?'skipped':'')+'"><div class="row between"><div><h3>'+esc(e.name)+'</h3><span class="tag">'+e.type+" · "+e.min+"–"+e.max+" reps"+(e.min===e.max?' each':'')+'</span></div><button class="btn '+(e.skipped?'primary':'')+'" onclick="skipEx('+ei+')">'+(e.skipped?'Unskip':'Skip')+'</button></div>'+(!e.skipped?'<div class="sets"><div class="sethead"><span>#</span><span>kg</span><span>reps</span><span>RIR</span><span>✓</span></div>'+e.data.map((s,si)=>'<div class="set"><span class="setnum">'+(si+1)+'</span><input type="number" step="0.5" inputmode="decimal" value="'+s.weight+'" onchange="setVal('+ei+','+si+',\'weight\',this.value)"><input type="number" inputmode="numeric" value="'+s.reps+'" onchange="setVal('+ei+','+si+',\'reps\',this.value)"><input type="number" min="0" max="5" inputmode="numeric" value="'+s.rir+'" onchange="setVal('+ei+','+si+',\'rir\',this.value)"><button class="done '+(s.done?'yes':'')+'" onclick="toggleSet('+ei+','+si+')">'+(s.done?'✓':'')+'</button></div>').join("")+'</div><div class="field"><label>Exercise comments</label><input value="'+escAttr(e.comments||"")+'" placeholder="Technique, pain, equipment, notes..." onchange="commentEx('+ei+',this.value)"></div>':'<div class="small muted" style="margin-top:10px">Skipped for this session.</div>')+'</div>').join("")+'<button class="btn" onclick="addExercise()">+ Add exercise</button>'}
+function setVal(e,s,k,v){state.workouts[key()].ex[e].data[s][k]=v;save();renderWorkout()}
+function toggleSet(e,s){state.workouts[key()].ex[e].data[s].done=!state.workouts[key()].ex[e].data[s].done;save();renderWorkout()}
+function commentEx(e,v){state.workouts[key()].ex[e].comments=v;save()}
+function skipEx(e){state.workouts[key()].ex[e].skipped=!state.workouts[key()].ex[e].skipped;save();renderWorkout()}
+function addExercise(){let n=prompt("Exercise name");if(!n)return;let min=prompt("Target minimum reps","8");let max=prompt("Target maximum reps","12");let sets=prompt("Number of working sets","3");if(!min||!max||!sets)return;state.workouts[key()].ex.push({name:n,sets:+sets,min:+min,max:+max,type:"Added",skipped:false,comments:"",data:Array.from({length:+sets},()=>({weight:"",reps:"",rir:"",done:false}))});save();renderWorkout()}
+function saveSession(){let d=state.workouts[key()];d.sessionNotes=document.getElementById("sessionNotes").value;d.conditioningNotes=document.getElementById("conditioningNotes").value;let body={date:new Date().toISOString(),weight:document.getElementById("bodyWeight").value,waist:document.getElementById("waist").value};if(body.weight||body.waist)state.body.push(body);state.history.unshift({date:new Date().toISOString(),day:key(),focus:DAYS[state.day].focus,ex:JSON.parse(JSON.stringify(d.ex)),notes:d.sessionNotes,conditioning:d.conditioningNotes});save();toast("Session saved")}
+function loadBody(){let b=state.body?.[state.body.length-1]||{};document.getElementById("bodyWeight").value=b.weight||"";document.getElementById("waist").value=b.waist||"";document.getElementById("protein").value=localStorage.getItem("mtl-protein")||190;document.getElementById("goalWeight").value=localStorage.getItem("mtl-goal")||"";document.getElementById("protein").onchange=e=>localStorage.setItem("mtl-protein",e.target.value);document.getElementById("goalWeight").onchange=e=>localStorage.setItem("mtl-goal",e.target.value)}
+function openHistory(){document.getElementById("historyModal").classList.add("open");let h=document.getElementById("history");h.innerHTML=state.history.length?state.history.map((x,i)=>'<div class="history-item"><strong>'+new Date(x.date).toLocaleString()+'</strong><div class="small muted">'+esc(x.day)+" — "+esc(x.focus)+'</div><div class="small" style="margin-top:5px">'+x.ex.map(e=>esc(e.name)+": "+e.data.map(s=>s.done?(s.weight||"—")+"kg × "+(s.reps||"—")+" ("+(s.rir||"")+" RIR":"").filter(Boolean).join(", ")).filter(Boolean).join("<br>")+'</div></div>').join(""):'<p class="muted">No saved sessions yet.</p>'}
+function closeHistory(){document.getElementById("historyModal").classList.remove("open")}
+function exportData(){let blob=new Blob([JSON.stringify({state,protein:localStorage.getItem("mtl-protein"),goal:localStorage.getItem("mtl-goal")},null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="my-training-log-backup.json";a.click()}
+function importData(ev){let f=ev.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!x.state)throw Error();state=x.state;if(x.protein)localStorage.setItem("mtl-protein",x.protein);if(x.goal)localStorage.setItem("mtl-goal",x.goal);save();renderDays();loadDay();loadBody();toast("Backup restored")}catch(e){toast("That backup could not be read")}};r.readAsText(f)}
+function save(){localStorage.setItem("mtl-v1",JSON.stringify(state))}
+function startTimer(){if(timerId)return;timerId=setInterval(()=>{if(timer>0){timer--;showTimer()}else{clearInterval(timerId);timerId=null;navigator.vibrate?.([200,100,200]);toast("60 minutes complete")}},1000)}
+function pauseTimer(){clearInterval(timerId);timerId=null}
+function resetTimer(){pauseTimer();timer=3600;showTimer()}
+function showTimer(){document.getElementById("timer").textContent=Math.floor(timer/60).toString().padStart(2,"0")+":"+String(timer%60).padStart(2,"0")}
+function toast(t){let x=document.getElementById("toast");x.textContent=t;x.classList.add("show");setTimeout(()=>x.classList.remove("show"),1800)}
+function esc(s){return String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}
+function escAttr(s){return esc(s).replace(/"/g,"&quot;")}
+init();
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body></html>
