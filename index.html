@@ -28,7 +28,7 @@ textarea,input{font:inherit;border:1px solid var(--line);border-radius:9px;paddi
 <div class="card"><h3>Today's plan</h3><div id="plan"></div></div>
 <div class="card"><h3>Track your working sets</h3><div id="sets"></div><button onclick="add()">+ Add exercise</button></div>
 
-<div class="card"><b>Session comments</b><textarea id="notes" rows="4" placeholder="How did it feel? Energy, technique, pain, performance..."></textarea><br><br><button class="primary" onclick="saveSession()">Save session</button></div>
+<div class="card"><h3>Progression coach</h3><div class="muted">Suggestions are rule-based, not a substitute for checking form and recovery. They use saved sets and comments.</div><div id="coach"></div></div><div class="card"><b>Session comments</b><textarea id="notes" rows="4" placeholder="How did it feel? Energy, technique, pain, performance..."></textarea><br><br><button class="primary" onclick="saveSession()">Save session</button></div>
 
 <div class="card"><h3>Body tracking</h3><div class="bodyGrid"><input id="weight" placeholder="Body weight kg" type="number" step=".1"><input id="waist" placeholder="Waist cm" type="number" step=".1"><input id="protein" placeholder="Protein g" type="number"><input id="goal" placeholder="Goal weight kg" type="number" step=".1"></div><br><button onclick="saveBody()">Save body data</button></div>
 <div class="card"><button onclick="backup()">Export backup</button> <label><button>Import<input type="file" accept=".json" style="display:none" onchange="restore(event)"></button></label></div>
@@ -64,9 +64,9 @@ const D=[
 ["Shoulder strength","Standing dumbbell overhead press — 4 × 6–10.","Stand tall and press the dumbbells overhead under control. This is your main shoulder strength movement."],
 ["Back strength","Pull-ups or weighted pull-ups — 4 × 6–10.","Use a load you can control through a full range."],
 ["Shoulder/back circuit","3 rounds: dumbbell lateral raises 12–20 → dumbbell rows 10–12/side → rear delt fly 12–20.","Minimal equipment: dumbbells and ideally one bench/area. Rest about 60–90 seconds."],
-["Functional finisher","Dumbbell complex for 4–5 rounds: Romanian deadlift × 6 → hang clean × 6 → push press × 6 → front squat × 6.","Use one pair of dumbbells. Do the sequence without putting them down if safe; rest as needed between rounds."],
+["Functional finisher","5 rounds: DB Romanian deadlift × 6 → DB hang clean × 6 → DB push press × 6 → bodyweight squat × 10.","No front squats. Use one pair of dumbbells for the first three moves, put them down for bodyweight squats. Start with 26 kg per hand if form is controlled; target 60–75 sec rest."],
 ["Stretch","5 minutes: shoulders, chest, lats and thoracic rotations.","Finish with mobility rather than skipping it."]],[
-["DB overhead press",4,6,10],["Pull-up / weighted pull-up",4,6,10],["DB lateral raise",3,12,20],["DB row (per side)",3,10,12],["Rear delt fly",3,12,20]],null],
+["DB overhead press",4,6,10],["Pull-up / weighted pull-up",5,6,10],["DB lateral raise",4,10,15],["DB row (per side)",3,10,12],["Rear delt fly",3,12,20],["DB functional complex (kg per hand)",5,1,1]],null],
 
 ["Friday","Heavy Squat + Athletic Conditioning",[
 ["Warm-up & ramp-up","General mobility followed by progressive squat warm-up sets.","Your ramp-up should prepare you without exhausting you before working sets."],
@@ -83,17 +83,36 @@ function toast(x){let e=$("toast");e.textContent=x;e.style.display="block";setTi
 function fmt(sec){let m=Math.floor(sec/60),s=sec%60;return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")}
 function init(){
  tabs.innerHTML=D.map((x,i)=>'<button class="'+(i===S.day?"active":"")+'" onclick="S.day='+i+';save();init()">'+x[0].slice(0,3)+'</button>').join("");
- let d=D[S.day],w=S.work[d[0]]||(S.work[d[0]]={ex:d[3].map(x=>({name:x[0],n:x[1],min:x[2],max:x[3],data:Array.from({length:x[1]},()=>({w:"",r:"",rir:"",done:false}))})),notes:""});save();
+ let d=D[S.day],w=S.work[d[0]]||(S.work[d[0]]={ex:[],notes:""});for(let spec of d[3]){let existing=w.ex.find(x=>x.name===spec[0]);if(!existing){w.ex.push({name:spec[0],n:spec[1],min:spec[2],max:spec[3],data:Array.from({length:spec[1]},()=>({w:"",r:"",rir:"",done:false}))})}else{existing.min=spec[2];existing.max=spec[3];while(existing.data.length<spec[1])existing.data.push({w:"",r:"",rir:"",done:false});existing.n=existing.data.length}}save();
  title.textContent=d[0];focus.textContent=d[1];notes.value=w.notes;
  plan.innerHTML=d[2].map((x,i)=>'<div class="move"><details '+(!i?"open":"")+'><summary><b>'+x[0]+'</b></summary><p>'+x[1]+'</p><p class="muted">'+x[2]+'</p></details></div>').join("");
- renderSets();interval(d[4]);let b=S.body.at(-1)||{};weight.value=b.weight||"";waist.value=b.waist||"";protein.value=b.protein||190;goal.value=b.goal||"";
+ renderSets();renderCoach();interval(d[4]);let b=S.body.at(-1)||{};weight.value=b.weight||"";waist.value=b.waist||"";protein.value=b.protein||190;goal.value=b.goal||"";
 }
 function last(name){for(let h of S.history){let e=h.ex.find(x=>x.name===name);if(e)return e.data.filter(x=>x.done).map(x=>x.w+"kg × "+x.r+" @ "+x.rir+" RIR").join(" | ")}return ""}
+function renderCoach(){
+ let day=D[S.day][0],w=S.work[day],saved=S.history.filter(x=>x.day===day),prior=saved[0];
+ let items=w.ex.map(e=>{
+  let completed=e.data.filter(x=>x.done&&Number(x.r)>0);
+  let source=completed.length?completed:(prior?.ex.find(x=>x.name===e.name)?.data||[]).filter(x=>x.done&&Number(x.r)>0);
+  let comment=((e.comment||"")+" "+(w.notes||"")).toLowerCase();
+  let target="";
+  if(source.length){
+   let reps=source.map(x=>Number(x.r)),weights=source.map(x=>Number(x.w)||0),min=Math.min(...reps),maxWeight=Math.max(...weights);
+   if(/too easy|easy|light/.test(comment))target="Felt easy: consider a small weight increase next session, provided form was controlled.";
+   else if(min>=e.max&&e.max>e.min&&weights.every(x=>x===maxWeight))target="Top of rep range achieved: consider increasing load by the smallest practical increment.";
+   else target="Keep the load and aim to add 1 rep to your lowest completed set while maintaining form.";
+  }else target="Log completed sets to receive a personalised progression suggestion.";
+  return '<div class="move"><b>'+e.name+'</b><p class="muted">'+target+'</p><label class="small">Exercise feedback</label><textarea rows="2" placeholder="Too easy, form issue, change load next time..." onchange="exerciseComment('+w.ex.indexOf(e)+',this.value)">'+escapeHtml(e.comment||"")+'</textarea></div>';
+ });
+ coach.innerHTML=items.join("")+'<div class="muted">Thursday reference from your latest report: DB press 34 kg next time; lateral raises 14 kg; pull-ups aim for 8/8/8/8/8 at bodyweight; DB complex 26 kg × 5 rounds with 60 sec rest. Adjust for recovery and technique.</div>';
+}
+function escapeHtml(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function exerciseComment(i,v){S.work[D[S.day][0]].ex[i].comment=v;save();renderCoach()}
 function renderSets(){let w=S.work[D[S.day][0]],done=0,total=0;sets.innerHTML=w.ex.map((e,ei)=>{total+=e.n;done+=e.data.filter(x=>x.done).length;return '<div class="move"><b>'+e.name+'</b><div class="muted">'+e.min+'–'+e.max+' reps</div>'+(last(e.name)?'<div class="last">Last saved: '+last(e.name)+'</div>':'<div class="last">No previous saved performance yet.</div>')+'<div class="sets"><small>#</small><small>kg</small><small>reps</small><small>RIR</small><small>✓</small>'+e.data.map((x,si)=>'<span>'+(si+1)+'</span><input type="number" step=".5" value="'+x.w+'" onchange="val('+ei+','+si+',\'w\',this.value)"><input type="number" value="'+x.r+'" onchange="val('+ei+','+si+',\'r\',this.value)"><input type="number" value="'+x.rir+'" onchange="val('+ei+','+si+',\'rir\',this.value)"><button class="'+(x.done?"active":"")+' done" onclick="toggle('+ei+','+si+')">'+(x.done?"✓":"")+'</button>').join("")+'</div></div>'}).join("");count.textContent=done+" / "+total+" sets";bar.style.width=(total?done/total*100:0)+"%"}
-function val(e,s,k,v){S.work[D[S.day][0]].ex[e].data[s][k]=v;save()}
-function toggle(e,s){let x=S.work[D[S.day][0]].ex[e].data[s];x.done=!x.done;save();renderSets()}
-function add(){let n=prompt("Exercise name");if(!n)return;let a=+(prompt("Sets","3")||3),b=+(prompt("Minimum reps","8")||8),c=+(prompt("Maximum reps","12")||12);S.work[D[S.day][0]].ex.push({name:n,n:a,min:b,max:c,data:Array.from({length:a},()=>({w:"",r:"",rir:"",done:false}))});save();renderSets()}
-function saveSession(){let w=S.work[D[S.day][0]];w.notes=notes.value;S.history.unshift({date:new Date().toISOString(),day:D[S.day][0],ex:structuredClone(w.ex)});save();toast("Saved — your performance will show next time")}
+function val(e,s,k,v){S.work[D[S.day][0]].ex[e].data[s][k]=v;save();renderCoach()}
+function toggle(e,s){let x=S.work[D[S.day][0]].ex[e].data[s];x.done=!x.done;save();renderSets();renderCoach()}
+function add(){let n=prompt("Exercise name");if(!n)return;let a=+(prompt("Sets","3")||3),b=+(prompt("Minimum reps","8")||8),c=+(prompt("Maximum reps","12")||12);S.work[D[S.day][0]].ex.push({name:n,n:a,min:b,max:c,data:Array.from({length:a},()=>({w:"",r:"",rir:"",done:false}))});save();renderSets();renderCoach()}
+function saveSession(){let w=S.work[D[S.day][0]];w.notes=notes.value;S.history.unshift({date:new Date().toISOString(),day:D[S.day][0],ex:structuredClone(w.ex),notes:w.notes});save();renderCoach();toast("Session saved — progression feedback updated")}
 function interval(c){stopI();icfg=c;ir=0;elapsed=0;if(!c){intervalCard.style.display="none";return}intervalCard.style.display="block";intervalCard.innerHTML='<b>Workout timer</b><div class="clock intervalClock" id="iclock">'+fmt(c[1]*60)+'</div><div class="status" id="istatus">'+(c[0]=="amrap"?"AMRAP — READY":"READY")+'</div><div class="muted" id="idesc">'+(c[0]=="amrap"?"10 minutes: complete as many quality rounds as possible.":"")+'</div><br><div class="clockButtons"><button class="primary" onclick="startI()">Start</button><button onclick="stopI()">Pause</button><button onclick="resetI()">Reset</button></div>'}
 function renderI(){if(!icfg)return;let remain=Math.max(0,icfg[1]*60-elapsed);iclock.textContent=fmt(remain);istatus.textContent=remain===0?"COMPLETE":(icfg[0]=="amrap"?"AMRAP — GO":"RUNNING")}
 function startI(){if(iv||!icfg)return;iv=setInterval(()=>{elapsed++;renderI();if(elapsed>=icfg[1]*60){stopI();navigator.vibrate?.(300);toast("Timer complete")}},1000)}
