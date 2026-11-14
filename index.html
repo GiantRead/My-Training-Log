@@ -28,7 +28,7 @@ textarea,input{font:inherit;border:1px solid var(--line);border-radius:9px;paddi
 <div class="card"><h3>Today's plan</h3><div id="plan"></div></div>
 <div class="card"><h3>Track your working sets</h3><div id="sets"></div><button onclick="add()">+ Add exercise</button></div>
 
-<div class="card"><h3>Progression coach</h3><div class="muted">Suggestions are rule-based, not a substitute for checking form and recovery. They use saved sets and comments.</div><div id="coach"></div></div><div class="card"><b>Session comments</b><textarea id="notes" rows="4" placeholder="How did it feel? Energy, technique, pain, performance..."></textarea><br><br><button class="primary" onclick="saveSession()">Save session</button></div>
+<div class="card"><h3>Progression coach</h3><div class="muted">Suggestions are rule-based, not a substitute for checking form and recovery. They use saved sets and comments.</div><div id="coach"></div></div><div class="card"><b>Session comments</b><textarea id="notes" rows="4" placeholder="How did it feel? Energy, technique, pain, performance..."></textarea><br><br><button class="primary" onclick="saveSession()">Save session</button> <button onclick="copyReport()">Copy workout report</button><div class="muted" style="margin-top:8px">Copies the latest saved session for this day, or your current unsaved entries. Paste it into ChatGPT for detailed coaching. Your data stays on your device unless you share it.</div><textarea id="reportFallback" rows="7" style="display:none;margin-top:8px" readonly aria-label="Workout report to copy"></textarea></div>
 
 <div class="card"><h3>Body tracking</h3><div class="bodyGrid"><input id="weight" placeholder="Body weight kg" type="number" step=".1"><input id="waist" placeholder="Waist cm" type="number" step=".1"><input id="protein" placeholder="Protein g" type="number"><input id="goal" placeholder="Goal weight kg" type="number" step=".1"></div><br><button onclick="saveBody()">Save body data</button></div>
 <div class="card"><button onclick="backup()">Export backup</button> <label><button>Import<input type="file" accept=".json" style="display:none" onchange="restore(event)"></button></label></div>
@@ -64,9 +64,9 @@ const D=[
 ["Shoulder strength","Standing dumbbell overhead press — 4 × 6–10.","Stand tall and press the dumbbells overhead under control. This is your main shoulder strength movement."],
 ["Back strength","Pull-ups or weighted pull-ups — 4 × 6–10.","Use a load you can control through a full range."],
 ["Shoulder/back circuit","3 rounds: dumbbell lateral raises 12–20 → dumbbell rows 10–12/side → rear delt fly 12–20.","Minimal equipment: dumbbells and ideally one bench/area. Rest about 60–90 seconds."],
-["Functional finisher","5 rounds: DB Romanian deadlift × 6 → DB hang clean × 6 → DB push press × 6 → bodyweight squat × 10.","No front squats. Use one pair of dumbbells for the first three moves, put them down for bodyweight squats. Start with 26 kg per hand if form is controlled; target 60–75 sec rest."],
+["Functional finisher","5 rounds: DB Romanian deadlift × 6–10 (test 40 kg per hand) → DB hang clean × 6 (26 kg per hand) → DB push press × 6 (26 kg per hand) → bodyweight squat × 10.","Use TWO pairs of dumbbells if available, and put them down for squats. Rest 60–75 sec between rounds. 40 kg RDL is a provisional test weight: warm up and prioritise hinge technique. Keep cleans and presses crisp."],
 ["Stretch","5 minutes: shoulders, chest, lats and thoracic rotations.","Finish with mobility rather than skipping it."]],[
-["DB overhead press",4,6,10],["Pull-up / weighted pull-up",5,6,10],["DB lateral raise",4,10,15],["DB row (per side)",3,10,12],["Rear delt fly",3,12,20],["DB functional complex (kg per hand)",5,1,1]],null],
+["DB overhead press",4,6,10],["Pull-up / weighted pull-up",5,6,10],["DB lateral raise",4,10,15],["DB row (per side)",3,10,12],["Rear delt fly",3,12,20],["DB RDL (kg per hand)",5,6,10],["DB hang clean (kg per hand)",5,6,6],["DB push press (kg per hand)",5,6,6],["Bodyweight squat",5,10,15]],null],
 
 ["Friday","Heavy Squat + Athletic Conditioning",[
 ["Warm-up & ramp-up","General mobility followed by progressive squat warm-up sets.","Your ramp-up should prepare you without exhausting you before working sets."],
@@ -84,9 +84,9 @@ function fmt(sec){let m=Math.floor(sec/60),s=sec%60;return String(m).padStart(2,
 function init(){
  tabs.innerHTML=D.map((x,i)=>'<button class="'+(i===S.day?"active":"")+'" onclick="S.day='+i+';save();init()">'+x[0].slice(0,3)+'</button>').join("");
  let d=D[S.day],w=S.work[d[0]]||(S.work[d[0]]={ex:[],notes:""});for(let spec of d[3]){let existing=w.ex.find(x=>x.name===spec[0]);if(!existing){w.ex.push({name:spec[0],n:spec[1],min:spec[2],max:spec[3],data:Array.from({length:spec[1]},()=>({w:"",r:"",rir:"",done:false}))})}else{existing.min=spec[2];existing.max=spec[3];while(existing.data.length<spec[1])existing.data.push({w:"",r:"",rir:"",done:false});existing.n=existing.data.length}}save();
- title.textContent=d[0];focus.textContent=d[1];notes.value=w.notes;
+ $("title").textContent=d[0];$("focus").textContent=d[1];$("notes").value=w.notes;
  plan.innerHTML=d[2].map((x,i)=>'<div class="move"><details '+(!i?"open":"")+'><summary><b>'+x[0]+'</b></summary><p>'+x[1]+'</p><p class="muted">'+x[2]+'</p></details></div>').join("");
- renderSets();renderCoach();interval(d[4]);let b=S.body.at(-1)||{};weight.value=b.weight||"";waist.value=b.waist||"";protein.value=b.protein||190;goal.value=b.goal||"";
+ renderSets();renderCoach();$("reportFallback").style.display="none";interval(d[4]);let b=S.body.at(-1)||{};weight.value=b.weight||"";waist.value=b.waist||"";protein.value=b.protein||190;goal.value=b.goal||"";
 }
 function last(name){for(let h of S.history){let e=h.ex.find(x=>x.name===name);if(e)return e.data.filter(x=>x.done).map(x=>x.w+"kg × "+x.r+" @ "+x.rir+" RIR").join(" | ")}return ""}
 function renderCoach(){
@@ -104,15 +104,45 @@ function renderCoach(){
   }else target="Log completed sets to receive a personalised progression suggestion.";
   return '<div class="move"><b>'+e.name+'</b><p class="muted">'+target+'</p><label class="small">Exercise feedback</label><textarea rows="2" placeholder="Too easy, form issue, change load next time..." onchange="exerciseComment('+w.ex.indexOf(e)+',this.value)">'+escapeHtml(e.comment||"")+'</textarea></div>';
  });
- coach.innerHTML=items.join("")+'<div class="muted">Thursday reference from your latest report: DB press 34 kg next time; lateral raises 14 kg; pull-ups aim for 8/8/8/8/8 at bodyweight; DB complex 26 kg × 5 rounds with 60 sec rest. Adjust for recovery and technique.</div>';
+ coach.innerHTML=items.join("")+(day==="Thursday"?'<div class="last"><b>Provisional Thursday targets (not a complete baseline):</b> overhead press test 34 kg per hand × 6–10; lateral raises 14 kg per hand × 10–12; pull-ups at bodyweight aim for 8/8/8/8/8; RDL test 40 kg per hand × 6–10; hang clean and push press 26 kg per hand × 6; bodyweight squats × 10–15; complex rest 60–75 sec. Reassess after a full week of logged training.</div>':'<div class="muted">Record a full week before treating progression targets as established baselines.</div>');
 }
 function escapeHtml(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
-function exerciseComment(i,v){S.work[D[S.day][0]].ex[i].comment=v;save();renderCoach()}
+function exerciseComment(i,v){S.work[D[S.day][0]].ex[i].comment=v;save()}
 function renderSets(){let w=S.work[D[S.day][0]],done=0,total=0;sets.innerHTML=w.ex.map((e,ei)=>{total+=e.n;done+=e.data.filter(x=>x.done).length;return '<div class="move"><b>'+e.name+'</b><div class="muted">'+e.min+'–'+e.max+' reps</div>'+(last(e.name)?'<div class="last">Last saved: '+last(e.name)+'</div>':'<div class="last">No previous saved performance yet.</div>')+'<div class="sets"><small>#</small><small>kg</small><small>reps</small><small>RIR</small><small>✓</small>'+e.data.map((x,si)=>'<span>'+(si+1)+'</span><input type="number" step=".5" value="'+x.w+'" onchange="val('+ei+','+si+',\'w\',this.value)"><input type="number" value="'+x.r+'" onchange="val('+ei+','+si+',\'r\',this.value)"><input type="number" value="'+x.rir+'" onchange="val('+ei+','+si+',\'rir\',this.value)"><button class="'+(x.done?"active":"")+' done" onclick="toggle('+ei+','+si+')">'+(x.done?"✓":"")+'</button>').join("")+'</div></div>'}).join("");count.textContent=done+" / "+total+" sets";bar.style.width=(total?done/total*100:0)+"%"}
 function val(e,s,k,v){S.work[D[S.day][0]].ex[e].data[s][k]=v;save();renderCoach()}
 function toggle(e,s){let x=S.work[D[S.day][0]].ex[e].data[s];x.done=!x.done;save();renderSets();renderCoach()}
 function add(){let n=prompt("Exercise name");if(!n)return;let a=+(prompt("Sets","3")||3),b=+(prompt("Minimum reps","8")||8),c=+(prompt("Maximum reps","12")||12);S.work[D[S.day][0]].ex.push({name:n,n:a,min:b,max:c,data:Array.from({length:a},()=>({w:"",r:"",rir:"",done:false}))});save();renderSets();renderCoach()}
-function saveSession(){let w=S.work[D[S.day][0]];w.notes=notes.value;S.history.unshift({date:new Date().toISOString(),day:D[S.day][0],ex:structuredClone(w.ex),notes:w.notes});save();renderCoach();toast("Session saved — progression feedback updated")}
+function saveSession(){let w=S.work[D[S.day][0]];w.notes=$("notes").value;S.history.unshift({date:new Date().toISOString(),day:D[S.day][0],ex:structuredClone(w.ex),notes:w.notes});save();renderCoach();toast("Saved. Tap Copy workout report to share.")}
+
+function formatReport(record){
+ let day=record.day||D[S.day][0],date=record.date?new Date(record.date).toLocaleDateString():"Draft / not yet saved";
+ let lines=["CUT PHASE — WORKOUT REPORT","Day: "+day,"Date: "+date,"Goal: Build/maintain strength and muscle, lose fat, sub-2-hour half marathon in February.",""];
+ for(let e of record.ex||[]){
+  lines.push(e.name+" | target "+e.n+" sets × "+e.min+"–"+e.max+" reps");
+  let found=false;
+  for(let i=0;i<(e.data||[]).length;i++){
+   let s=e.data[i];
+   if(s.done||s.w!==""||s.r!==""||s.rir!==""){
+    found=true;
+    lines.push("  Set "+(i+1)+": "+(s.w!==""?s.w+" kg":"BW / not entered")+" × "+(s.r!==""?s.r:"?")+" reps"+(s.rir!==""?", "+s.rir+" RIR":"")+(s.done?" [completed]":" [not marked completed]"));
+   }
+  }
+  if(!found)lines.push("  No sets logged");
+  if(e.comment)lines.push("  Exercise feedback: "+e.comment);
+ }
+ lines.push("","Session comments: "+(record.notes||"(none)"),"","Please evaluate exercise technique notes, weights, rep progression, fatigue and running recovery; recommend precise changes for next time and flag any assumptions. Treat this week's values as provisional baseline.");
+ return lines.join("\n");
+}
+async function copyReport(){
+ let day=D[S.day][0],w=S.work[day];
+ // Prioritise current work if it has any recorded sets; otherwise use latest saved session.
+ let hasDraft=w.ex.some(e=>e.data.some(s=>s.done||s.w!==""||s.r!==""||s.rir!==""))||!!$("notes").value.trim();
+ let record=hasDraft?{day,ex:w.ex,notes:$("notes").value}:S.history.find(x=>x.day===day);
+ if(!record){record={day,ex:w.ex,notes:$("notes").value}}
+ let report=formatReport(record);
+ try{if(!navigator.clipboard?.writeText)throw Error("clipboard unavailable");await navigator.clipboard.writeText(report);toast("Workout report copied — paste into ChatGPT");$("reportFallback").style.display="none"}
+ catch(err){let e=$("reportFallback");e.value=report;e.style.display="block";e.focus();e.select();toast("Select and copy the report below")}
+}
 function interval(c){stopI();icfg=c;ir=0;elapsed=0;if(!c){intervalCard.style.display="none";return}intervalCard.style.display="block";intervalCard.innerHTML='<b>Workout timer</b><div class="clock intervalClock" id="iclock">'+fmt(c[1]*60)+'</div><div class="status" id="istatus">'+(c[0]=="amrap"?"AMRAP — READY":"READY")+'</div><div class="muted" id="idesc">'+(c[0]=="amrap"?"10 minutes: complete as many quality rounds as possible.":"")+'</div><br><div class="clockButtons"><button class="primary" onclick="startI()">Start</button><button onclick="stopI()">Pause</button><button onclick="resetI()">Reset</button></div>'}
 function renderI(){if(!icfg)return;let remain=Math.max(0,icfg[1]*60-elapsed);iclock.textContent=fmt(remain);istatus.textContent=remain===0?"COMPLETE":(icfg[0]=="amrap"?"AMRAP — GO":"RUNNING")}
 function startI(){if(iv||!icfg)return;iv=setInterval(()=>{elapsed++;renderI();if(elapsed>=icfg[1]*60){stopI();navigator.vibrate?.(300);toast("Timer complete")}},1000)}
