@@ -1,55 +1,107 @@
-<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cut Phase</title><style>
-body{margin:0;background:#f4f5f7;font-family:-apple-system,BlinkMacSystemFont,Arial;color:#111827}header{padding:14px;background:#fff;position:sticky;top:0;border-bottom:1px solid #ddd}main{max-width:760px;margin:auto;padding:14px}.tabs{display:flex;gap:6px;overflow:auto;margin-top:10px}button{padding:14px 18px;min-height:48px;border:1px solid #ddd;border-radius:10px;background:#fff;font-weight:800;font-size:16px}.active,.primary{background:#111827!important;color:#fff}.card{background:#fff;border:1px solid #ddd;border-radius:14px;padding:14px;margin:10px 0}.timer{font-size:32px;font-weight:800}.row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}.move{padding:10px 0;border-top:1px solid #eee}.move:first-child{border-top:0}.muted{color:#6b7280;font-size:13px}.sets{display:grid;grid-template-columns:30px 1fr 1fr 60px 45px;gap:5px;align-items:center;text-align:center}.sets input{width:100%;padding:8px;border:1px solid #ddd;border-radius:7px}.done{height:36px}.last{background:#f8fafc;padding:7px;border-radius:7px;font-size:12px;margin:6px 0}.bar{height:8px;background:#ddd;border-radius:8px}.bar div{height:100%;background:#111827;border-radius:8px}.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 14px;border-radius:9px;display:none}details p{line-height:1.45}
-</style></head><body><header><div><b>Cut Phase</b><div class="muted">“Fall in love with the grind.”</div></div><div class="tabs" id="tabs"></div></header><main>
+<!doctype html><html><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Cut Phase</title>
+<style>
+:root{--ink:#111827;--bg:#f3f4f6;--line:#d1d5db;--muted:#6b7280}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial;color:var(--ink)}
+header{padding:14px;background:#fff;position:sticky;top:0;z-index:5;border-bottom:1px solid var(--line)}main{max-width:780px;margin:auto;padding:12px 12px 50px}
+.tabs{display:flex;gap:7px;overflow:auto;margin-top:10px;padding-bottom:2px}.tabs button{white-space:nowrap}
+button{padding:15px 19px;min-height:52px;border:1px solid var(--line);border-radius:11px;background:#fff;font-weight:800;font-size:16px;touch-action:manipulation}
+.active,.primary{background:var(--ink)!important;color:#fff}.card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:15px;margin:11px 0}
+.row{display:flex;justify-content:space-between;align-items:center;gap:9px;flex-wrap:wrap}.muted{color:var(--muted);font-size:13px;line-height:1.45}
+.clock{font-size:56px;line-height:1;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:1px;margin:10px 0}.intervalClock{font-size:72px}
+.clockButtons{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.clockButtons button{min-height:64px;font-size:18px}
+.move{padding:12px 0;border-top:1px solid #eee}.move:first-child{border-top:0}.move p{line-height:1.45;margin:8px 0}.move summary{cursor:pointer}
+.sets{display:grid;grid-template-columns:28px 1fr 1fr 54px 46px;gap:5px;align-items:center;text-align:center}.sets input{width:100%;padding:10px 4px;border:1px solid var(--line);border-radius:8px;text-align:center;font-size:16px}.done{min-height:44px;padding:0}
+.last{background:#f8fafc;padding:8px;border-radius:8px;font-size:12px;margin:7px 0}.bar{height:9px;background:#e5e7eb;border-radius:10px;overflow:hidden}.bar div{height:100%;background:var(--ink);width:0}.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 15px;border-radius:10px;display:none;z-index:10}
+textarea,input{font:inherit;border:1px solid var(--line);border-radius:9px;padding:10px}textarea{width:100%}.bodyGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bodyGrid input{width:100%}
+.small{font-size:12px}.status{font-weight:900;font-size:18px;margin:6px 0}
+@media(max-width:420px){.clock{font-size:48px}.intervalClock{font-size:62px}.clockButtons button{font-size:16px;padding:12px 6px}}
+</style></head><body>
+<header><div><b>Cut Phase</b><div class="muted">“Fall in love with the grind.”</div></div><div class="tabs" id="tabs"></div></header>
+<main>
 <div class="card"><div class="row"><div><b id="title"></b><div class="muted" id="focus"></div></div><div id="count"></div></div><div class="bar"><div id="bar"></div></div></div>
-<div class="card"><div class="muted">Workout timer</div><div class="timer" id="clock">45:00</div><button class="primary" onclick="start()">Start</button> <button onclick="stop()">Pause</button> <button onclick="reset()">Reset</button></div>
-<div class="card" id="intervalCard"></div><div class="card"><h3>Today's plan</h3><div id="plan"></div></div><div class="card"><h3>Track your working sets</h3><div id="sets"></div><button onclick="add()">+ Add exercise</button></div>
-<div class="card"><label><b>Session comments</b></label><textarea id="notes" style="width:100%;margin-top:8px" rows="3"></textarea><br><br><button class="primary" onclick="saveSession()">Save session</button></div>
-<div class="card"><h3>Body tracking</h3><input id="weight" placeholder="Body weight kg" type="number" step=".1"> <input id="waist" placeholder="Waist cm" type="number" step=".1"><br><br><input id="protein" placeholder="Protein g" type="number"> <input id="goal" placeholder="Goal weight kg" type="number" step=".1"><br><br><button onclick="saveBody()">Save body data</button></div>
-<div class="card"><button onclick="backup()">Export backup</button> <label><button>Import<input type="file" style="display:none" onchange="restore(event)"></button></label></div>
-</main><div class="toast" id="toast"></div><script>
+
+<div class="card"><b>Workout stopwatch</b><div class="clock" id="clock">45:00</div><div class="clockButtons"><button class="primary" onclick="start()">Start</button><button onclick="stop()">Pause</button><button onclick="reset()">Reset</button></div></div>
+
+<div class="card" id="intervalCard"></div>
+
+<div class="card"><h3>Today's plan</h3><div id="plan"></div></div>
+<div class="card"><h3>Track your working sets</h3><div id="sets"></div><button onclick="add()">+ Add exercise</button></div>
+
+<div class="card"><b>Session comments</b><textarea id="notes" rows="4" placeholder="How did it feel? Energy, technique, pain, performance..."></textarea><br><br><button class="primary" onclick="saveSession()">Save session</button></div>
+
+<div class="card"><h3>Body tracking</h3><div class="bodyGrid"><input id="weight" placeholder="Body weight kg" type="number" step=".1"><input id="waist" placeholder="Waist cm" type="number" step=".1"><input id="protein" placeholder="Protein g" type="number"><input id="goal" placeholder="Goal weight kg" type="number" step=".1"></div><br><button onclick="saveBody()">Save body data</button></div>
+<div class="card"><button onclick="backup()">Export backup</button> <label><button>Import<input type="file" accept=".json" style="display:none" onchange="restore(event)"></button></label></div>
+</main><div class="toast" id="toast"></div>
+<script>
 const D=[
-["Monday","Heavy Bench + Upper Body",[
-["Warm-up & mobility","5 minutes: arm circles, shoulder circles, scapular push-ups and cat-cow.","Scapular push-up: keep arms straight and only let your shoulder blades move together/apart. Cat-cow: on hands and knees, slowly round then arch your back."],
-["Bench ramp-up","Example: bar × 15–20, 60 × 8, 90 × 5, 110 × 3, 125 × 1, then working sets.","Adjust to feel ready without tiring yourself. Ramp-up sets are not progression sets."],
-["Main lift","Bench press — 3 working sets × 4–6 reps.","Rest 2–4 minutes. Leave 1–2 reps in reserve; no failed reps without a spotter."],
-["Support","Weighted pull-ups 3 × 6–10 + push-ups 3 × 15–25.","Rest 60–90 sec after each pair."],
-["EMOM finisher","8 minutes: odd minutes farmer's carry; even minutes battle ropes.","EMOM = Every Minute On the Minute. Start work on the beep, work ~30–40 sec, then rest until the next beep. The timer below does this."],
-["Stretch","5 minutes: pec doorway stretch, lat stretch, thoracic rotations.","Thoracic rotation: hands and knees, one hand behind head, rotate elbow toward ceiling then back down. 5 slow reps/side."]], [["Bench press",3,4,6],["Weighted pull-up",3,6,10]],["emom",8,60]],
-["Tuesday","Conditioning + Movement",[
-["Conditioning","5 rounds: battle ropes 30 sec hard → farmer's carry 40–60m → push-ups 15–20 → rower 45 sec hard → rest 60–90 sec.","No SkiErg required."],
-["Core","3 rounds: hanging knee raises 10–15, dead bugs 10/side, plank 45–60 sec.","Dead bug: lie on back, hips/knees at 90°, slowly lower opposite arm and leg while keeping your lower back controlled."],
-["Mobility","10 minutes: pec stretch, thoracic rotations, hip flexor stretch, hamstring stretch.","This is part of the session, not optional."]],[],null],
-["Wednesday","Heavy Straight-Bar Deadlift + Pull",[
-["Warm-up","Cat-cow, unloaded hip hinges, thoracic rotations and gentle hamstring mobility.","Then ramp the bar progressively."],
-["Main lift","Straight-bar deadlift — 3 × 3–5 working sets.","Rest 2–4 minutes. Keep volume sensible while cutting."],
-["Support","Pull-ups 3 × 6–10 + DB overhead press 3 × 8–12.","Rest 60–90 sec after each pair."],
-["EMOM finisher","8-minute farmer's carry EMOM: carry 30–40 sec, rest the remainder.","Timer beeps every minute."],
-["Stretch","5 minutes: hamstrings, hip flexors, lats, thoracic rotation.","Comfortable, not aggressive."]],[["Straight-bar deadlift",3,3,5],["Pull-up",3,6,10],["DB overhead press",3,8,12]],["emom",8,60]],
-["Thursday","Hard Conditioning",[
-["Main circuit","5 rounds: battle ropes 40 sec → push-ups 15–25 → rower 60 sec hard → farmer's carry 40–60m → rest 90 sec.","No SkiErg required."],
-["Mobility","10 minutes: chest, shoulders, thoracic spine, hips and hamstrings.","Deliberately scheduled so you actually do it."]],[],null],
-["Friday","Heavy Squat + Full Body",[
-["Main lift","Squat — 3 × 4–6 after sensible ramp-up.","Rest 2–4 minutes."],
-["Support","Weighted chin-ups 3 × 6–10 + Bulgarian split squats 3 × 8/leg.","Reduce if legs are excessively sore."],
-["Finisher","Choose sled pushes for 8–10 min OR rower: 10 rounds of 20 sec hard / 40 sec easy.","Use the interval timer for the rower."],
-["Stretch","5 minutes: quads, hip flexors, hamstrings and pecs.","Finish moving better than you started."]],[["Squat",3,4,6],["Weighted chin-up",3,6,10],["Bulgarian split squat",3,8,8]],["interval",10,60]]
+["Monday","Heavy Bench + Superhero Upper Body",[
+["Warm-up & mobility","5 minutes: arm circles, shoulder circles, scapular push-ups and cat-cow.","Scapular push-up: arms stay straight; move only your shoulder blades. Cat-cow: on hands and knees, slowly round then arch your back."],
+["Bench ramp-up","Example: bar × 15–20, 60 × 8, 90 × 5, 110 × 3, 125 × 1, then working sets.","Adjust for your working weight. Ramp-up sets prepare you; they are not progression sets."],
+["Main lift","Bench press — 3 × 4–6 working sets.","Do this before explosive work because heavy bench is your priority. Rest 2–4 minutes and leave 1–2 reps in reserve."],
+["Upper-body power circuit","3 rounds: explosive push-ups 8–12 → weighted pull-ups 6–10 → dumbbell push press 8–10.","Rest 90–120 seconds after each round. Explosive push-up = lower under control, then push as powerfully as possible."],
+["Superhero shoulders","Dumbbell lateral raises — 3 × 12–20.","Raise dumbbells out to your sides under control. This directly targets the side delts for broader shoulders."],
+["Stretch","5 minutes: pec doorway stretch, lat stretch and thoracic rotations.","Thoracic rotation: hands and knees, one hand behind your head, rotate elbow toward the ceiling then back down. 5 slow reps/side."]],[
+["Bench press",3,4,6],["Explosive push-up",3,8,12],["Weighted pull-up",3,6,10],["DB push press",3,8,10],["DB lateral raise",3,12,20]],null],
+
+["Tuesday","Functional Conditioning + Core + Half-Marathon Running",[
+["Functional Five","5 rounds: battle ropes 40 sec → push-ups 20–25 → farmer's carry 20 m → pull-ups 5–8 → farmer's carry 20 m back.","Rest 60–90 seconds between rounds. Stay in one functional area; do not reserve half the gym."],
+["Running","15–25 minutes easy Zone 2 running.","Keep it genuinely aerobic: you should be able to speak in sentences. The circuit is already your high-intensity work."],
+["Core","3 rounds: hanging knee raises 10–15 → dead bugs 8–10/side → plank 45–60 sec.","Dead bug: lie on your back with hips/knees at 90°, slowly lower opposite arm and leg while keeping your lower back controlled."],
+["Mobility","5 minutes: hip flexors, hamstrings and thoracic rotations.","Mobility is part of the workout, not optional."]],[
+["Hanging knee raise",3,10,15],["Dead bug (per side)",3,8,10],["Plank (seconds)",3,45,60]],null],
+
+["Wednesday","Heavy Deadlift + Back + Power",[
+["Warm-up & ramp-up","Cat-cow, unloaded hip hinges, thoracic rotations and gentle hamstring mobility, then progressive deadlift warm-up sets.","Hip hinge: push hips backwards while keeping your spine controlled; this rehearses the deadlift pattern."],
+["Main lift","Straight-bar deadlift — 3 × 3–5 working sets.","Rest 2–4 minutes. Heavy enough to preserve strength; avoid unnecessary junk volume."],
+["Power circuit","3–4 rounds: burpees 8–10 → broad jumps 5.","Rest about 90 seconds. Broad jump = jump forward explosively and land softly under control. Use the space you can safely find."],
+["Back hypertrophy","Chest-supported dumbbell row or dumbbell row — 3 × 8–12.","This adds horizontal pulling for back thickness."],
+["Rear delts","Rear delt fly — 2–3 × 12–20.","Hinge forward lightly or use a bench; sweep arms out under control to target the rear shoulders."],
+["Stretch","5 minutes: hamstrings, hip flexors, lats and thoracic rotations.","Comfortable stretching, not aggressive."]],[
+["Straight-bar deadlift",3,3,5],["Burpee",4,8,10],["Broad jump",4,5,5],["DB row",3,8,12],["Rear delt fly",3,12,20]],null],
+
+["Thursday","Shoulders + Back + Functional Strength",[
+["Shoulder strength","Standing dumbbell overhead press — 4 × 6–10.","Stand tall and press the dumbbells overhead under control. This is your main shoulder strength movement."],
+["Back strength","Pull-ups or weighted pull-ups — 4 × 6–10.","Use a load you can control through a full range."],
+["Shoulder/back circuit","3 rounds: dumbbell lateral raises 12–20 → dumbbell rows 10–12/side → rear delt fly 12–20.","Minimal equipment: dumbbells and ideally one bench/area. Rest about 60–90 seconds."],
+["Functional finisher","Dumbbell complex for 4–5 rounds: Romanian deadlift × 6 → hang clean × 6 → push press × 6 → front squat × 6.","Use one pair of dumbbells. Do the sequence without putting them down if safe; rest as needed between rounds."],
+["Stretch","5 minutes: shoulders, chest, lats and thoracic rotations.","Finish with mobility rather than skipping it."]],[
+["DB overhead press",4,6,10],["Pull-up / weighted pull-up",4,6,10],["DB lateral raise",3,12,20],["DB row (per side)",3,10,12],["Rear delt fly",3,12,20]],null],
+
+["Friday","Heavy Squat + Athletic Conditioning",[
+["Warm-up & ramp-up","General mobility followed by progressive squat warm-up sets.","Your ramp-up should prepare you without exhausting you before working sets."],
+["Main lift","Squat — 3 × 4–6 working sets.","Rest 2–4 minutes. This is your main lower-body strength work."],
+["10-minute AMRAP","Push press × 6 → barbell row × 8 → burpees × 6. Repeat as many QUALITY rounds as possible in 10 minutes.","AMRAP = As Many Rounds As Possible. You have already squatted heavily, so there is no second squat variation here."],
+["Stretch","5 minutes: quads, hip flexors, hamstrings and pecs.","Finish the week moving better than you started."]],[
+["Squat",3,4,6],["Barbell push press",1,6,6],["Barbell row",1,8,8],["Burpee",1,6,6]],["amrap",10]]
 ];
-let S=JSON.parse(localStorage.cutphase||"null")||{day:0,work:{},history:[],body:[]},t=2700,tid,iv,icfg,ir=0,isec=60,phase="READY";
-const $=id=>document.getElementById(id),save=()=>localStorage.cutphase=JSON.stringify(S),toast=x=>{let e=$("toast");e.textContent=x;e.style.display="block";setTimeout(()=>e.style.display="none",1800)};
-function init(){tabs.innerHTML=D.map((x,i)=>'<button class="'+(i==S.day?"active":"")+'" onclick="S.day='+i+';save();init()">'+x[0].slice(0,3)+'</button>').join("");let d=D[S.day],w=S.work[d[0]]||(S.work[d[0]]={ex:d[3].map(x=>({name:x[0],n:x[1],min:x[2],max:x[3],data:Array.from({length:x[1]},()=>({w:"",r:"",rir:"",done:false}))})),notes:""});save();title.textContent=d[0];focus.textContent=d[1];notes.value=w.notes;plan.innerHTML=d[2].map((x,i)=>'<div class="move"><details '+(!i?"open":"")+'><summary><b>'+x[0]+'</b></summary><p>'+x[1]+'</p><p class="muted">'+x[2]+'</p></details></div>').join("");renderSets();interval(d[4]);let b=S.body.at(-1)||{};weight.value=b.weight||"";waist.value=b.waist||"";protein.value=b.protein||190;goal.value=b.goal||""}
-function last(name){for(let h of S.history){let e=h.ex.find(x=>x.name==name);if(e)return e.data.filter(x=>x.done).map(x=>x.w+"kg × "+x.r+" @ "+x.rir+" RIR").join(" | ")}return ""}
-function renderSets(){let w=S.work[D[S.day][0]],done=0,total=0;sets.innerHTML=w.ex.map((e,ei)=>{total+=e.n;done+=e.data.filter(x=>x.done).length;return '<div class="move"><b>'+e.name+'</b><div class="muted">'+e.min+'–'+e.max+' reps</div>'+(last(e.name)?'<div class="last">Last time: '+last(e.name)+'</div>':'<div class="last">No previous saved performance yet.</div>')+'<div class="sets"><small>#</small><small>kg</small><small>reps</small><small>RIR</small><small>✓</small>'+e.data.map((x,si)=>'<span>'+(si+1)+'</span><input type="number" step=".5" value="'+x.w+'" onchange="val('+ei+','+si+',\'w\',this.value)"><input type="number" value="'+x.r+'" onchange="val('+ei+','+si+',\'r\',this.value)"><input type="number" value="'+x.rir+'" onchange="val('+ei+','+si+',\'rir\',this.value)"><button class="'+(x.done?"active":"")+' done" onclick="toggle('+ei+','+si+')">'+(x.done?"✓":"")+'</button>').join("")+'</div></div>'}).join("");count.textContent=done+" / "+total+" sets";bar.style.width=(total?done/total*100:0)+"%"}
-function val(e,s,k,v){S.work[D[S.day][0]].ex[e].data[s][k]=v;save()}function toggle(e,s){let x=S.work[D[S.day][0]].ex[e].data[s];x.done=!x.done;save();renderSets()}
+
+let S=JSON.parse(localStorage.cutphase||"null")||{day:0,work:{},history:[],body:[]};
+let t=2700,tid=null,iv=null,icfg=null,elapsed=0,ir=0;
+const $=id=>document.getElementById(id),save=()=>localStorage.cutphase=JSON.stringify(S);
+function toast(x){let e=$("toast");e.textContent=x;e.style.display="block";setTimeout(()=>e.style.display="none",1800)}
+function fmt(sec){let m=Math.floor(sec/60),s=sec%60;return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")}
+function init(){
+ tabs.innerHTML=D.map((x,i)=>'<button class="'+(i===S.day?"active":"")+'" onclick="S.day='+i+';save();init()">'+x[0].slice(0,3)+'</button>').join("");
+ let d=D[S.day],w=S.work[d[0]]||(S.work[d[0]]={ex:d[3].map(x=>({name:x[0],n:x[1],min:x[2],max:x[3],data:Array.from({length:x[1]},()=>({w:"",r:"",rir:"",done:false}))})),notes:""});save();
+ title.textContent=d[0];focus.textContent=d[1];notes.value=w.notes;
+ plan.innerHTML=d[2].map((x,i)=>'<div class="move"><details '+(!i?"open":"")+'><summary><b>'+x[0]+'</b></summary><p>'+x[1]+'</p><p class="muted">'+x[2]+'</p></details></div>').join("");
+ renderSets();interval(d[4]);let b=S.body.at(-1)||{};weight.value=b.weight||"";waist.value=b.waist||"";protein.value=b.protein||190;goal.value=b.goal||"";
+}
+function last(name){for(let h of S.history){let e=h.ex.find(x=>x.name===name);if(e)return e.data.filter(x=>x.done).map(x=>x.w+"kg × "+x.r+" @ "+x.rir+" RIR").join(" | ")}return ""}
+function renderSets(){let w=S.work[D[S.day][0]],done=0,total=0;sets.innerHTML=w.ex.map((e,ei)=>{total+=e.n;done+=e.data.filter(x=>x.done).length;return '<div class="move"><b>'+e.name+'</b><div class="muted">'+e.min+'–'+e.max+' reps</div>'+(last(e.name)?'<div class="last">Last saved: '+last(e.name)+'</div>':'<div class="last">No previous saved performance yet.</div>')+'<div class="sets"><small>#</small><small>kg</small><small>reps</small><small>RIR</small><small>✓</small>'+e.data.map((x,si)=>'<span>'+(si+1)+'</span><input type="number" step=".5" value="'+x.w+'" onchange="val('+ei+','+si+',\'w\',this.value)"><input type="number" value="'+x.r+'" onchange="val('+ei+','+si+',\'r\',this.value)"><input type="number" value="'+x.rir+'" onchange="val('+ei+','+si+',\'rir\',this.value)"><button class="'+(x.done?"active":"")+' done" onclick="toggle('+ei+','+si+')">'+(x.done?"✓":"")+'</button>').join("")+'</div></div>'}).join("");count.textContent=done+" / "+total+" sets";bar.style.width=(total?done/total*100:0)+"%"}
+function val(e,s,k,v){S.work[D[S.day][0]].ex[e].data[s][k]=v;save()}
+function toggle(e,s){let x=S.work[D[S.day][0]].ex[e].data[s];x.done=!x.done;save();renderSets()}
 function add(){let n=prompt("Exercise name");if(!n)return;let a=+(prompt("Sets","3")||3),b=+(prompt("Minimum reps","8")||8),c=+(prompt("Maximum reps","12")||12);S.work[D[S.day][0]].ex.push({name:n,n:a,min:b,max:c,data:Array.from({length:a},()=>({w:"",r:"",rir:"",done:false}))});save();renderSets()}
-function saveSession(){let w=S.work[D[S.day][0]];w.notes=notes.value;S.history.unshift({date:new Date().toISOString(),day:D[S.day][0],ex:structuredClone(w.ex)});save();toast("Saved — next time your previous performance will appear")}
-function fmtI(){let m=Math.floor(isec/60),s=isec%60;return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")}
-function resetI(){stopI();ir=0;if(!icfg)return;if(icfg[0]=="emom"){isec=60;phase="READY"}else{isec=20;phase="WORK"}renderI()}
-function renderI(){if(!window.iclock)return;iclock.textContent=fmtI();let status=document.getElementById("istatus");let desc=document.getElementById("idesc");if(status)status.textContent=phase;if(desc){if(icfg[0]=="emom"){let next=Math.min(ir+1,icfg[1]);desc.textContent=phase=="READY"?"Press Start — Minute 1 begins with the first exercise.":"Minute "+next+" of "+icfg[1]+" — "+(ir%2===0?"Farmer's carry":"Battle ropes")+". Work, then rest until the beep."}else desc.textContent="Round "+(ir+1)+" of "+icfg[1]+" — "+phase.toLowerCase()+" phase."}}
-function interval(c){icfg=c;if(!c){intervalCard.style.display="none";return}stopI();ir=0;phase=c[0]=="emom"?"READY":"WORK";isec=c[0]=="emom"?60:20;intervalCard.style.display="block";intervalCard.innerHTML='<b>Interval / EMOM timer</b><div class="timer" id="iclock">01:00</div><div id="istatus" style="font-weight:800;margin:6px 0"></div><div class="muted" id="idesc"></div><br><button class="primary" onclick="startI()">Start</button> <button onclick="stopI()">Pause</button> <button onclick="resetI()">Reset</button>';renderI()}
-function startI(){if(iv||!icfg)return;if(icfg[0]=="emom"&&phase=="READY")phase="GO";renderI();iv=setInterval(()=>{isec--;renderI();if(isec<=0){navigator.vibrate?.(200);if(icfg[0]=="emom"){ir++;if(ir>=icfg[1]){stopI();phase="COMPLETE";isec=0;renderI();toast("EMOM complete");return}isec=60;phase="GO";toast("Next minute — GO!")}else{if(phase=="WORK"){phase="REST";isec=40;toast("Rest")}else{ir++;if(ir>=icfg[1]){stopI();phase="COMPLETE";isec=0;renderI();toast("Intervals complete");return}phase="WORK";isec=20;toast("WORK!")}}renderI()}},1000)}
+function saveSession(){let w=S.work[D[S.day][0]];w.notes=notes.value;S.history.unshift({date:new Date().toISOString(),day:D[S.day][0],ex:structuredClone(w.ex)});save();toast("Saved — your performance will show next time")}
+function interval(c){stopI();icfg=c;ir=0;elapsed=0;if(!c){intervalCard.style.display="none";return}intervalCard.style.display="block";intervalCard.innerHTML='<b>Workout timer</b><div class="clock intervalClock" id="iclock">'+fmt(c[1]*60)+'</div><div class="status" id="istatus">'+(c[0]=="amrap"?"AMRAP — READY":"READY")+'</div><div class="muted" id="idesc">'+(c[0]=="amrap"?"10 minutes: complete as many quality rounds as possible.":"")+'</div><br><div class="clockButtons"><button class="primary" onclick="startI()">Start</button><button onclick="stopI()">Pause</button><button onclick="resetI()">Reset</button></div>'}
+function renderI(){if(!icfg)return;let remain=Math.max(0,icfg[1]*60-elapsed);iclock.textContent=fmt(remain);istatus.textContent=remain===0?"COMPLETE":(icfg[0]=="amrap"?"AMRAP — GO":"RUNNING")}
+function startI(){if(iv||!icfg)return;iv=setInterval(()=>{elapsed++;renderI();if(elapsed>=icfg[1]*60){stopI();navigator.vibrate?.(300);toast("Timer complete")}},1000)}
 function stopI(){clearInterval(iv);iv=null}
-function show(){clock.textContent=Math.floor(t/60).toString().padStart(2,"0")+":"+String(t%60).padStart(2,"0")}function start(){if(tid)return;tid=setInterval(()=>{if(t)t--;else stop();show()},1000)}function stop(){clearInterval(tid);tid=null}function reset(){stop();t=2700;show()}
+function resetI(){stopI();elapsed=0;renderI()}
+function show(){clock.textContent=fmt(t)}function start(){if(tid)return;tid=setInterval(()=>{if(t>0)t--;else stop();show()},1000)}function stop(){clearInterval(tid);tid=null}function reset(){stop();t=2700;show()}
 function saveBody(){S.body.push({date:new Date().toISOString(),weight:weight.value,waist:waist.value,protein:protein.value,goal:goal.value});save();toast("Body data saved")}
-function backup(){let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:"application/json"}));a.download="cut-phase-backup.json";a.click()}function restore(e){let r=new FileReader();r.onload=()=>{S=JSON.parse(r.result);save();init()};r.readAsText(e.target.files[0])}
-init();</script></body></html>
+function backup(){let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:"application/json"}));a.download="cut-phase-backup.json";a.click()}
+function restore(e){let r=new FileReader();r.onload=()=>{S=JSON.parse(r.result);save();init();toast("Backup restored")};r.readAsText(e.target.files[0])}
+init();
+</script></body></html>
