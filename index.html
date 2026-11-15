@@ -252,7 +252,7 @@ function newWorkout(){
 }
 function saveDayNotes(){if($("notes")&&S.work[D[S.day][0]]){S.work[D[S.day][0]].notes=$("notes").value;save()}}
 function init(){
- tabs.innerHTML=D.map((x,i)=>'<button class="'+(i===S.day?"active":"")+'" onclick="saveDayNotes();S.day='+i+';save();init()">'+(x[0]==="Weekend"?"Weekend":x[0].slice(0,3))+'</button>').join("");
+ tabs.innerHTML=D.map((x,i)=>'<button class="'+(i===S.day?"active":"")+'" onclick="saveDayNotes();S.day='+i+';save();init();showScreen(&quot;workout&quot;)">'+(x[0]==="Weekend"?"Weekend":x[0].slice(0,3))+'</button>').join("");
  let d=D[S.day],w=S.work[d[0]]||(S.work[d[0]]={ex:[],notes:""});for(let spec of d[3]){let existing=w.ex.find(x=>x.name===spec[0]);if(!existing){w.ex.push({name:spec[0],n:spec[1],min:spec[2],max:spec[3],data:Array.from({length:spec[1]},()=>({w:"",r:"",rir:"",done:false}))})}else{existing.min=spec[2];existing.max=spec[3];while(existing.data.length<spec[1])existing.data.push({w:"",r:"",rir:"",done:false});existing.n=existing.data.length}}save();
  $("title").textContent=d[0];$("focus").textContent=d[1];$("notes").value=w.notes;
  plan.innerHTML=d[2].map((x,i)=>{let type=planType(x[0]),grp=planGroupName(d[0],i,x[0]);return '<div class="planGroup" data-type="'+type+'"><div class="groupHeader"><span>'+escapeHtml(grp)+'</span></div><div class="move"><details open><summary>'+escapeHtml(x[0])+'</summary><p>'+escapeHtml(x[1])+'</p><p class="muted">'+escapeHtml(x[2])+'</p></details></div></div>'}).join("");
@@ -331,7 +331,7 @@ function saveSession(){
  const record={date:new Date().toISOString(),day,ex:structuredClone(w.ex),notes:w.notes,run:w.run?structuredClone(w.run):null,sessionId:w.sessionId};
  const existing=S.history.findIndex(x=>x.sessionId===w.sessionId);
  if(existing>=0){record.date=S.history[existing].date;S.history[existing]=record}else{S.history.unshift(record)}
- save();$("historyCount").textContent="("+S.history.length+")";toast(existing>=0?"Saved workout updated":"Workout saved to History");
+ save();$("historyCount").textContent="("+S.history.length+")";if(day==="Weekend")renderRun();toast(existing>=0?"Saved workout updated":"Workout saved to History");
 }
 
 
@@ -425,7 +425,7 @@ function formatReport(record){
     lines.push("  Set "+(i+1)+": "+(s.w!==""?s.w+" kg":"BW / not entered")+" × "+(s.r!==""?s.r:"?")+" reps"+(s.rir!==""?", "+s.rir+" RIR":"")+(s.done?" [completed]":" [not marked completed]"));
    }
   }
-  if(!found)lines.push("  No sets logged");
+  if(!found&&!(day==="Weekend"&&record.run))lines.push("  No sets logged");
   if(e.comment)lines.push("  Exercise feedback: "+e.comment);
  }
  lines.push("","Session comments: "+(record.notes||"(none)"),"","Please evaluate exercise technique notes, weights, rep progression, fatigue and running recovery; recommend precise changes for next time and flag any assumptions. Treat this week's values as provisional baseline.");
@@ -435,8 +435,10 @@ async function copyReport(){
  let day=D[S.day][0],w=S.work[day];
  // Prioritise current work if it has any recorded sets; otherwise use latest saved session.
  let hasDraft=w.ex.some(e=>quickHasData(e)||e.data.some(s=>s.done||s.w!==""||s.r!==""||s.rir!==""))||!!$("notes").value.trim()|| (day==="Weekend"&&!!(w.run?.distance||w.run?.duration||w.run?.recovery));
- let record=hasDraft?{day,ex:w.ex,notes:$("notes").value,run:w.run}:S.history.find(x=>x.day===day);
- if(!record){record={day,ex:w.ex,notes:$("notes").value,run:w.run}}
+ const draft={day,ex:w.ex,notes:$("notes").value,run:w.run};
+ const saved=w.sessionId?S.history.find(x=>x.sessionId===w.sessionId):null;
+ const unchanged=saved&&JSON.stringify({ex:draft.ex,notes:draft.notes,run:draft.run||null})===JSON.stringify({ex:saved.ex,notes:saved.notes,run:saved.run||null});
+ let record=unchanged?saved:(hasDraft?draft:(saved||S.history.find(x=>x.day===day)||draft));
  let report=formatReport(record);
  try{if(!navigator.clipboard?.writeText)throw Error("clipboard unavailable");await navigator.clipboard.writeText(report);toast("Workout report copied — paste into ChatGPT");$("reportFallback").style.display="none"}
  catch(err){let e=$("reportFallback");e.value=report;e.style.display="block";e.focus();e.select();toast("Select and copy the report below")}
