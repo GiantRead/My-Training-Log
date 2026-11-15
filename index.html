@@ -139,6 +139,10 @@ button:focus-visible,summary:focus-visible,input:focus-visible,textarea:focus-vi
 .historyCompareTable th,.historyCompareTable td{padding:9px 6px;text-align:left;vertical-align:top;border-bottom:1px solid #e2e9f2;overflow-wrap:anywhere}
 .historyCompareTable th:first-child{width:36%}
 .historyEmpty{padding:20px;color:#637690;text-align:center}
+.historyActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.historyActions button{flex:1;min-width:135px}
+.deleteHistoryBtn{border:1px solid #f0a9a9;color:#9f2626;background:#fff6f6}
+.emptyHistoryLabel{display:inline-block;padding:5px 9px;background:#fff0d6;color:#86551b;border-radius:7px;font-weight:800;font-size:12px;margin-top:9px}
 @media(max-width:390px){.runGrid{grid-template-columns:1fr 1fr;gap:8px}.runGrid label{font-size:12px}.computedPace{font-size:19px}}
 </style></head><body>
 <header><div><b>Cut Phase</b><div class="muted">“Fall in love with the grind.”</div></div><div class="tabs" id="tabs"></div></header>
@@ -175,7 +179,7 @@ button:focus-visible,summary:focus-visible,input:focus-visible,textarea:focus-vi
 <div class="card"><details><summary><b>Backup and restore</b></summary><div class="actionrow"><button onclick="backup()">Export backup</button> <label class="importLabel">Import backup<input type="file" accept=".json" onchange="restore(event)" hidden></label></div></details></div>
 </section>
 <section id="historyView" hidden>
-<div class="card historyHeader"><div class="row"><h2>Training history</h2><span class="chip" id="historyTotal">0 sessions</span></div><p class="muted">Review saved workouts, compare the last two sessions, and copy an old report for ChatGPT.</p>
+<div class="card historyHeader"><div class="row"><h2>Training history</h2><span class="chip" id="historyTotal">0 sessions</span></div><p class="muted">Review saved workouts, compare sessions, copy old reports, or delete unwanted entries. Deletion requires confirmation.</p>
 <label for="historyFilter"><b>Show sessions</b></label>
 <select id="historyFilter" onchange="renderHistory()"><option value="all">All days</option><option value="Monday">Monday</option><option value="Tuesday">Tuesday</option><option value="Wednesday">Wednesday</option><option value="Thursday">Thursday</option><option value="Friday">Friday</option><option value="Weekend">Weekend long runs</option></select>
 </div><div class="card" id="historyComparison"></div><div id="historyEntries"></div><textarea id="historyCopyFallback" readonly style="display:none" rows="7" aria-label="Saved workout report"></textarea></section>
@@ -324,8 +328,20 @@ function renderSets(){
 function val(e,s,k,v){S.work[D[S.day][0]].ex[e].data[s][k]=v;save()}
 function toggle(e,s){let x=S.work[D[S.day][0]].ex[e].data[s];x.done=!x.done;save();renderSets()}
 function add(){let n=prompt("Exercise name");if(!n)return;let a=+(prompt("Sets","3")||3),b=+(prompt("Minimum reps","8")||8),c=+(prompt("Maximum reps","12")||12);S.work[D[S.day][0]].ex.push({name:n,n:a,min:b,max:c,data:Array.from({length:a},()=>({w:"",r:"",rir:"",done:false}))});save();renderSets()}
+function sessionHasData(record){
+ if(String(record?.notes||"").trim())return true;
+ const r=record?.run||{};
+ if(["distance","duration","target","effort","terrain","recovery"].some(k=>String(r[k]??"").trim()))return true;
+ return (record?.ex||[]).some(e=>{
+  const q=e.quick||{};
+  if(q.done||["weight","reps","rir","comment"].some(k=>String(q[k]??"").trim()))return true;
+  if(String(e.comment||"").trim())return true;
+  return (e.data||[]).some(s=>s.done||["w","r","rir"].some(k=>String(s[k]??"").trim()));
+ });
+}
 function saveSession(){
  const day=D[S.day][0],w=S.work[day];w.notes=$("notes").value;
+ if(!sessionHasData(w)){toast("Nothing logged yet — workout not saved");return;}
  if(day==="Weekend"&&(!(Number(w.run?.distance)>0)||!(Number(w.run?.duration)>0))&&!confirm("Distance or duration is missing. Save this long run anyway?"))return;
  if(!w.sessionId)w.sessionId=new Date().toISOString()+"-"+Math.random().toString(36).slice(2,8);
  const record={date:new Date().toISOString(),day,ex:structuredClone(w.ex),notes:w.notes,run:w.run?structuredClone(w.run):null,sessionId:w.sessionId};
@@ -395,13 +411,28 @@ function renderHistory(){
  if(!sessions.length){$("historyEntries").innerHTML='<div class="card historyEmpty">No saved workouts yet. Save a session to see it here.</div>';return}
  $("historyEntries").innerHTML=sessions.map((s)=>{
  const idx=S.history.indexOf(s),date=new Date(s.date).toLocaleString(undefined,{weekday:"short",day:"numeric",month:"short",year:"numeric",hour:"numeric",minute:"2-digit"});
- const summary=s.day==="Weekend"?(s.run?.distance?s.run.distance+" km · "+paceLabel(s.run.distance,s.run.duration):"Long run · legacy entry"):(s.ex||[]).filter(x=>x.quick?.done||(x.data||[]).some(y=>y.done)).length+" exercises completed";
+ const empty=!sessionHasData(s);
+ const summary=empty?"No workout data recorded":s.day==="Weekend"?(s.run?.distance?s.run.distance+" km · "+paceLabel(s.run.distance,s.run.duration):"Long run · legacy entry"):(s.ex||[]).filter(x=>x.quick?.done||(x.data||[]).some(y=>y.done)).length+" exercises completed";
  const detail=s.day==="Weekend"&&s.run?'<div class="historyExercise">Distance: '+escapeHtml(s.run.distance||"—")+' km · Time: '+escapeHtml(s.run.duration||"—")+' min · Pace: '+escapeHtml(paceLabel(s.run.distance,s.run.duration))+' · Effort: '+escapeHtml(s.run.effort||"—")+'/10</div><div class="muted">Terrain: '+escapeHtml(s.run.terrain||"—")+'<br>Recovery: '+escapeHtml(s.run.recovery||"—")+'</div>':"";
  return '<div class="card historyEntry '+(s.day==="Weekend"?"weekendEntry":"")+'"><details><summary>'+escapeHtml(s.day)+' · '+escapeHtml(date)+'</summary><div class="muted">'+escapeHtml(summary)+'</div><div class="historyDetail">'+detail+
  (s.ex||[]).filter(e=>e.quick?.done||e.quick?.comment||e.quick?.weight||e.quick?.reps||(e.data||[]).some(x=>x.done||x.w||x.r)).map(e=>'<div class="historyExercise"><b>'+escapeHtml(e.name)+'</b><div>'+escapeHtml(formatExercise(e))+'</div>'+(e.quick?.comment?'<div class="muted">Note: '+escapeHtml(e.quick.comment)+'</div>':"")+'</div>').join("")+
  (s.notes?'<p class="muted">Overall: '+escapeHtml(s.notes)+'</p>':"")+
- '<button onclick="copyOldSession('+idx+')">Copy this report</button></div></details></div>';
+ (empty?'<div class="emptyHistoryLabel">Empty saved workout</div>':"")+
+ '<div class="historyActions"><button onclick="copyOldSession('+idx+')">Copy report</button><button class="deleteHistoryBtn" onclick="deleteOldSession('+idx+')">Delete workout</button></div></div></details></div>';
  }).join("");
+}
+function deleteOldSession(i){
+ const entry=S.history[i];if(!entry)return;
+ const label=entry.day+" — "+new Date(entry.date).toLocaleString(undefined,{day:"numeric",month:"short",year:"numeric",hour:"numeric",minute:"2-digit"});
+ const note=sessionHasData(entry)?"This removes the saved workout and all its recorded exercise data.":"This saved workout has no recorded data.";
+ if(!confirm("Delete saved workout?\n\n"+label+"\n\n"+note+"\n\nThis cannot be undone. Your other workouts and body measurements will stay intact."))return;
+ S.history.splice(i,1);
+ const current=S.work[entry.day];
+ if(current?.sessionId&&entry.sessionId===current.sessionId)current.sessionId="";
+ save();
+ $("historyCount").textContent="("+S.history.length+")";
+ renderHistory();
+ toast("Workout deleted from history");
 }
 async function copyOldSession(i){
  const record=S.history[i];if(!record)return;
