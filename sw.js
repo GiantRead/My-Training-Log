@@ -1,4 +1,4 @@
-const CACHE="mtl-v6-delete-history";
+const CACHE="mtl-v7-ios-keyboards";
 const ASSETS=["./","./index.html","./manifest.webmanifest"];
 
 self.addEventListener("install",event=>{
