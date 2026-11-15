@@ -1,5 +1,5 @@
-const CACHE="mtl-v3-art";
-const ASSETS=["./","./index.html","./manifest.webmanifest","./assets/day-art.webp"];
+const CACHE="mtl-v4-layout";
+const ASSETS=["./","./index.html","./manifest.webmanifest"];
 
 self.addEventListener("install",event=>{
   self.skipWaiting();
