@@ -175,7 +175,7 @@ button:focus-visible,summary:focus-visible,input:focus-visible,textarea:focus-vi
 
 
 
-<div class="card"><details><summary><b>Body tracking</b></summary><h3>Measurements</h3><div class="bodyGrid"><input id="weight" placeholder="Body weight kg" type="number" step=".1"><input id="waist" placeholder="Waist cm" type="number" step=".1"><input id="protein" placeholder="Protein g" type="number"><input id="goal" placeholder="Goal weight kg" type="number" step=".1"></div><br><button onclick="saveBody()">Save body data</button></details></div>
+<div class="card"><details><summary><b>Body tracking</b></summary><h3>Measurements</h3><div class="bodyGrid"><input id="weight" placeholder="Body weight kg" type="number" inputmode="decimal" step=".1"><input id="waist" placeholder="Waist cm" type="number" inputmode="decimal" step=".1"><input id="protein" placeholder="Protein g" type="number" inputmode="numeric" pattern="[0-9]*"><input id="goal" placeholder="Goal weight kg" type="number" inputmode="decimal" step=".1"></div><br><button onclick="saveBody()">Save body data</button></details></div>
 <div class="card"><details><summary><b>Backup and restore</b></summary><div class="actionrow"><button onclick="backup()">Export backup</button> <label class="importLabel">Import backup<input type="file" accept=".json" onchange="restore(event)" hidden></label></div></details></div>
 </section>
 <section id="historyView" hidden>
@@ -315,12 +315,12 @@ function renderSets(){
  if(q.done||logged)done++;
  let prev=last(e.name);
  const g=exerciseGroup(D[S.day][0],ei),next=exerciseGroup(D[S.day][0],ei+1);let prefix="",suffix="";if(g&&g[0]!==previousGroup)prefix='<div class="exerciseGroup '+g[1]+'"><div class="groupHeader">↪ '+escapeHtml(g[0])+'</div>';if(g&&(!next||next[0]!==g[0]))suffix="</div>";previousGroup=g?g[0]:"";return prefix+'<div class="exerciseCard"><div class="row"><div><div class="exTitle">'+escapeHtml(e.name)+'</div><div class="muted">Plan: '+e.n+' sets × '+e.min+'–'+e.max+' reps'+(prev?' · Last: '+escapeHtml(prev):'')+'</div></div><button class="markDone '+(q.done?"primary":"")+'" onclick="markExercise('+ei+')">'+(q.done?"✓ Done":"Mark done")+'</button></div>'+
- '<div class="quickGrid"><label>Weight (kg)<input type="number" step=".5" placeholder="BW / kg" value="'+escapeHtml(q.weight)+'" oninput="quickVal('+ei+',\'weight\',this.value)"></label>'+
- '<label>Reps / set<input type="text" placeholder="e.g. 8–10" value="'+escapeHtml(q.reps)+'" oninput="quickVal('+ei+',\'reps\',this.value)"></label>'+
- '<label>RIR <span class="muted">(opt.)</span><input type="number" min="0" max="10" placeholder="2" value="'+escapeHtml(q.rir)+'" oninput="quickVal('+ei+',\'rir\',this.value)"></label></div>'+
+ '<div class="quickGrid"><label>Weight (kg)<input type="number" inputmode="decimal" step=".5" placeholder="BW / kg" value="'+escapeHtml(q.weight)+'" oninput="quickVal('+ei+',\'weight\',this.value)"></label>'+
+ '<label>Reps / set<input type="text" inputmode="numeric" pattern="[0-9]*" placeholder="e.g. 8" value="'+escapeHtml(q.reps)+'" oninput="quickVal('+ei+',\'reps\',this.value)"></label>'+
+ '<label>RIR <span class="muted">(opt.)</span><input type="number" inputmode="numeric" min="0" max="10" placeholder="2" value="'+escapeHtml(q.rir)+'" oninput="quickVal('+ei+',\'rir\',this.value)"></label></div>'+
  '<label class="small"><b>Exercise comments</b></label><textarea rows="2" placeholder="Too easy, increase next week, lighter last set, technique, pain..." oninput="exerciseComment('+ei+',this.value)">'+escapeHtml(q.comment||e.comment||"")+'</textarea>'+
  '<details><summary>Detailed sets (optional) · '+logged+' logged</summary><p class="muted">Use this when weights or reps varied. It preserves your existing set-by-set history.</p><div class="sets"><small>#</small><small>kg</small><small>reps</small><small>RIR</small><small>✓</small>'+
- e.data.map((x,si)=>'<span>'+(si+1)+'</span><input type="number" step=".5" value="'+escapeHtml(x.w)+'" onchange="val('+ei+','+si+',\'w\',this.value)"><input type="number" value="'+escapeHtml(x.r)+'" onchange="val('+ei+','+si+',\'r\',this.value)"><input type="number" value="'+escapeHtml(x.rir)+'" onchange="val('+ei+','+si+',\'rir\',this.value)"><button class="'+(x.done?"active":"")+' done" onclick="toggle('+ei+','+si+')">'+(x.done?"✓":"")+'</button>').join("")+'</div></details></div>'+suffix
+ e.data.map((x,si)=>'<span>'+(si+1)+'</span><input type="number" inputmode="decimal" step=".5" value="'+escapeHtml(x.w)+'" onchange="val('+ei+','+si+',\'w\',this.value)"><input type="number" inputmode="numeric" value="'+escapeHtml(x.r)+'" onchange="val('+ei+','+si+',\'r\',this.value)"><input type="number" inputmode="numeric" value="'+escapeHtml(x.rir)+'" onchange="val('+ei+','+si+',\'rir\',this.value)"><button class="'+(x.done?"active":"")+' done" onclick="toggle('+ei+','+si+')">'+(x.done?"✓":"")+'</button>').join("")+'</div></details></div>'+suffix
  }).join("");
  $("count").textContent=done+" / "+total+" exercises";
  $("bar").style.width=(total?done/total*100:0)+"%";
