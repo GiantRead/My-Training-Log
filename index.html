@@ -34,18 +34,40 @@ h2{font-size:23px;line-height:1.15;margin:6px 0}h3{margin:3px 0 10px;font-size:1
 .actionrow button{flex:1}
 .importLabel{display:inline-flex;align-items:center;justify-content:center;padding:15px 19px;min-height:52px;border:1px solid var(--line);border-radius:11px;font-size:16px;font-weight:800}
 #overview{line-height:1.5}
+
+:root{--ink:#13243c;--bg:#edf3fa;--line:#d7e1ec;--muted:#62748b}
+body{background:radial-gradient(ellipse at 100% 0,#d9eaf9,transparent 360px),var(--bg)}
+header{background:linear-gradient(115deg,#142542,#1d3864);border-color:#26496f;box-shadow:0 5px 18px #0a23451a}
+header b{font-size:19px;color:#fff}header .muted{color:#bed7ef}
+.tabs button{background:#244267;color:#dbeafa;border-color:#375982}.tabs button.active{background:#e9f5ff!important;color:#173c77!important;border-color:#9bcdf3}
+.card{border-color:#dae3ed;box-shadow:0 4px 15px #18395a0a}
+button.primary,.primary{background:#255ccd!important;color:white;border-color:#2858b5}
+button:focus-visible,summary:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #53c7ed;outline-offset:2px}
+.overview{position:relative;min-height:235px;overflow:hidden;background:linear-gradient(122deg,#122c55,#2057a2 76%,#1e70c1);color:#fff;border:0;box-shadow:0 10px 30px #143c7130}
+.overview .row,.overview #overview,.overview .bar{position:relative;z-index:2}.overview .row{padding-right:min(39%,185px);align-items:flex-start}
+.overview .eyebrow{color:#86e1f4}.overview h2{font-size:clamp(23px,5.7vw,33px);line-height:1.1;margin:10px 0 12px}.overview .muted{color:#d3eaff}
+.overview #count{font-weight:800;background:#ffffff1c;border:1px solid #ffffff2c;border-radius:30px;padding:6px 10px;font-size:12px;white-space:nowrap;margin-top:10px}
+.overview .bar{background:#ffffff3d}.overview .bar div{background:#66d9ff}.overview .chip{background:#ffffff1c;color:#f4fbff;border:1px solid #ffffff29}
+.heroArt{position:absolute;width:45%;max-width:235px;right:-4px;bottom:-16px;z-index:1;pointer-events:none;opacity:.88;filter:drop-shadow(0 6px 16px #041b3f55)}.heroArt svg{width:100%;height:auto}
+.heroGlow{position:absolute;right:-85px;top:-105px;width:310px;height:310px;border:32px solid #ffffff0b;border-radius:50%;pointer-events:none}
+.logCard{border-top:4px solid #3c8fd7}.finishCard{border-top:4px solid #20aa8d}.progressCard{border-left:4px solid #6795e6;background:linear-gradient(100deg,#f7faff,#fff)}
+.exerciseCard{border-color:#dae4ef;border-left:4px solid #a4bfdc;box-shadow:0 2px 8px #24476b0a}.exerciseCard:has(.markDone.primary){border-left-color:#0c8c6d;background:#f2fcf8}
+.exTitle{color:#163f72}.exerciseCard .quickGrid input{background:#f6faff;border-color:#cbd8ea}.exerciseCard textarea{background:#fbfdff}
+.exerciseCard button.primary{background:#087e65!important;border-color:#087e65}
+.clock{color:#194a97}#mainTimerCard,#intervalCard{background:linear-gradient(105deg,#f2f8ff,#fff 70%);border-top:4px solid #51bde2}.bar div{background:#245dcc}.toast{background:#163c77}
+@media(max-width:420px){.overview{min-height:233px}.overview .row{padding-right:35%}.heroArt{width:49%;right:-18px;bottom:7px}.overview #count{font-size:11px;padding:5px 7px}.overview h2{font-size:24px}.overview .chip{font-size:11px;padding:5px 7px}}
 </style></head><body>
 <header><div><b>Cut Phase</b><div class="muted">“Fall in love with the grind.”</div></div><div class="tabs" id="tabs"></div></header>
 <main>
-<div class="card overview"><div class="row"><div><div class="eyebrow">TODAY'S TRAINING</div><h2 id="title"></h2><div class="muted" id="focus"></div></div><div id="count"></div></div><div class="bar"><div id="bar"></div></div><div id="overview"></div></div>
+<div class="card overview"><div class="heroGlow"></div><div class="heroArt" aria-hidden="true"><svg viewBox="0 0 200 215" xmlns="http://www.w3.org/2000/svg"><circle cx="112" cy="105" r="87" fill="#64cbff" opacity=".16"/><path d="M28 149 65 86 108 158 174 49 189 204 82 204Z" fill="#48ade8"/><path d="M76 89 116 73 149 96 156 164 122 200 80 172 65 123Z" fill="#b6e7fa" stroke="#e6faff" stroke-width="4"/><path d="m70 120 34 17 34-20 17 35-32 24-42-17Z" fill="#2056a1"/><path d="m114 133 16 17-16 19-16-19Z" fill="#7df8ed"/><path d="M94 42 118 32 139 47 144 69 127 91 104 85 91 66Z" fill="#dff4ff"/><path d="m93 58 26 7 23-8-10 20-12-5-17 6Z" fill="#17386b"/><path d="m105 69 10 2m7 0 10-3" stroke="#55ecff" stroke-width="4"/><path d="M77 111 50 137 58 154 91 135m56-25 27 26-12 18-35-22" fill="none" stroke="#c4e6ff" stroke-width="15" stroke-linecap="round"/><path d="m94 172-9 31 29 6 11-38m11-1 10 38 31-7-22-43" fill="#14376a"/><path d="m21 55 8-19 5 15 15 3-15 8-4 14-4-15Zm152-27 8-17 5 15 15 4-15 6-7 15-1-14Z" fill="#7af8f0"/></svg></div><div class="row"><div><div class="eyebrow">⚡ TODAY'S MISSION</div><h2 id="title"></h2><div class="muted" id="focus"></div></div><div id="count"></div></div><div class="bar"><div id="bar"></div></div><div id="overview"></div></div>
 
 
 
-<div class="card"><div class="row"><h3>Workout log</h3><span class="muted">Weight · reps · notes</span></div><p class="muted">Log your usual working weight and reps, then note any changes. Detailed sets are optional.</p><div id="sets"></div><button onclick="add()">+ Add exercise</button></div>
+<div class="card logCard"><div class="row"><h3>💪 Workout log</h3><span class="muted">Weight · reps · notes</span></div><p class="muted">Log your usual working weight and reps, then note any changes. Detailed sets are optional.</p><div id="sets"></div><button onclick="add()">+ Add exercise</button></div>
 <div class="card"><details><summary><b>Full workout instructions</b> <span class="muted">— technique and mobility</span></summary><div id="plan"></div></details></div>
 
-<div class="card"><div class="row"><h3>Finish workout</h3><span class="muted">Save · share · progress</span></div><details><summary><b>Overall session notes (optional)</b></summary><textarea id="notes" rows="3" placeholder="Overall energy, fatigue, running, recovery..." style="margin-top:10px"></textarea></details><div class="actionrow"><button class="primary" onclick="saveSession()">Save workout</button><button onclick="copyReport()">Copy report</button></div><p class="muted">Copy the report into ChatGPT for detailed coaching. Your records stay on this device unless you share them.</p><textarea id="reportFallback" rows="7" style="display:none;margin-top:8px" readonly aria-label="Workout report to copy"></textarea></div>
-<div class="card"><details><summary><b>Progression suggestions</b> <span class="muted">— optional</span></summary><div id="coach"></div></details></div>
+<div class="card finishCard"><div class="row"><h3>✓ Finish workout</h3><span class="muted">Save · share · progress</span></div><details><summary><b>Overall session notes (optional)</b></summary><textarea id="notes" rows="3" placeholder="Overall energy, fatigue, running, recovery..." style="margin-top:10px"></textarea></details><div class="actionrow"><button class="primary" onclick="saveSession()">Save workout</button><button onclick="copyReport()">Copy report</button></div><p class="muted">Copy the report into ChatGPT for detailed coaching. Your records stay on this device unless you share them.</p><textarea id="reportFallback" rows="7" style="display:none;margin-top:8px" readonly aria-label="Workout report to copy"></textarea></div>
+<div class="card progressCard"><details><summary><b>✦ Progression suggestions</b> <span class="muted">— optional</span></summary><div id="coach"></div></details></div>
 
 <div class="card" id="mainTimerCard"><b>Workout stopwatch</b><div class="clock" id="clock">45:00</div><div class="clockButtons"><button class="primary" onclick="start()">Start</button><button onclick="stop()">Pause</button><button onclick="reset()">Reset</button></div></div>
 
@@ -138,7 +160,7 @@ function renderSets(){
  let q=quick(e),logged=e.data.filter(x=>x.done).length;
  if(q.done||logged)done++;
  let prev=last(e.name);
- return '<div class="exerciseCard"><div class="row"><div><div class="exTitle">'+escapeHtml(e.name)+'</div><div class="muted">Plan: '+e.n+' sets × '+e.min+'–'+e.max+' reps'+(prev?' · Last: '+escapeHtml(prev):'')+'</div></div><button class="'+(q.done?"primary":"")+'" onclick="markExercise('+ei+')">'+(q.done?"✓ Done":"Mark done")+'</button></div>'+
+ return '<div class="exerciseCard"><div class="row"><div><div class="exTitle">'+escapeHtml(e.name)+'</div><div class="muted">Plan: '+e.n+' sets × '+e.min+'–'+e.max+' reps'+(prev?' · Last: '+escapeHtml(prev):'')+'</div></div><button class="markDone '+(q.done?"primary":"")+'" onclick="markExercise('+ei+')">'+(q.done?"✓ Done":"Mark done")+'</button></div>'+
  '<div class="quickGrid"><label>Weight (kg)<input type="number" step=".5" placeholder="BW / kg" value="'+escapeHtml(q.weight)+'" oninput="quickVal('+ei+',\'weight\',this.value)"></label>'+
  '<label>Reps / set<input type="text" placeholder="e.g. 8–10" value="'+escapeHtml(q.reps)+'" oninput="quickVal('+ei+',\'reps\',this.value)"></label>'+
  '<label>RIR <span class="muted">(opt.)</span><input type="number" min="0" max="10" placeholder="2" value="'+escapeHtml(q.rir)+'" oninput="quickVal('+ei+',\'rir\',this.value)"></label></div>'+
