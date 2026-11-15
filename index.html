@@ -85,18 +85,39 @@ button:focus-visible,summary:focus-visible,input:focus-visible,textarea:focus-vi
 .heroArt{width:44%;max-width:225px;opacity:.98}
 .heroArt svg{width:100%;height:auto;display:block}
 @media(max-width:420px){.exerciseGroup{margin:12px -6px;padding:9px}.planGroup{padding:10px}.heroArt{width:45%}}
+
+/* Selected original manhwa art: six-day offline-friendly WebP artwork, reused subtly */
+.overview{padding:0;min-height:0;box-shadow:0 8px 24px #102b5150}
+.overview .row{padding:0!important;margin:14px 16px 0;align-items:center}
+.overview .bar{margin:13px 16px 0}
+.overview #overview{padding:0 16px 15px}
+.overview #overview .summaryList{margin:13px 0 0}
+.overview h2{font-size:clamp(23px,5.5vw,30px);margin:5px 0}
+.overview #count{flex-shrink:0;margin:0}
+.artViewport{position:relative;overflow:hidden;width:100%;isolation:isolate;background:linear-gradient(105deg,#1a3457,#315a7b)}
+.artViewport img{position:absolute;top:0;left:0;width:100%;height:auto;max-width:none;display:block;pointer-events:none}
+.heroBanner{aspect-ratio:3 / 1;max-height:260px;border-bottom:3px solid var(--dayAccent,#4cbcf2)}
+.heroBanner:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,#0c214366,transparent 55%);pointer-events:none}
+.overview .row,.overview .bar,.overview #overview{position:relative;z-index:2}
+.artDivider{position:relative;height:94px;margin:13px 0;border-radius:14px;overflow:hidden;background:#0b203b;box-shadow:0 3px 15px #1434571b}
+.artRibbon{height:94px;width:100%;opacity:.78}
+.artRibbon:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#071c34d9,#091d37ad 48%,#081e32aa)}
+.artDivider span{position:absolute;left:17px;bottom:14px;z-index:2;color:#fff;font-size:12px;letter-spacing:.18em;font-weight:900;text-shadow:0 1px 6px #0009}
+.artDividerOne,.artDividerTwo{border-left:4px solid var(--dayAccent,#51bde2)}
+.logCard,.instructionsCard{border-top-color:var(--dayAccent,#63bee9)}
+@media(max-width:420px){.overview .row{flex-wrap:wrap;gap:8px}.overview #count{margin:0 0 2px}.heroBanner{max-height:none}.artDivider{height:79px}.artRibbon{height:79px}.artDivider span{font-size:10px;letter-spacing:.12em}}
 </style></head><body>
 <header><div><b>Cut Phase</b><div class="muted">“Fall in love with the grind.”</div></div><div class="tabs" id="tabs"></div></header>
 <main>
-<div class="card overview" id="overviewBanner"><div class="heroGlow"></div><div class="heroArt" id="heroVisual" aria-hidden="true"></div><div class="row"><div><div class="eyebrow">⚡ TODAY'S MISSION</div><h2 id="title"></h2><div class="muted" id="focus"></div></div><div id="count"></div></div><div class="bar"><div id="bar"></div></div><div id="overview"></div></div>
+<div class="card overview" id="overviewBanner"><div class="artViewport heroBanner" aria-hidden="true"><img class="dayArt" src="assets/day-art.webp" alt="" loading="eager"></div><div class="row"><div><div class="eyebrow">⚡ TODAY'S MISSION</div><h2 id="title"></h2><div class="muted" id="focus"></div></div><div id="count"></div></div><div class="bar"><div id="bar"></div></div><div id="overview"></div></div>
 
 
 
 <div class="card instructionsCard"><div class="row"><h3>Full workout instructions</h3><span class="muted">Tap a section for details</span></div><div id="plan"></div></div>
-<div class="card logCard"><div class="row"><h3>💪 Workout log</h3><span class="muted">Weight · reps · notes</span></div><p class="muted">Log your usual working weight and reps, then note any changes. Detailed sets are optional.</p><div id="sets"></div><button onclick="add()">+ Add exercise</button></div>
+<div class="artDivider artDividerOne" aria-hidden="true"><div class="artViewport artRibbon"><img class="dayArt" src="assets/day-art.webp" alt="" loading="lazy"></div><span>TRAIN · ADAPT · LEVEL UP</span></div><div class="card logCard"><div class="row"><h3>💪 Workout log</h3><span class="muted">Weight · reps · notes</span></div><p class="muted">Log your usual working weight and reps, then note any changes. Detailed sets are optional.</p><div id="sets"></div><button onclick="add()">+ Add exercise</button></div>
 
 
-<div class="card finishCard"><div class="row"><h3>✓ Finish workout</h3><span class="muted">Save · share · progress</span></div><details><summary><b>Overall session notes (optional)</b></summary><textarea id="notes" rows="3" placeholder="Overall energy, fatigue, running, recovery..." style="margin-top:10px"></textarea></details><div class="actionrow"><button class="primary" onclick="saveSession()">Save workout</button><button onclick="copyReport()">Copy report</button></div><p class="muted">Copy the report into ChatGPT for detailed coaching. Your records stay on this device unless you share them.</p><textarea id="reportFallback" rows="7" style="display:none;margin-top:8px" readonly aria-label="Workout report to copy"></textarea></div>
+<div class="artDivider artDividerTwo" aria-hidden="true"><div class="artViewport artRibbon"><img class="dayArt" src="assets/day-art.webp" alt="" loading="lazy"></div><span>PROGRESS IS EARNED</span></div><div class="card finishCard"><div class="row"><h3>✓ Finish workout</h3><span class="muted">Save · share · progress</span></div><details><summary><b>Overall session notes (optional)</b></summary><textarea id="notes" rows="3" placeholder="Overall energy, fatigue, running, recovery..." style="margin-top:10px"></textarea></details><div class="actionrow"><button class="primary" onclick="saveSession()">Save workout</button><button onclick="copyReport()">Copy report</button></div><p class="muted">Copy the report into ChatGPT for detailed coaching. Your records stay on this device unless you share them.</p><textarea id="reportFallback" rows="7" style="display:none;margin-top:8px" readonly aria-label="Workout report to copy"></textarea></div>
 <div class="card progressCard"><details><summary><b>✦ Progression suggestions</b> <span class="muted">— optional</span></summary><div id="coach"></div></details></div>
 
 <div class="card" id="mainTimerCard"><b>Workout stopwatch</b><div class="clock" id="clock">45:00</div><div class="clockButtons"><button class="primary" onclick="start()">Start</button><button onclick="stop()">Pause</button><button onclick="reset()">Reset</button></div></div>
@@ -165,30 +186,13 @@ function init(){
  let d=D[S.day],w=S.work[d[0]]||(S.work[d[0]]={ex:[],notes:""});for(let spec of d[3]){let existing=w.ex.find(x=>x.name===spec[0]);if(!existing){w.ex.push({name:spec[0],n:spec[1],min:spec[2],max:spec[3],data:Array.from({length:spec[1]},()=>({w:"",r:"",rir:"",done:false}))})}else{existing.min=spec[2];existing.max=spec[3];while(existing.data.length<spec[1])existing.data.push({w:"",r:"",rir:"",done:false});existing.n=existing.data.length}}save();
  $("title").textContent=d[0];$("focus").textContent=d[1];$("notes").value=w.notes;
  plan.innerHTML=d[2].map((x,i)=>{let type=planType(x[0]),grp=planGroupName(d[0],i,x[0]);return '<div class="planGroup" data-type="'+type+'"><div class="groupHeader"><span>'+escapeHtml(grp)+'</span></div><div class="move"><details open><summary>'+escapeHtml(x[0])+'</summary><p>'+escapeHtml(x[1])+'</p><p class="muted">'+escapeHtml(x[2])+'</p></details></div></div>'}).join("");
- $("overviewBanner").dataset.day=d[0];$("heroVisual").innerHTML=dayArtwork(S.day);
+ $("overviewBanner").dataset.day=d[0];document.documentElement.style.setProperty("--dayAccent",["#4cbcf2","#ef8c4a","#65cfc6","#24b987","#f3b064","#68d5b4"][S.day]);document.querySelectorAll(".dayArt").forEach((img)=>{img.style.transform="translateY(calc("+(-S.day*100/6)+"% + "+(img.closest(".artRibbon")?"-34px":"0px")+"))"});
  renderOverview();renderSets();renderCoach();$("reportFallback").style.display="none";interval(d[4]);let b=S.body.at(-1)||{};weight.value=b.weight||"";waist.value=b.waist||"";protein.value=b.protein||190;goal.value=b.goal||"";
 }
 function last(name){for(let h of S.history){let e=h.ex.find(x=>x.name===name);if(e)return e.data.filter(x=>x.done).map(x=>x.w+"kg × "+x.r+" @ "+x.rir+" RIR").join(" | ")}return ""}
 
 function escapeHtml(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 
-function dayArtwork(i){
- const scenes=[
- // Bench strength: shield and barbell
- '<path d="M44 96h112v12H44zM28 83h14v38H28zM12 91h13v22H12zM159 83h14v38h-14zM176 91h13v22h-13z" fill="#dffaff"/><path d="m100 125 35 13-8 40-27 20-27-20-8-40Z" fill="#2d72c6" stroke="#abebff" stroke-width="4"/><path d="m100 139 8 15-8 15-8-15Z" fill="#8df9ed"/>',
- // Conditioning: lightning and strongman carry
- '<path d="m103 16-28 72h30l-16 52 64-87h-39l21-37Z" fill="#a6f4fc"/><path d="M69 137h61v15H69zM51 126h19v35H51zM132 126h19v35h-19zM32 135h17v18H32zM153 135h17v18h-17z" fill="#f0faff"/><path d="m80 158 22 12 24-12 10 29-35 14-32-14Z" fill="#3ed2dd"/>',
- // Deadlift: barbell and mountainous abstract backdrop
- '<path d="m20 145 42-50 27 31 26-51 61 70Z" fill="#9ecbff" opacity=".45"/><path d="M21 155h161v10H21zM21 144h17v33H21zM41 137h15v46H41zM146 137h15v46h-15zM166 144h17v33h-17z" fill="#eef8ff"/><path d="m103 53 35 23-35 30-35-30Z" fill="#a8fbf4"/>',
- // Shoulder strength: crossed stylised dumbbells
- '<g transform="rotate(-34 100 100)"><path d="M27 98h146v14H27zM17 85h19v40H17zM38 90h16v30H38zM148 90h16v30h-16zM166 85h19v40h-19z" fill="#ddfbff"/></g><g transform="rotate(34 100 100)"><path d="M27 98h146v14H27zM17 85h19v40H17zM38 90h16v30H38zM148 90h16v30h-16zM166 85h19v40h-19z" fill="#a6e2f5"/></g><circle cx="100" cy="102" r="26" fill="#1d577b"/><path d="m100 85 14 17-14 17-14-17Z" fill="#70f5e2"/>',
- // Squat/athletic: hero emblem
- '<path d="m100 22 65 24-12 87-53 57-53-57-12-87Z" fill="#abcbfa" stroke="#e5faff" stroke-width="5"/><path d="m100 43 43 15-8 67-35 39-35-39-8-67Z" fill="#3b76bf"/><path d="m100 61 14 35 30 2-24 18 7 30-27-18-27 18 7-30-24-18 30-2Z" fill="#8cf4ed"/>',
- // Long run: stylized running path and finish marker
- '<path d="M34 192c55-57 100-31 113-83 9-34-25-45-5-79" fill="none" stroke="#b9f8ff" stroke-width="14" stroke-linecap="round" stroke-dasharray="16 16"/><circle cx="143" cy="30" r="14" fill="#e4faff"/><path d="m139 55-18 31-31 11m34-11 25 21 30 1m-56-20-11 34-30 25m43-52 1 38 27 17" stroke="#ebffff" stroke-width="11" stroke-linecap="round" fill="none"/><path d="M20 31h65v28H20z" fill="#85eac5"/><path d="M20 31v73" stroke="#dff" stroke-width="5"/>'
- ];
- return '<svg viewBox="0 0 200 215" xmlns="http://www.w3.org/2000/svg"><circle cx="108" cy="104" r="89" fill="#ffffff" opacity=".1"/><circle cx="108" cy="104" r="68" fill="#ffffff" opacity=".08"/><path d="m18 70 13-23 5 18 19 3-18 9-6 19-3-21ZM163 30l12-18 6 18 17 4-17 8-6 18-2-20Z" fill="#83eaf5" opacity=".8">'+(scenes[i]||scenes[0])+'</svg>';
-}
 function planType(name){return /circuit|finisher|AMRAP|power/i.test(name)?"circuit":/run/i.test(name)?"run":/warm-up|stretch|mobility|recovery/i.test(name)?"recovery":/lift|strength|bench|squat|deadlift|press|back|shoulder/i.test(name)?"strength":"other"}
 function planGroupName(day,i,name){
  if(day==="Monday"&&i===3)return "Circuit A · 3 rounds";
