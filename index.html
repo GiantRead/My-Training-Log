@@ -16,22 +16,42 @@ button{padding:15px 19px;min-height:52px;border:1px solid var(--line);border-rad
 textarea,input{font:inherit;border:1px solid var(--line);border-radius:9px;padding:10px}textarea{width:100%}.bodyGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bodyGrid input{width:100%}
 .small{font-size:12px}.status{font-weight:900;font-size:18px;margin:6px 0}
 @media(max-width:420px){.clock{font-size:48px}.intervalClock{font-size:62px}.clockButtons button{font-size:16px;padding:12px 6px}}
+
+.eyebrow{letter-spacing:.12em;font-weight:800;color:#64748b;font-size:11px}
+h2{font-size:23px;line-height:1.15;margin:6px 0}h3{margin:3px 0 10px;font-size:18px}
+.overview .bar{margin-top:14px}
+.summaryList{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0 0}
+.chip{font-size:12px;font-weight:700;background:#eef2f7;border-radius:99px;padding:6px 9px}
+.exerciseCard{border:1px solid #e5e7eb;border-radius:13px;padding:13px;margin:11px 0;background:#fff}
+.exTitle{font-size:17px;font-weight:850;margin-bottom:3px}
+.quickGrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin:12px 0}
+.quickGrid label{font-size:12px;color:#4b5563;font-weight:700;display:block}
+.quickGrid input{display:block;margin-top:5px;width:100%;font-weight:700;font-size:18px;padding:11px 7px}
+.exerciseCard textarea{margin-top:6px;resize:vertical;min-height:52px}
+.exerciseCard details{margin-top:11px;border-top:1px solid #e5e7eb;padding-top:11px}
+.exerciseCard summary{font-weight:700;cursor:pointer}
+.actionrow{display:flex;flex-wrap:wrap;gap:9px;margin-top:13px}
+.actionrow button{flex:1}
+.importLabel{display:inline-flex;align-items:center;justify-content:center;padding:15px 19px;min-height:52px;border:1px solid var(--line);border-radius:11px;font-size:16px;font-weight:800}
+#overview{line-height:1.5}
 </style></head><body>
 <header><div><b>Cut Phase</b><div class="muted">“Fall in love with the grind.”</div></div><div class="tabs" id="tabs"></div></header>
 <main>
-<div class="card"><div class="row"><div><b id="title"></b><div class="muted" id="focus"></div></div><div id="count"></div></div><div class="bar"><div id="bar"></div></div></div>
+<div class="card overview"><div class="row"><div><div class="eyebrow">TODAY'S TRAINING</div><h2 id="title"></h2><div class="muted" id="focus"></div></div><div id="count"></div></div><div class="bar"><div id="bar"></div></div><div id="overview"></div></div>
 
-<div class="card"><b>Workout stopwatch</b><div class="clock" id="clock">45:00</div><div class="clockButtons"><button class="primary" onclick="start()">Start</button><button onclick="stop()">Pause</button><button onclick="reset()">Reset</button></div></div>
+
+
+<div class="card"><div class="row"><h3>Workout log</h3><span class="muted">Weight · reps · notes</span></div><p class="muted">Log your usual working weight and reps, then note any changes. Detailed sets are optional.</p><div id="sets"></div><button onclick="add()">+ Add exercise</button></div>
+<div class="card"><details><summary><b>Full workout instructions</b> <span class="muted">— technique and mobility</span></summary><div id="plan"></div></details></div>
+
+<div class="card"><div class="row"><h3>Finish workout</h3><span class="muted">Save · share · progress</span></div><details><summary><b>Overall session notes (optional)</b></summary><textarea id="notes" rows="3" placeholder="Overall energy, fatigue, running, recovery..." style="margin-top:10px"></textarea></details><div class="actionrow"><button class="primary" onclick="saveSession()">Save workout</button><button onclick="copyReport()">Copy report</button></div><p class="muted">Copy the report into ChatGPT for detailed coaching. Your records stay on this device unless you share them.</p><textarea id="reportFallback" rows="7" style="display:none;margin-top:8px" readonly aria-label="Workout report to copy"></textarea></div>
+<div class="card"><details><summary><b>Progression suggestions</b> <span class="muted">— optional</span></summary><div id="coach"></div></details></div>
+
+<div class="card" id="mainTimerCard"><b>Workout stopwatch</b><div class="clock" id="clock">45:00</div><div class="clockButtons"><button class="primary" onclick="start()">Start</button><button onclick="stop()">Pause</button><button onclick="reset()">Reset</button></div></div>
 
 <div class="card" id="intervalCard"></div>
-
-<div class="card"><h3>Today's plan</h3><div id="plan"></div></div>
-<div class="card"><h3>Track your working sets</h3><div id="sets"></div><button onclick="add()">+ Add exercise</button></div>
-
-<div class="card"><h3>Progression coach</h3><div class="muted">Suggestions are rule-based, not a substitute for checking form and recovery. They use saved sets and comments.</div><div id="coach"></div></div><div class="card"><b>Session comments</b><textarea id="notes" rows="4" placeholder="How did it feel? Energy, technique, pain, performance..."></textarea><br><br><button class="primary" onclick="saveSession()">Save session</button> <button onclick="copyReport()">Copy workout report</button><div class="muted" style="margin-top:8px">Copies the latest saved session for this day, or your current unsaved entries. Paste it into ChatGPT for detailed coaching. Your data stays on your device unless you share it.</div><textarea id="reportFallback" rows="7" style="display:none;margin-top:8px" readonly aria-label="Workout report to copy"></textarea></div>
-
-<div class="card"><h3>Body tracking</h3><div class="bodyGrid"><input id="weight" placeholder="Body weight kg" type="number" step=".1"><input id="waist" placeholder="Waist cm" type="number" step=".1"><input id="protein" placeholder="Protein g" type="number"><input id="goal" placeholder="Goal weight kg" type="number" step=".1"></div><br><button onclick="saveBody()">Save body data</button></div>
-<div class="card"><button onclick="backup()">Export backup</button> <label><button>Import<input type="file" accept=".json" style="display:none" onchange="restore(event)"></button></label></div>
+<div class="card"><details><summary><b>Body tracking</b></summary><h3>Measurements</h3><div class="bodyGrid"><input id="weight" placeholder="Body weight kg" type="number" step=".1"><input id="waist" placeholder="Waist cm" type="number" step=".1"><input id="protein" placeholder="Protein g" type="number"><input id="goal" placeholder="Goal weight kg" type="number" step=".1"></div><br><button onclick="saveBody()">Save body data</button></details></div>
+<div class="card"><details><summary><b>Backup and restore</b></summary><div class="actionrow"><button onclick="backup()">Export backup</button> <label class="importLabel">Import backup<input type="file" accept=".json" onchange="restore(event)" hidden></label></div></details></div>
 </main><div class="toast" id="toast"></div>
 <script>
 const D=[
@@ -81,44 +101,77 @@ let t=2700,tid=null,iv=null,icfg=null,elapsed=0,ir=0;
 const $=id=>document.getElementById(id),save=()=>localStorage.cutphase=JSON.stringify(S);
 function toast(x){let e=$("toast");e.textContent=x;e.style.display="block";setTimeout(()=>e.style.display="none",1800)}
 function fmt(sec){let m=Math.floor(sec/60),s=sec%60;return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")}
+function saveDayNotes(){if($("notes")&&S.work[D[S.day][0]]){S.work[D[S.day][0]].notes=$("notes").value;save()}}
 function init(){
- tabs.innerHTML=D.map((x,i)=>'<button class="'+(i===S.day?"active":"")+'" onclick="S.day='+i+';save();init()">'+x[0].slice(0,3)+'</button>').join("");
+ tabs.innerHTML=D.map((x,i)=>'<button class="'+(i===S.day?"active":"")+'" onclick="saveDayNotes();S.day='+i+';save();init()">'+x[0].slice(0,3)+'</button>').join("");
  let d=D[S.day],w=S.work[d[0]]||(S.work[d[0]]={ex:[],notes:""});for(let spec of d[3]){let existing=w.ex.find(x=>x.name===spec[0]);if(!existing){w.ex.push({name:spec[0],n:spec[1],min:spec[2],max:spec[3],data:Array.from({length:spec[1]},()=>({w:"",r:"",rir:"",done:false}))})}else{existing.min=spec[2];existing.max=spec[3];while(existing.data.length<spec[1])existing.data.push({w:"",r:"",rir:"",done:false});existing.n=existing.data.length}}save();
  $("title").textContent=d[0];$("focus").textContent=d[1];$("notes").value=w.notes;
  plan.innerHTML=d[2].map((x,i)=>'<div class="move"><details '+(!i?"open":"")+'><summary><b>'+x[0]+'</b></summary><p>'+x[1]+'</p><p class="muted">'+x[2]+'</p></details></div>').join("");
- renderSets();renderCoach();$("reportFallback").style.display="none";interval(d[4]);let b=S.body.at(-1)||{};weight.value=b.weight||"";waist.value=b.waist||"";protein.value=b.protein||190;goal.value=b.goal||"";
+ renderOverview();renderSets();renderCoach();$("reportFallback").style.display="none";interval(d[4]);let b=S.body.at(-1)||{};weight.value=b.weight||"";waist.value=b.waist||"";protein.value=b.protein||190;goal.value=b.goal||"";
 }
 function last(name){for(let h of S.history){let e=h.ex.find(x=>x.name===name);if(e)return e.data.filter(x=>x.done).map(x=>x.w+"kg × "+x.r+" @ "+x.rir+" RIR").join(" | ")}return ""}
-function renderCoach(){
- let day=D[S.day][0],w=S.work[day],saved=S.history.filter(x=>x.day===day),prior=saved[0];
- let items=w.ex.map(e=>{
-  let completed=e.data.filter(x=>x.done&&Number(x.r)>0);
-  let source=completed.length?completed:(prior?.ex.find(x=>x.name===e.name)?.data||[]).filter(x=>x.done&&Number(x.r)>0);
-  let comment=((e.comment||"")+" "+(w.notes||"")).toLowerCase();
-  let target="";
-  if(source.length){
-   let reps=source.map(x=>Number(x.r)),weights=source.map(x=>Number(x.w)||0),min=Math.min(...reps),maxWeight=Math.max(...weights);
-   if(/too easy|easy|light/.test(comment))target="Felt easy: consider a small weight increase next session, provided form was controlled.";
-   else if(min>=e.max&&e.max>e.min&&weights.every(x=>x===maxWeight))target="Top of rep range achieved: consider increasing load by the smallest practical increment.";
-   else target="Keep the load and aim to add 1 rep to your lowest completed set while maintaining form.";
-  }else target="Log completed sets to receive a personalised progression suggestion.";
-  return '<div class="move"><b>'+e.name+'</b><p class="muted">'+target+'</p><label class="small">Exercise feedback</label><textarea rows="2" placeholder="Too easy, form issue, change load next time..." onchange="exerciseComment('+w.ex.indexOf(e)+',this.value)">'+escapeHtml(e.comment||"")+'</textarea></div>';
- });
- coach.innerHTML=items.join("")+(day==="Thursday"?'<div class="last"><b>Provisional Thursday targets (not a complete baseline):</b> overhead press test 34 kg per hand × 6–10; lateral raises 14 kg per hand × 10–12; pull-ups at bodyweight aim for 8/8/8/8/8; RDL test 40 kg per hand × 6–10; hang clean and push press 26 kg per hand × 6; bodyweight squats × 10–15; complex rest 60–75 sec. Reassess after a full week of logged training.</div>':'<div class="muted">Record a full week before treating progression targets as established baselines.</div>');
+
+function escapeHtml(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function renderOverview(){
+ const d=D[S.day],w=S.work[d[0]];
+ const highlight=d[2].filter(x=>!(/warm-up|stretch|mobility/i.test(x[0]))).slice(0,5);
+ $("overview").innerHTML='<div class="summaryList">'+highlight.map(x=>'<span class="chip">'+escapeHtml(x[0])+'</span>').join("")+'</div><p class="muted" style="margin:12px 0 0">'+escapeHtml(d[2].find(x=>/warm-up|stretch|mobility/i.test(x[0]))?.[1]||"Include a warm-up and mobility.")+'</p>';
 }
-function escapeHtml(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
-function exerciseComment(i,v){S.work[D[S.day][0]].ex[i].comment=v;save()}
-function renderSets(){let w=S.work[D[S.day][0]],done=0,total=0;sets.innerHTML=w.ex.map((e,ei)=>{total+=e.n;done+=e.data.filter(x=>x.done).length;return '<div class="move"><b>'+e.name+'</b><div class="muted">'+e.min+'–'+e.max+' reps</div>'+(last(e.name)?'<div class="last">Last saved: '+last(e.name)+'</div>':'<div class="last">No previous saved performance yet.</div>')+'<div class="sets"><small>#</small><small>kg</small><small>reps</small><small>RIR</small><small>✓</small>'+e.data.map((x,si)=>'<span>'+(si+1)+'</span><input type="number" step=".5" value="'+x.w+'" onchange="val('+ei+','+si+',\'w\',this.value)"><input type="number" value="'+x.r+'" onchange="val('+ei+','+si+',\'r\',this.value)"><input type="number" value="'+x.rir+'" onchange="val('+ei+','+si+',\'rir\',this.value)"><button class="'+(x.done?"active":"")+' done" onclick="toggle('+ei+','+si+')">'+(x.done?"✓":"")+'</button>').join("")+'</div></div>'}).join("");count.textContent=done+" / "+total+" sets";bar.style.width=(total?done/total*100:0)+"%"}
-function val(e,s,k,v){S.work[D[S.day][0]].ex[e].data[s][k]=v;save();renderCoach()}
-function toggle(e,s){let x=S.work[D[S.day][0]].ex[e].data[s];x.done=!x.done;save();renderSets();renderCoach()}
+function quick(e){
+ if(!e.quick)e.quick={weight:"",reps:"",rir:"",comment:"",done:false};
+ return e.quick;
+}
+function quickHasData(e){let q=quick(e);return q.done||q.weight!==""||q.reps!==""||q.rir!==""||!!q.comment.trim()}
+function exerciseComment(i,v){let e=S.work[D[S.day][0]].ex[i];quick(e).comment=v;save()}
+function quickVal(i,k,v){let e=S.work[D[S.day][0]].ex[i];quick(e)[k]=v;save()}
+function markExercise(i){let e=S.work[D[S.day][0]].ex[i];quick(e).done=!quick(e).done;save();renderSets()}
+function last(name){
+ for(let h of S.history){let e=(h.ex||[]).find(x=>x.name===name);if(e){let q=e.quick;
+ if(q&&(q.weight!==""||q.reps!==""))return [q.weight?q.weight+"kg":"BW",q.reps?q.reps+" reps":"",q.rir!==""?q.rir+" RIR":""].filter(Boolean).join(" · ");
+ let sets=(e.data||[]).filter(x=>x.done);
+ if(sets.length)return sets.map(x=>(x.w||"BW")+"kg × "+x.r).join(" | ");
+ }}return "";
+}
+function renderSets(){
+ let w=S.work[D[S.day][0]],done=0,total=w.ex.length;
+ $("sets").innerHTML=w.ex.map((e,ei)=>{
+ let q=quick(e),logged=e.data.filter(x=>x.done).length;
+ if(q.done||logged)done++;
+ let prev=last(e.name);
+ return '<div class="exerciseCard"><div class="row"><div><div class="exTitle">'+escapeHtml(e.name)+'</div><div class="muted">Plan: '+e.n+' sets × '+e.min+'–'+e.max+' reps'+(prev?' · Last: '+escapeHtml(prev):'')+'</div></div><button class="'+(q.done?"primary":"")+'" onclick="markExercise('+ei+')">'+(q.done?"✓ Done":"Mark done")+'</button></div>'+
+ '<div class="quickGrid"><label>Weight (kg)<input type="number" step=".5" placeholder="BW / kg" value="'+escapeHtml(q.weight)+'" oninput="quickVal('+ei+',\'weight\',this.value)"></label>'+
+ '<label>Reps / set<input type="text" placeholder="e.g. 8–10" value="'+escapeHtml(q.reps)+'" oninput="quickVal('+ei+',\'reps\',this.value)"></label>'+
+ '<label>RIR <span class="muted">(opt.)</span><input type="number" min="0" max="10" placeholder="2" value="'+escapeHtml(q.rir)+'" oninput="quickVal('+ei+',\'rir\',this.value)"></label></div>'+
+ '<label class="small"><b>Exercise comments</b></label><textarea rows="2" placeholder="Too easy, increase next week, lighter last set, technique, pain..." oninput="exerciseComment('+ei+',this.value)">'+escapeHtml(q.comment||e.comment||"")+'</textarea>'+
+ '<details><summary>Detailed sets (optional) · '+logged+' logged</summary><p class="muted">Use this when weights or reps varied. It preserves your existing set-by-set history.</p><div class="sets"><small>#</small><small>kg</small><small>reps</small><small>RIR</small><small>✓</small>'+
+ e.data.map((x,si)=>'<span>'+(si+1)+'</span><input type="number" step=".5" value="'+escapeHtml(x.w)+'" onchange="val('+ei+','+si+',\'w\',this.value)"><input type="number" value="'+escapeHtml(x.r)+'" onchange="val('+ei+','+si+',\'r\',this.value)"><input type="number" value="'+escapeHtml(x.rir)+'" onchange="val('+ei+','+si+',\'rir\',this.value)"><button class="'+(x.done?"active":"")+' done" onclick="toggle('+ei+','+si+')">'+(x.done?"✓":"")+'</button>').join("")+'</div></details></div>'
+ }).join("");
+ $("count").textContent=done+" / "+total+" exercises";
+ $("bar").style.width=(total?done/total*100:0)+"%";
+}
+function renderCoach(){
+ let day=D[S.day][0],w=S.work[day];
+ $("coach").innerHTML=w.ex.map(e=>{
+ let q=quick(e),note=(q.comment||e.comment||"").toLowerCase(),prior=last(e.name),advice="";
+ if(!quickHasData(e)&&!prior)advice="Log a workout to establish your baseline.";
+ else if(/too easy|light|easy/.test(note))advice="If technique and recovery are good, consider the smallest available weight increase next time.";
+ else if(/technique|pain|form/.test(note))advice="Prioritise technique and pain-free movement before increasing load.";
+ else advice="Aim for controlled progression: an extra rep or small load increase when sets feel solid. Check recovery before progressing.";
+ return '<div class="move"><b>'+escapeHtml(e.name)+'</b><p class="muted">'+advice+'</p></div>'
+ }).join("")+'<p class="muted">Suggestions are basic rules. Copy your report to ChatGPT for more detailed analysis.</p>';
+}
+function val(e,s,k,v){S.work[D[S.day][0]].ex[e].data[s][k]=v;save()}
+function toggle(e,s){let x=S.work[D[S.day][0]].ex[e].data[s];x.done=!x.done;save();renderSets()}
 function add(){let n=prompt("Exercise name");if(!n)return;let a=+(prompt("Sets","3")||3),b=+(prompt("Minimum reps","8")||8),c=+(prompt("Maximum reps","12")||12);S.work[D[S.day][0]].ex.push({name:n,n:a,min:b,max:c,data:Array.from({length:a},()=>({w:"",r:"",rir:"",done:false}))});save();renderSets();renderCoach()}
-function saveSession(){let w=S.work[D[S.day][0]];w.notes=$("notes").value;S.history.unshift({date:new Date().toISOString(),day:D[S.day][0],ex:structuredClone(w.ex),notes:w.notes});save();renderCoach();toast("Saved. Tap Copy workout report to share.")}
+function saveSession(){let w=S.work[D[S.day][0]];w.notes=$("notes").value;S.history.unshift({date:new Date().toISOString(),day:D[S.day][0],ex:structuredClone(w.ex),notes:w.notes});save();renderCoach();toast("Saved. Tap Copy report to share.")}
 
 function formatReport(record){
  let day=record.day||D[S.day][0],date=record.date?new Date(record.date).toLocaleDateString():"Draft / not yet saved";
  let lines=["CUT PHASE — WORKOUT REPORT","Day: "+day,"Date: "+date,"Goal: Build/maintain strength and muscle, lose fat, sub-2-hour half marathon in February.",""];
  for(let e of record.ex||[]){
   lines.push(e.name+" | target "+e.n+" sets × "+e.min+"–"+e.max+" reps");
+  let q=e.quick||{};if(q.weight!==undefined&&(q.weight!==""||q.reps!==""||q.rir!==""||q.done||q.comment))lines.push("  Exercise summary: "+(q.weight!==""?q.weight+" kg":"BW / unspecified")+"; "+(q.reps||"reps not entered")+" reps per set"+(q.rir!==""&&q.rir!==undefined?"; "+q.rir+" RIR":"")+(q.done?"; marked complete":""));
+  if(q.comment)lines.push("  Exercise comments: "+q.comment);
   let found=false;
   for(let i=0;i<(e.data||[]).length;i++){
    let s=e.data[i];
@@ -136,7 +189,7 @@ function formatReport(record){
 async function copyReport(){
  let day=D[S.day][0],w=S.work[day];
  // Prioritise current work if it has any recorded sets; otherwise use latest saved session.
- let hasDraft=w.ex.some(e=>e.data.some(s=>s.done||s.w!==""||s.r!==""||s.rir!==""))||!!$("notes").value.trim();
+ let hasDraft=w.ex.some(e=>quickHasData(e)||e.data.some(s=>s.done||s.w!==""||s.r!==""||s.rir!==""))||!!$("notes").value.trim();
  let record=hasDraft?{day,ex:w.ex,notes:$("notes").value}:S.history.find(x=>x.day===day);
  if(!record){record={day,ex:w.ex,notes:$("notes").value}}
  let report=formatReport(record);
