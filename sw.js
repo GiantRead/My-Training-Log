@@ -1,4 +1,4 @@
-const CACHE="mtl-v4-layout";
+const CACHE="mtl-v5-training-history";
 const ASSETS=["./","./index.html","./manifest.webmanifest"];
 
 self.addEventListener("install",event=>{
