@@ -1,4 +1,4 @@
-const CACHE="mtl-v5-training-history";
+const CACHE="mtl-v6-delete-history";
 const ASSETS=["./","./index.html","./manifest.webmanifest"];
 
 self.addEventListener("install",event=>{
