@@ -56,15 +56,45 @@ button:focus-visible,summary:focus-visible,input:focus-visible,textarea:focus-vi
 .exerciseCard button.primary{background:#087e65!important;border-color:#087e65}
 .clock{color:#194a97}#mainTimerCard,#intervalCard{background:linear-gradient(105deg,#f2f8ff,#fff 70%);border-top:4px solid #51bde2}.bar div{background:#245dcc}.toast{background:#163c77}
 @media(max-width:420px){.overview{min-height:233px}.overview .row{padding-right:35%}.heroArt{width:49%;right:-18px;bottom:7px}.overview #count{font-size:11px;padding:5px 7px}.overview h2{font-size:24px}.overview .chip{font-size:11px;padding:5px 7px}}
+
+/* Circuit grouping and day-specific artwork */
+.instructionsCard{border-top:4px solid #63bee9}
+.planGroup{padding:12px;border-radius:13px;margin:10px 0;border:1px solid #dce6f4}
+.planGroup .move{border-top:0;padding:2px 0}
+.planGroup[data-type="circuit"]{background:#e6f3ff;border-color:#a9cef4;border-left:5px solid #347fe0}
+.planGroup[data-type="strength"]{background:#f0f4fd;border-color:#c8d5f5;border-left:5px solid #5775c7}
+.planGroup[data-type="run"]{background:#e8f8ef;border-color:#a8dfbd;border-left:5px solid #179b6d}
+.planGroup[data-type="recovery"]{background:#f5f5f9;border-color:#dcdeed;border-left:5px solid #8992b6}
+.planGroup[data-type="other"]{background:#f8fafd;border-color:#dce6f4;border-left:5px solid #adc6de}
+.planGroup summary{font-weight:800;font-size:15px;color:#163f72}
+.planGroup p{margin:7px 0 2px}
+.groupHeader{display:flex;align-items:center;gap:8px;font-size:12px;text-transform:uppercase;letter-spacing:.07em;font-weight:900;color:#1e568b;margin:6px 0 8px}
+.groupHeader span{background:#fff9;border-radius:25px;padding:5px 8px}
+.exerciseGroup{padding:12px;border-radius:15px;margin:14px -4px;border:1px solid #bed8f0;background:#eaf4ff}
+.exerciseGroup .exerciseCard{margin:8px 0;background:#fff}
+.exerciseGroup .groupHeader{font-size:13px;margin:3px 0 12px}
+.exerciseGroup.strength{background:#edf1fc;border-color:#c7d6fa}
+.exerciseGroup.run{background:#e7f7ee;border-color:#a5ddbc}
+.exerciseGroup.circuit{background:#eaf4ff;border-color:#bdd9f5}
+.exerciseGroup .muted{color:#536b86}
+.overview[data-day="Tuesday"]{background:linear-gradient(125deg,#122947,#087aab)}
+.overview[data-day="Wednesday"]{background:linear-gradient(125deg,#1d2b50,#5148a5)}
+.overview[data-day="Thursday"]{background:linear-gradient(125deg,#142c4c,#177e87)}
+.overview[data-day="Friday"]{background:linear-gradient(125deg,#292e52,#7a4c98)}
+.overview[data-day="Weekend"]{background:linear-gradient(125deg,#153b49,#25846e)}
+.heroArt{width:44%;max-width:225px;opacity:.98}
+.heroArt svg{width:100%;height:auto;display:block}
+@media(max-width:420px){.exerciseGroup{margin:12px -6px;padding:9px}.planGroup{padding:10px}.heroArt{width:45%}}
 </style></head><body>
 <header><div><b>Cut Phase</b><div class="muted">“Fall in love with the grind.”</div></div><div class="tabs" id="tabs"></div></header>
 <main>
-<div class="card overview"><div class="heroGlow"></div><div class="heroArt" aria-hidden="true"><svg viewBox="0 0 200 215" xmlns="http://www.w3.org/2000/svg"><circle cx="112" cy="105" r="87" fill="#64cbff" opacity=".16"/><path d="M28 149 65 86 108 158 174 49 189 204 82 204Z" fill="#48ade8"/><path d="M76 89 116 73 149 96 156 164 122 200 80 172 65 123Z" fill="#b6e7fa" stroke="#e6faff" stroke-width="4"/><path d="m70 120 34 17 34-20 17 35-32 24-42-17Z" fill="#2056a1"/><path d="m114 133 16 17-16 19-16-19Z" fill="#7df8ed"/><path d="M94 42 118 32 139 47 144 69 127 91 104 85 91 66Z" fill="#dff4ff"/><path d="m93 58 26 7 23-8-10 20-12-5-17 6Z" fill="#17386b"/><path d="m105 69 10 2m7 0 10-3" stroke="#55ecff" stroke-width="4"/><path d="M77 111 50 137 58 154 91 135m56-25 27 26-12 18-35-22" fill="none" stroke="#c4e6ff" stroke-width="15" stroke-linecap="round"/><path d="m94 172-9 31 29 6 11-38m11-1 10 38 31-7-22-43" fill="#14376a"/><path d="m21 55 8-19 5 15 15 3-15 8-4 14-4-15Zm152-27 8-17 5 15 15 4-15 6-7 15-1-14Z" fill="#7af8f0"/></svg></div><div class="row"><div><div class="eyebrow">⚡ TODAY'S MISSION</div><h2 id="title"></h2><div class="muted" id="focus"></div></div><div id="count"></div></div><div class="bar"><div id="bar"></div></div><div id="overview"></div></div>
+<div class="card overview" id="overviewBanner"><div class="heroGlow"></div><div class="heroArt" id="heroVisual" aria-hidden="true"></div><div class="row"><div><div class="eyebrow">⚡ TODAY'S MISSION</div><h2 id="title"></h2><div class="muted" id="focus"></div></div><div id="count"></div></div><div class="bar"><div id="bar"></div></div><div id="overview"></div></div>
 
 
 
+<div class="card instructionsCard"><div class="row"><h3>Full workout instructions</h3><span class="muted">Tap a section for details</span></div><div id="plan"></div></div>
 <div class="card logCard"><div class="row"><h3>💪 Workout log</h3><span class="muted">Weight · reps · notes</span></div><p class="muted">Log your usual working weight and reps, then note any changes. Detailed sets are optional.</p><div id="sets"></div><button onclick="add()">+ Add exercise</button></div>
-<div class="card"><details><summary><b>Full workout instructions</b> <span class="muted">— technique and mobility</span></summary><div id="plan"></div></details></div>
+
 
 <div class="card finishCard"><div class="row"><h3>✓ Finish workout</h3><span class="muted">Save · share · progress</span></div><details><summary><b>Overall session notes (optional)</b></summary><textarea id="notes" rows="3" placeholder="Overall energy, fatigue, running, recovery..." style="margin-top:10px"></textarea></details><div class="actionrow"><button class="primary" onclick="saveSession()">Save workout</button><button onclick="copyReport()">Copy report</button></div><p class="muted">Copy the report into ChatGPT for detailed coaching. Your records stay on this device unless you share them.</p><textarea id="reportFallback" rows="7" style="display:none;margin-top:8px" readonly aria-label="Workout report to copy"></textarea></div>
 <div class="card progressCard"><details><summary><b>✦ Progression suggestions</b> <span class="muted">— optional</span></summary><div id="coach"></div></details></div>
@@ -115,7 +145,13 @@ const D=[
 ["Main lift","Squat — 3 × 4–6 working sets.","Rest 2–4 minutes. This is your main lower-body strength work."],
 ["10-minute AMRAP","Push press × 6 → barbell row × 8 → burpees × 6. Repeat as many QUALITY rounds as possible in 10 minutes.","AMRAP = As Many Rounds As Possible. You have already squatted heavily, so there is no second squat variation here."],
 ["Stretch","5 minutes: quads, hip flexors, hamstrings and pecs.","Finish the week moving better than you started."]],[
-["Squat",3,4,6],["Barbell push press",1,6,6],["Barbell row",1,8,8],["Burpee",1,6,6]],["amrap",10]]
+["Squat",3,4,6],["Barbell push press",1,6,6],["Barbell row",1,8,8],["Burpee",1,6,6]],["amrap",10]],
+["Weekend","Half-Marathon Long Run",[
+["Before you run","5–10 minutes brisk walking, easy jogging and leg swings.","Start gently. Avoid aggressive static stretching before running."],
+["Long run","Run at a comfortable conversational pace. Start around 10–12 km ONLY if your recent running volume supports it; otherwise start shorter. Build gradually according to weekly mileage, recovery and how the run feels.","This is a provisional starting range, not a locked weekly progression. Do not force race pace. Your sub-2-hour goal requires about 5:41/km on race day, but most long runs should be slower."],
+["Post-run recovery","Walk 5 minutes, rehydrate, eat and note any calf, Achilles or knee symptoms.","Reduce the next long run if soreness or fatigue persists. Avoid adding distance rapidly after a low-mileage week."],
+["Training notes","Log distance, duration, average pace, effort and any soreness in the run entry below.","Use the comment field for terrain, recovery, and how the final kilometres felt."]],[
+["Long run distance (km)",1,1,30],["Long run time (minutes)",1,1,180]],null]
 ];
 
 let S=JSON.parse(localStorage.cutphase||"null")||{day:0,work:{},history:[],body:[]};
@@ -128,12 +164,52 @@ function init(){
  tabs.innerHTML=D.map((x,i)=>'<button class="'+(i===S.day?"active":"")+'" onclick="saveDayNotes();S.day='+i+';save();init()">'+x[0].slice(0,3)+'</button>').join("");
  let d=D[S.day],w=S.work[d[0]]||(S.work[d[0]]={ex:[],notes:""});for(let spec of d[3]){let existing=w.ex.find(x=>x.name===spec[0]);if(!existing){w.ex.push({name:spec[0],n:spec[1],min:spec[2],max:spec[3],data:Array.from({length:spec[1]},()=>({w:"",r:"",rir:"",done:false}))})}else{existing.min=spec[2];existing.max=spec[3];while(existing.data.length<spec[1])existing.data.push({w:"",r:"",rir:"",done:false});existing.n=existing.data.length}}save();
  $("title").textContent=d[0];$("focus").textContent=d[1];$("notes").value=w.notes;
- plan.innerHTML=d[2].map((x,i)=>'<div class="move"><details '+(!i?"open":"")+'><summary><b>'+x[0]+'</b></summary><p>'+x[1]+'</p><p class="muted">'+x[2]+'</p></details></div>').join("");
+ plan.innerHTML=d[2].map((x,i)=>{let type=planType(x[0]),grp=planGroupName(d[0],i,x[0]);return '<div class="planGroup" data-type="'+type+'"><div class="groupHeader"><span>'+escapeHtml(grp)+'</span></div><div class="move"><details open><summary>'+escapeHtml(x[0])+'</summary><p>'+escapeHtml(x[1])+'</p><p class="muted">'+escapeHtml(x[2])+'</p></details></div></div>'}).join("");
+ $("overviewBanner").dataset.day=d[0];$("heroVisual").innerHTML=dayArtwork(S.day);
  renderOverview();renderSets();renderCoach();$("reportFallback").style.display="none";interval(d[4]);let b=S.body.at(-1)||{};weight.value=b.weight||"";waist.value=b.waist||"";protein.value=b.protein||190;goal.value=b.goal||"";
 }
 function last(name){for(let h of S.history){let e=h.ex.find(x=>x.name===name);if(e)return e.data.filter(x=>x.done).map(x=>x.w+"kg × "+x.r+" @ "+x.rir+" RIR").join(" | ")}return ""}
 
 function escapeHtml(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+
+function dayArtwork(i){
+ const scenes=[
+ // Bench strength: shield and barbell
+ '<path d="M44 96h112v12H44zM28 83h14v38H28zM12 91h13v22H12zM159 83h14v38h-14zM176 91h13v22h-13z" fill="#dffaff"/><path d="m100 125 35 13-8 40-27 20-27-20-8-40Z" fill="#2d72c6" stroke="#abebff" stroke-width="4"/><path d="m100 139 8 15-8 15-8-15Z" fill="#8df9ed"/>',
+ // Conditioning: lightning and strongman carry
+ '<path d="m103 16-28 72h30l-16 52 64-87h-39l21-37Z" fill="#a6f4fc"/><path d="M69 137h61v15H69zM51 126h19v35H51zM132 126h19v35h-19zM32 135h17v18H32zM153 135h17v18h-17z" fill="#f0faff"/><path d="m80 158 22 12 24-12 10 29-35 14-32-14Z" fill="#3ed2dd"/>',
+ // Deadlift: barbell and mountainous abstract backdrop
+ '<path d="m20 145 42-50 27 31 26-51 61 70Z" fill="#9ecbff" opacity=".45"/><path d="M21 155h161v10H21zM21 144h17v33H21zM41 137h15v46H41zM146 137h15v46h-15zM166 144h17v33h-17z" fill="#eef8ff"/><path d="m103 53 35 23-35 30-35-30Z" fill="#a8fbf4"/>',
+ // Shoulder strength: crossed stylised dumbbells
+ '<g transform="rotate(-34 100 100)"><path d="M27 98h146v14H27zM17 85h19v40H17zM38 90h16v30H38zM148 90h16v30h-16zM166 85h19v40h-19z" fill="#ddfbff"/></g><g transform="rotate(34 100 100)"><path d="M27 98h146v14H27zM17 85h19v40H17zM38 90h16v30H38zM148 90h16v30h-16zM166 85h19v40h-19z" fill="#a6e2f5"/></g><circle cx="100" cy="102" r="26" fill="#1d577b"/><path d="m100 85 14 17-14 17-14-17Z" fill="#70f5e2"/>',
+ // Squat/athletic: hero emblem
+ '<path d="m100 22 65 24-12 87-53 57-53-57-12-87Z" fill="#abcbfa" stroke="#e5faff" stroke-width="5"/><path d="m100 43 43 15-8 67-35 39-35-39-8-67Z" fill="#3b76bf"/><path d="m100 61 14 35 30 2-24 18 7 30-27-18-27 18 7-30-24-18 30-2Z" fill="#8cf4ed"/>',
+ // Long run: stylized running path and finish marker
+ '<path d="M34 192c55-57 100-31 113-83 9-34-25-45-5-79" fill="none" stroke="#b9f8ff" stroke-width="14" stroke-linecap="round" stroke-dasharray="16 16"/><circle cx="143" cy="30" r="14" fill="#e4faff"/><path d="m139 55-18 31-31 11m34-11 25 21 30 1m-56-20-11 34-30 25m43-52 1 38 27 17" stroke="#ebffff" stroke-width="11" stroke-linecap="round" fill="none"/><path d="M20 31h65v28H20z" fill="#85eac5"/><path d="M20 31v73" stroke="#dff" stroke-width="5"/>'
+ ];
+ return '<svg viewBox="0 0 200 215" xmlns="http://www.w3.org/2000/svg"><circle cx="108" cy="104" r="89" fill="#ffffff" opacity=".1"/><circle cx="108" cy="104" r="68" fill="#ffffff" opacity=".08"/><path d="m18 70 13-23 5 18 19 3-18 9-6 19-3-21ZM163 30l12-18 6 18 17 4-17 8-6 18-2-20Z" fill="#83eaf5" opacity=".8">'+(scenes[i]||scenes[0])+'</svg>';
+}
+function planType(name){return /circuit|finisher|AMRAP|power/i.test(name)?"circuit":/run/i.test(name)?"run":/warm-up|stretch|mobility|recovery/i.test(name)?"recovery":/lift|strength|bench|squat|deadlift|press|back|shoulder/i.test(name)?"strength":"other"}
+function planGroupName(day,i,name){
+ if(day==="Monday"&&i===3)return "Circuit A · 3 rounds";
+ if(day==="Tuesday"&&i===0)return "Circuit A · 5 rounds";
+ if(day==="Tuesday"&&i===2)return "Circuit B · Core";
+ if(day==="Wednesday"&&i===2)return "Circuit A · Power";
+ if(day==="Thursday"&&i===2)return "Circuit A · Shoulder / back";
+ if(day==="Thursday"&&i===3)return "Circuit B · DB complex";
+ if(day==="Friday"&&i===2)return "Circuit A · 10-minute AMRAP";
+ return /stretch|mobility|recovery/i.test(name)?"Recovery":/warm-up/i.test(name)?"Preparation":/run/i.test(name)?"Endurance":"Strength & technique"
+}
+function exerciseGroup(day,i){
+ if(day==="Monday"&&[1,2,3].includes(i))return ["Circuit A · Explosive upper body","circuit"];
+ if(day==="Tuesday"&&[0,1,2].includes(i))return ["Circuit B · Core","circuit"];
+ if(day==="Wednesday"&&[1,2].includes(i))return ["Circuit A · Power","circuit"];
+ if(day==="Thursday"&&[2,3,4].includes(i))return ["Circuit A · Shoulders & back","circuit"];
+ if(day==="Thursday"&&[5,6,7,8].includes(i))return ["Circuit B · DB complex","circuit"];
+ if(day==="Friday"&&[1,2,3].includes(i))return ["Circuit A · AMRAP","circuit"];
+ if(day==="Weekend")return ["Long run · endurance","run"];
+ return null;
+}
 function renderOverview(){
  const d=D[S.day],w=S.work[d[0]];
  const highlight=d[2].filter(x=>!(/warm-up|stretch|mobility/i.test(x[0]))).slice(0,5);
@@ -156,17 +232,17 @@ function last(name){
 }
 function renderSets(){
  let w=S.work[D[S.day][0]],done=0,total=w.ex.length;
- $("sets").innerHTML=w.ex.map((e,ei)=>{
+ let previousGroup="";$("sets").innerHTML=w.ex.map((e,ei)=>{
  let q=quick(e),logged=e.data.filter(x=>x.done).length;
  if(q.done||logged)done++;
  let prev=last(e.name);
- return '<div class="exerciseCard"><div class="row"><div><div class="exTitle">'+escapeHtml(e.name)+'</div><div class="muted">Plan: '+e.n+' sets × '+e.min+'–'+e.max+' reps'+(prev?' · Last: '+escapeHtml(prev):'')+'</div></div><button class="markDone '+(q.done?"primary":"")+'" onclick="markExercise('+ei+')">'+(q.done?"✓ Done":"Mark done")+'</button></div>'+
+ const g=exerciseGroup(D[S.day][0],ei),next=exerciseGroup(D[S.day][0],ei+1);let prefix="",suffix="";if(g&&g[0]!==previousGroup)prefix='<div class="exerciseGroup '+g[1]+'"><div class="groupHeader">↪ '+escapeHtml(g[0])+'</div>';if(previousGroup&&(!g||g[0]!==previousGroup))prefix='</div>'+prefix;if(g&&(!next||next[0]!==g[0]))suffix="</div>";previousGroup=g?g[0]:"";return prefix+'<div class="exerciseCard"><div class="row"><div><div class="exTitle">'+escapeHtml(e.name)+'</div><div class="muted">Plan: '+e.n+' sets × '+e.min+'–'+e.max+' reps'+(prev?' · Last: '+escapeHtml(prev):'')+'</div></div><button class="markDone '+(q.done?"primary":"")+'" onclick="markExercise('+ei+')">'+(q.done?"✓ Done":"Mark done")+'</button></div>'+
  '<div class="quickGrid"><label>Weight (kg)<input type="number" step=".5" placeholder="BW / kg" value="'+escapeHtml(q.weight)+'" oninput="quickVal('+ei+',\'weight\',this.value)"></label>'+
  '<label>Reps / set<input type="text" placeholder="e.g. 8–10" value="'+escapeHtml(q.reps)+'" oninput="quickVal('+ei+',\'reps\',this.value)"></label>'+
  '<label>RIR <span class="muted">(opt.)</span><input type="number" min="0" max="10" placeholder="2" value="'+escapeHtml(q.rir)+'" oninput="quickVal('+ei+',\'rir\',this.value)"></label></div>'+
  '<label class="small"><b>Exercise comments</b></label><textarea rows="2" placeholder="Too easy, increase next week, lighter last set, technique, pain..." oninput="exerciseComment('+ei+',this.value)">'+escapeHtml(q.comment||e.comment||"")+'</textarea>'+
  '<details><summary>Detailed sets (optional) · '+logged+' logged</summary><p class="muted">Use this when weights or reps varied. It preserves your existing set-by-set history.</p><div class="sets"><small>#</small><small>kg</small><small>reps</small><small>RIR</small><small>✓</small>'+
- e.data.map((x,si)=>'<span>'+(si+1)+'</span><input type="number" step=".5" value="'+escapeHtml(x.w)+'" onchange="val('+ei+','+si+',\'w\',this.value)"><input type="number" value="'+escapeHtml(x.r)+'" onchange="val('+ei+','+si+',\'r\',this.value)"><input type="number" value="'+escapeHtml(x.rir)+'" onchange="val('+ei+','+si+',\'rir\',this.value)"><button class="'+(x.done?"active":"")+' done" onclick="toggle('+ei+','+si+')">'+(x.done?"✓":"")+'</button>').join("")+'</div></details></div>'
+ e.data.map((x,si)=>'<span>'+(si+1)+'</span><input type="number" step=".5" value="'+escapeHtml(x.w)+'" onchange="val('+ei+','+si+',\'w\',this.value)"><input type="number" value="'+escapeHtml(x.r)+'" onchange="val('+ei+','+si+',\'r\',this.value)"><input type="number" value="'+escapeHtml(x.rir)+'" onchange="val('+ei+','+si+',\'rir\',this.value)"><button class="'+(x.done?"active":"")+' done" onclick="toggle('+ei+','+si+')">'+(x.done?"✓":"")+'</button>').join("")+'</div></details></div>'+suffix
  }).join("");
  $("count").textContent=done+" / "+total+" exercises";
  $("bar").style.width=(total?done/total*100:0)+"%";
