@@ -218,6 +218,11 @@ body.victoryOpen{overflow:hidden}
 /* The added block-character strips have been removed. Original day artwork is retained only in the header. */
 
 /* Reduced chrome and high contrast: one clear step guide, one completion per exercise. */
+#overview{display:none}
+.overview .bar{margin-bottom:15px}
+.timerHelp{margin-top:10px}
+.timerHelp summary{font-size:12px;color:#5a7395;cursor:pointer;min-height:40px}
+
 .instructionsCard{border-top:0}
 .planGroup{background:#f9fbfe!important;border:1px solid #dce6f0!important;border-left:3px solid #afc4dd!important;box-shadow:none;margin:8px 0;padding:11px 12px}
 .planGroup[data-type="circuit"]{border-left-color:#4f94d8!important}
@@ -259,10 +264,10 @@ body.victoryOpen{overflow:hidden}
 
 
 <div class="card instructionsCard"><div class="row"><h3>Workout plan</h3><span class="muted" id="planProgress" hidden></span></div><div id="plan"></div></div>
-<div class="card" id="mainTimerCard"><div class="row"><b>60-minute workout clock</b><span class="muted" id="clockState">Ready · 60-minute countdown</span></div><div class="clock" id="clock" aria-live="off">60:00</div><div class="clockButtons"><button class="primary" onclick="start()">Start</button><button onclick="stop()">Pause</button><button onclick="reset()">Reset</button></div><p class="muted">Keeps accurate elapsed time while your screen is locked or you switch apps. When you return, it shows the correct remaining time, stopping at 00:00. iPhone web apps cannot reliably sound an alarm while fully closed.</p></div>
+<div class="card" id="mainTimerCard"><div class="row"><b>60-minute workout clock</b><span class="muted" id="clockState">Ready · 60-minute countdown</span></div><div class="clock" id="clock" aria-live="off">60:00</div><div class="clockButtons"><button class="primary" onclick="start()">Start</button><button onclick="stop()">Pause</button><button onclick="reset()">Reset</button></div><details class="timerHelp"><summary>About the countdown</summary><p class="muted">Elapsed time stays accurate across screen locks when reopened. iPhone web apps cannot reliably sound a background alarm.</p></details></div>
 <div class="card" id="intervalCard"></div>
 <div class="card runCard" id="runCard" style="display:none"><div class="row"><h3 id="runCardTitle">🏃 Run tracker</h3><span class="muted" id="runCardSubtitle">Distance · time · pace</span></div>
-<p class="muted">Record what you actually completed, even if you were interrupted. The clock uses real elapsed time when the screen locks. Tap “Use elapsed time” to put it into your running duration field.</p><div class="runStopwatch"><div id="runElapsed" class="runTime">00:00</div><div class="clockButtons"><button onclick="startRunTimer()" class="primary">Start</button><button onclick="pauseRunTimer()">Pause</button><button onclick="resetRunTimer()">Reset</button></div><button class="useTimeBtn" onclick="useRunTime()">Use elapsed time as running duration</button></div>
+<p class="muted">Record running and walking separately. Tap “Use elapsed time” after your run.</p><div class="runStopwatch"><div id="runElapsed" class="runTime">00:00</div><div class="clockButtons"><button onclick="startRunTimer()" class="primary">Start</button><button onclick="pauseRunTimer()">Pause</button><button onclick="resetRunTimer()">Reset</button></div><button class="useTimeBtn" onclick="useRunTime()">Use elapsed time as running duration</button></div>
 <div class="runGrid">
 <label>Running distance (km)<input id="runDistance" type="number" min="0" step="0.1" inputmode="decimal" placeholder="e.g. 10.0" oninput="runMetric('distance',this.value)"></label>
 <label>Running time (minutes)<input id="runDuration" type="number" min="0" step="0.1" inputmode="decimal" placeholder="e.g. 62" oninput="runMetric('duration',this.value)"></label>
@@ -276,7 +281,7 @@ body.victoryOpen{overflow:hidden}
 <div class="card logCard" id="gymLogCard"><div class="row"><h3>💪 Workout log</h3><span class="muted">Weight · reps · notes</span></div><p class="muted"></p><div id="sets"></div><button onclick="add()" id="addExerciseBtn">+ Add exercise</button><div id="addExercisePicker" class="addPicker" hidden><h3>Supplementary exercise</h3><p class="muted">Choose a suggested option for this day or add your own. Sets, reps and starting-load guidance will fill in automatically.</p><select id="addChoice" onchange="changeAddChoice()"></select><div id="addPreview" class="muted"></div><div id="customAdd" hidden><label>Exercise name<input id="customName" type="text" placeholder="Exercise name"></label><div class="runGrid"><label>Sets<input id="customSets" type="number" inputmode="numeric" min="1" max="20" value="3"></label><label>Minimum reps / time<input id="customMin" type="number" inputmode="numeric" min="1" value="8"></label><label>Maximum reps / time<input id="customMax" type="number" inputmode="numeric" min="1" value="12"></label><label>Starting-load note<input id="customLoad" type="text" placeholder="e.g. light / 12–18 kg"></label></div></div><div class="actionrow"><button class="primary" onclick="confirmAddExercise()">Add to workout</button><button onclick="closeAddExercise()">Cancel</button></div></div></div>
 
 
-<div class="card finishCard" id="finishWorkout"><div class="row"><h3>✓ Finish workout</h3><span class="muted">Feedback · save · share</span></div><h3>How hard was the workout?</h3><div class="runGrid"><label>Overall difficulty (1–10)<select id="sessionEffort" onchange="saveFeedback()"><option value="">Select difficulty</option><option value="1">1 — Very easy</option><option value="2">2 — Easy</option><option value="3">3 — Light</option><option value="4">4 — Some effort</option><option value="5">5 — Moderate</option><option value="6">6 — Challenging</option><option value="7">7 — Hard</option><option value="8">8 — Very hard</option><option value="9">9 — Extremely hard</option><option value="10">10 — Maximum effort</option></select></label></div><label class="runLabel"><b>Workout feedback / what should change next week?</b><textarea id="notes" rows="4" oninput="saveFeedback()" placeholder="e.g. Not hard enough; heart rate too low. Run interrupted by work. Increase circuit pace or add 10 minutes conditioning."></textarea></label><p class="muted">Feedback saves as you type, and is included in History and Copy report.</p><div class="actionrow"><button class="primary" onclick="saveSession()">Save workout</button><button onclick="copyReport()">Copy report</button></div><button class="newWorkoutBtn" onclick="newWorkout()">+ Start New Workout</button><p class="muted">Starting a new workout clears this day's active entries only. Your saved history and measurements stay intact.</p><p class="muted">Copy the report into ChatGPT for detailed coaching. Your records stay on this device unless you share them.</p><textarea id="reportFallback" rows="7" style="display:none;margin-top:8px" readonly aria-label="Workout report to copy"></textarea></div>
+<div class="card finishCard" id="finishWorkout"><div class="row"><h3>✓ Finish workout</h3><span class="muted">Feedback · save · share</span></div><h3>How hard was the workout?</h3><div class="runGrid"><label>Overall difficulty (1–10)<select id="sessionEffort" onchange="saveFeedback()"><option value="">Select difficulty</option><option value="1">1 — Very easy</option><option value="2">2 — Easy</option><option value="3">3 — Light</option><option value="4">4 — Some effort</option><option value="5">5 — Moderate</option><option value="6">6 — Challenging</option><option value="7">7 — Hard</option><option value="8">8 — Very hard</option><option value="9">9 — Extremely hard</option><option value="10">10 — Maximum effort</option></select></label></div><label class="runLabel"><b>Workout feedback / what should change next week?</b><textarea id="notes" rows="4" oninput="saveFeedback()" placeholder="e.g. Not hard enough; heart rate too low. Run interrupted by work. Increase circuit pace or add 10 minutes conditioning."></textarea></label><div class="actionrow"><button class="primary" onclick="saveSession()">Save workout</button><button onclick="copyReport()">Copy report</button></div><button class="newWorkoutBtn" onclick="newWorkout()">+ Start New Workout</button><p class="muted">New workout clears this day’s active entries, not saved History.</p><textarea id="reportFallback" rows="7" style="display:none;margin-top:8px" readonly aria-label="Workout report to copy"></textarea></div>
 
 
 
@@ -328,7 +333,7 @@ const D=[
 ["Shoulder/back circuit","3 rounds: dumbbell lateral raises 12–20 → dumbbell rows 10–12/side.","Stay in one dumbbell area and rest 60–90 seconds after each round. Both exercises are 3 sets in the log."],
 ["Functional finisher","5 rounds: DB Romanian deadlift × 6–10 (test 40 kg per hand) → DB hang clean × 6 (26 kg per hand) → DB push press × 6 (26 kg per hand) → bodyweight squat × 10.","All four exercises have 5 sets in the log. Use two pairs of dumbbells if available. Rest 60–75 sec between rounds. Warm up for 40 kg RDL and prioritise controlled technique."],
 ["Rear delts (separate from circuit)","Reverse pec-deck / machine rear-delt fly — 3 × 12–20.","Do this as a standalone exercise, away from the dumbbell circuit. Machine stability makes it easier to focus on rear delts; dumbbells are also effective, so use whichever you can progress comfortably."] ,["Stretch","5 minutes: shoulders, chest, lats and thoracic rotations.","Finish with mobility rather than skipping it."]],[
-["DB overhead press",4,6,10],["Pull-up / weighted pull-up",4,6,10],["DB lateral raise",3,12,20],["DB row (per side)",3,10,12],["Rear delt fly",3,12,20],["DB RDL (kg per hand)",5,6,10],["DB hang clean (kg per hand)",5,6,6],["DB push press (kg per hand)",5,6,6],["Bodyweight squat",5,10,15]],null],
+["DB overhead press",4,6,10],["Pull-up / weighted pull-up",4,6,10],["DB lateral raise",3,12,20],["DB row (per side)",3,10,12],["DB RDL (kg per hand)",5,6,10],["DB hang clean (kg per hand)",5,6,6],["DB push press (kg per hand)",5,6,6],["Bodyweight squat",5,10,15],["Rear delt fly",3,12,20]],null],
 
 ["Friday","Heavy Squat + Athletic Conditioning",[
 ["Warm-up & ramp-up","General mobility followed by progressive squat warm-up sets.","Your ramp-up should prepare you without exhausting you before working sets."],
@@ -490,16 +495,12 @@ function exerciseGroup(day,i){
  if(day==="Tuesday"&&[0,1,2].includes(i))return ["Circuit B · Core","circuit"];
  if(day==="Wednesday"&&[1,2].includes(i))return ["Circuit A · Power","circuit"];
  if(day==="Thursday"&&[2,3].includes(i))return ["Circuit A · Shoulders & back · 3 rounds","circuit"];
- if(day==="Thursday"&&[5,6,7,8].includes(i))return ["Circuit B · DB complex · 5 rounds","circuit"];
+ if(day==="Thursday"&&[4,5,6,7].includes(i))return ["Circuit B · DB complex · 5 rounds","circuit"];
  if(day==="Friday"&&[1,2,3].includes(i))return ["Circuit A · AMRAP","circuit"];
  if(day==="Weekend")return ["Long run · endurance","run"];
  return null;
 }
-function renderOverview(){
- const d=D[S.day],w=S.work[d[0]];
- const highlight=d[2].filter(x=>!(/warm-up|stretch|mobility/i.test(x[0]))).slice(0,5);
- $("overview").innerHTML='<div class="summaryList">'+highlight.map(x=>'<span class="chip">'+escapeHtml(x[0])+'</span>').join("")+'</div><p class="muted" style="margin:12px 0 0">'+escapeHtml(d[2].find(x=>/warm-up|stretch|mobility/i.test(x[0]))?.[1]||"Include a warm-up and mobility.")+'</p>';
-}
+function renderOverview(){$("overview").textContent="";}
 function quick(e){
  if(!e.quick)e.quick={weight:"",reps:"",rir:"",comment:"",done:false};
  return e.quick;
@@ -870,7 +871,7 @@ function renderI(){
  const remain=Math.max(0,icfg[1]*60-elapsed);
  $("iclock").textContent=fmt(remain);
  if(remain===0){
-  if(intervalStartAt!==null){stopI();toast("Interval complete");celebrate("interval");renderPlanCount()}
+  if(intervalStartAt!==null){stopI();if(icfg[0]==="rope"){const w=S.work[D[S.day][0]],rope=w.ex?.find(e=>e.name==="Battle ropes (40s work intervals)");if(rope){quick(rope).done=true;save();}}toast("Interval complete");celebrate("interval");renderPlanCount()}
   $("istatus").textContent="COMPLETE";return;
  }
  if(intervalStartAt===null){$("istatus").textContent=elapsed?"PAUSED":"READY";return}
