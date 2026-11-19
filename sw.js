@@ -1,4 +1,4 @@
-const CACHE="mtl-v8-60min-persistent-clock";
+const CACHE="mtl-v9-feedback-run-tracking";
 const ASSETS=["./","./index.html","./manifest.webmanifest"];
 
 self.addEventListener("install",event=>{
