@@ -214,7 +214,7 @@ button{min-height:48px;touch-action:manipulation}
 body.victoryOpen{overflow:hidden}
 @keyframes questArrival{from{opacity:.2;transform:translateY(24px) scale(.94)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(prefers-reduced-motion:reduce){.victoryCard{animation:none}}
-@media(max-width:380px){.amrapTimerGrid{gap:8px;grid-template-columns:minmax(0,1fr) 135px}.roundTap{min-height:168px}.roundTap span{font-size:17px}.roundTap small{font-size:10px}.recipeStep{font-size:14px}}
+@media(max-width:380px){.amrapClockPane .clock{font-size:35px}.amrapTimerGrid{gap:8px;grid-template-columns:minmax(0,1fr) 135px}.roundTap{min-height:168px}.roundTap span{font-size:17px}.roundTap small{font-size:10px}.recipeStep{font-size:14px}}
 /* Three fresh manhwa scenes are packaged into a lightweight WebP strip. */
 .bonusStrip{position:relative;height:103px;margin:13px 0;border-radius:15px;overflow:hidden;background:#101d39;isolation:isolate}
 .bonusStrip .bonusViewport,.bonusVictory{position:relative;overflow:hidden;width:100%;height:100%;background:#132f58}
@@ -823,7 +823,8 @@ async function copyReport(){
  let day=D[S.day][0],w=S.work[day];
  // Prioritise current work if it has any recorded sets; otherwise use latest saved session.
  let hasDraft=sessionHasData({...w,notes:$("notes").value});
- const draft={day,ex:w.ex,notes:$("notes").value,effort:w.effort,planDone:w.planDone,amrapRounds:w.amrapRounds||0,amrapNotes:w.amrapNotes||"",run:w.run};
+ const draftPlan={};D[S.day][2].forEach((step,i)=>{draftPlan[step[0]]=isStepDone(i)});
+ const draft={day,ex:w.ex,notes:$("notes").value,effort:w.effort,planDone:draftPlan,amrapRounds:w.amrapRounds||0,amrapNotes:w.amrapNotes||"",run:w.run};
  const saved=w.sessionId?S.history.find(x=>x.sessionId===w.sessionId):null;
  const unchanged=saved&&JSON.stringify({ex:draft.ex,notes:draft.notes,effort:draft.effort,planDone:draft.planDone,amrapRounds:draft.amrapRounds,amrapNotes:draft.amrapNotes,run:draft.run||null})===JSON.stringify({ex:saved.ex,notes:saved.notes,effort:saved.effort,planDone:saved.planDone,amrapRounds:saved.amrapRounds,amrapNotes:saved.amrapNotes,run:saved.run||null});
  let record=unchanged?saved:(hasDraft?draft:(saved||S.history.find(x=>x.day===day)||draft));
@@ -851,8 +852,11 @@ function interval(c){
  if(amrap){$("amrapNotes").value=S.work[D[S.day][0]].amrapNotes||"";renderRoundCounter()}
  renderI();
 }
+let lastRoundTapAt=0;
 function addAmrapRound(){
  if(icfg?.[0]!=="amrap")return;
+ if(Date.now()-lastRoundTapAt<250)return;
+ lastRoundTapAt=Date.now();
  const w=S.work[D[S.day][0]],current=Math.max(0,Number(w.amrapRounds)||0);
  w.amrapRounds=current+1;save();renderRoundCounter();renderPlanCount();
  const button=$("roundTap");button?.classList.add("roundPop");setTimeout(()=>button?.classList.remove("roundPop"),180);
