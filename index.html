@@ -402,7 +402,7 @@ function init(){
  $("overviewBanner").dataset.day=d[0];
  document.documentElement.style.setProperty("--dayAccent",["#4cbcf2","#ef8c4a","#65cfc6","#24b987","#f3b064","#68d5b4"][S.day]);
  document.querySelectorAll(".dayArt").forEach((img)=>{if(img.src!==DAILY_ART)img.src=DAILY_ART;img.style.transform="translateY(calc("+(-S.day*100/6)+"% + "+(img.closest(".artRibbon")?"-34px":"0px")+"))"});
- renderOverview();renderSets();
+ renderOverview();if(d[0]!=="Weekend")renderSets();else $("sets").innerHTML="";
  $("gymLogCard").style.display=d[0]==="Weekend"?"none":"block";
  $("runCard").style.display=["Tuesday","Weekend"].includes(d[0])?"block":"none";
  if(["Tuesday","Weekend"].includes(d[0]))renderRun();
@@ -449,14 +449,14 @@ function renderPlanCount(){
  const day=D[S.day][0],w=S.work[day],d=D[S.day];
  const amrapNames=["Barbell push press","Barbell row","Burpee"];
  const planned=d[3].filter(spec=>!(day==="Friday"&&amrapNames.includes(spec[0])));
- const completed=planned.filter(spec=>isExerciseComplete(w.ex.find(e=>e.name===spec[0]))).length;
+ let completed=planned.filter(spec=>isExerciseComplete(w.ex.find(e=>e.name===spec[0]))).length;
  const rounds=Math.max(0,Number(w.amrapRounds)||0);
  const run=day==="Tuesday"||day==="Weekend";
  const runDone=run&&d[2].some(x=>/Running|Run \/ walk|Long run/i.test(x[0])&&w.planDone?.[x[0]]);
  let extra=0,target=planned.length,label=completed+" / "+planned.length+" exercises";
  if(day==="Friday"){target++;if(rounds>0)extra++;label=completed+" / "+planned.length+" lifts · "+rounds+" rounds"}
  if(day==="Tuesday"){target++;if(runDone)extra++;label=completed+" / "+planned.length+" exercises · "+(runDone?"run done":"run pending")}
- if(day==="Weekend"){target=1;extra=runDone?1:0;label=runDone?"Run complete":"Long run"}
+ if(day==="Weekend"){completed=0;target=1;extra=runDone?1:0;label=runDone?"Run complete":"Long run"}
  $("count").textContent=label;
  $("bar").style.width=(target?(completed+extra)/target*100:0)+"%";
  const btn=$("runDoneBtn");
