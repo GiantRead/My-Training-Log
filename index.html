@@ -796,8 +796,12 @@ function formatReport(record){
  }
  if(record.planDone)lines.push("Completed plan sections: "+(Object.keys(record.planDone).filter(k=>record.planDone[k]).join("; ")||"none marked"),"");
  if(record.effort)lines.push("Overall workout difficulty: "+record.effort+"/10","");
- if(day==="Friday"&&(record.amrapRounds>0||record.amrapNotes)){lines.push("FRIDAY AMRAP","Complete circuit rounds counted: "+(record.amrapRounds||0),"Circuit modifications: "+(record.amrapNotes||"none recorded"),"");}
+ if(day==="Friday"&&(record.amrapRounds>0||record.amrapNotes)){lines.push("FRIDAY AMRAP","One full prescribed round: barbell push press × 6 → barbell row × 8 → burpees × 6","Complete circuit rounds counted: "+(record.amrapRounds||0),"Circuit modifications: "+(record.amrapNotes||"none recorded"),"");}
  for(const e of record.ex||[]){
+  // AMRAP components are accounted for by the round tally; suppress empty duplicates.
+  const isCountedAmrap=day==="Friday"&&Number(record.amrapRounds)>0&&["Barbell push press","Barbell row","Burpee"].includes(e.name);
+  const logged=e.quick?.done||["weight","reps","rir","comment"].some(k=>String(e.quick?.[k]??"").trim())||(e.data||[]).some(s=>s.done||["w","r","rir"].some(k=>String(s[k]??"").trim()));
+  if(isCountedAmrap&&!logged)continue;
   const unit=e.unit==="minutes"?"minutes":"reps";
   lines.push(e.name+" | target "+e.n+" sets × "+e.min+"–"+e.max+" "+unit+(e.optional?" [optional extra]":e.legacy?" [older programme]":""));
   const q=e.quick||{};
