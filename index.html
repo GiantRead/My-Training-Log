@@ -218,6 +218,10 @@ body.victoryOpen{overflow:hidden}
 /* The added block-character strips have been removed. Original day artwork is retained only in the header. */
 
 /* Reduced chrome and high contrast: one clear step guide, one completion per exercise. */
+.addSetButton{width:100%;min-height:48px;padding:10px 12px;margin-top:12px;background:#edf5ff;border:1px dashed #8ab1d9;color:#1f568d;font-size:14px}
+.addSetButton:active{background:#dbeafe}
+.extraSetIndex{color:#215c9a;font-weight:900}
+
 #overview{display:none}
 .overview .bar{margin-bottom:15px}
 .timerHelp{margin-top:10px}
@@ -382,10 +386,8 @@ function init(){
   if(!existing){w.ex.push(freshExercise(spec));continue}
   existing.min=spec[2];existing.max=spec[3];existing.n=spec[1];existing.data ||= [];
   while(existing.data.length<spec[1])existing.data.push({w:"",r:"",rir:"",done:false});
-  if(existing.data.length>spec[1]){
-   const extra=existing.data.splice(spec[1]);
-   if(extra.some(s=>s.done||["w","r","rir"].some(k=>String(s[k]??"").trim())))existing.previousSets=(existing.previousSets||[]).concat(extra);
-  }
+  // Keep user-added sets beyond the prescribed count. They remain editable in this session.
+  // Do not move or truncate them when switching tabs or returning to the PWA.
  }
  w.ex.forEach(e=>{
   // Convert existing set ticks into one exercise-level check without erasing historical sets.
@@ -557,14 +559,36 @@ function renderSets(){
   '<label class="small"><b>Exercise notes</b></label><textarea rows="2" placeholder="Load changes, technique, interruptions…" oninput="exerciseComment('+ei+',this.value)">'+escapeHtml(q.comment||e.comment||"")+'</textarea>'+
   '<p class="setHeading">Individual sets (optional)</p>'+detailedPrevious+
   '<div class="sets"><small>#</small><small>'+(isRun?'km':'kg')+'</small><small>'+(isRun?'min':'reps')+'</small><small>RIR</small>'+
-  (e.data||[]).map((x,si)=>'<span>'+(si+1)+'</span><input aria-label="Set '+(si+1)+' weight" type="number" inputmode="decimal" step=".5" value="'+escapeHtml(x.w)+'" onchange="val('+ei+','+si+',\'w\',this.value)"><input aria-label="Set '+(si+1)+' reps" type="number" inputmode="numeric" value="'+escapeHtml(x.r)+'" onchange="val('+ei+','+si+',\'r\',this.value)"><input aria-label="Set '+(si+1)+' RIR" type="number" inputmode="numeric" value="'+escapeHtml(x.rir)+'" onchange="val('+ei+','+si+',\'rir\',this.value)">').join("")+
-  '</div></details></div>'+suffix;
+  (e.data||[]).map((x,si)=>setRowHtml(ei,si,x,isRun,si>=e.n)).join("")+
+  '</div><button type="button" class="addSetButton" onclick="addSet('+ei+',this)">＋ Add set</button></details></div>'+suffix;
  }).join("");
  renderCompletion();
 }
 function renderCompletion(){renderPlanCount()}
 
+function setRowHtml(ei,si,x,isRun,isExtra){
+ // One numbered, editable row. Only the main exercise card can be marked complete.
+ return '<span class="'+(isExtra?'extraSetIndex':'')+'" title="'+(isExtra?'Additional set':'Planned set')+'">'+(si+1)+'</span>'+
+ '<input aria-label="Set '+(si+1)+' '+(isRun?'distance':'weight')+'" type="number" inputmode="decimal" step=".5" value="'+escapeHtml(x.w)+'" onchange="val('+ei+','+si+',\'w\',this.value)">'+
+ '<input aria-label="Set '+(si+1)+' '+(isRun?'minutes':'reps')+'" type="number" inputmode="numeric" value="'+escapeHtml(x.r)+'" onchange="val('+ei+','+si+',\'r\',this.value)">'+
+ '<input aria-label="Set '+(si+1)+' RIR" type="number" inputmode="numeric" value="'+escapeHtml(x.rir)+'" onchange="val('+ei+','+si+',\'rir\',this.value)">';
+}
 function val(e,s,k,v){S.work[D[S.day][0]].ex[e].data[s][k]=v;save()}
+function addSet(i,button){
+ const exercise=S.work[D[S.day][0]]?.ex[i];if(!exercise)return;
+ exercise.data ||= [];
+ if(exercise.data.length>=40){toast("40 sets is the maximum");return}
+ const si=exercise.data.length;
+ const row={w:"",r:"",rir:"",done:false};
+ exercise.data.push(row);save();
+ const grid=button?.previousElementSibling;
+ if(grid?.classList?.contains("sets")){
+  grid.insertAdjacentHTML("beforeend",setRowHtml(i,si,row,exercise.unit==="minutes",si>=exercise.n));
+ }else{
+  // Fallback without losing the new set if a nonstandard DOM is used.
+  renderSets();
+ }
+}
 const BONUS_OPTIONS={
  Monday:[
   {name:"Incline DB press",sets:2,min:8,max:12,load:"Moderate dumbbells; 2–3 reps in reserve"},
