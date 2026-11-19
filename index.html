@@ -602,10 +602,10 @@ function renderHistory(){
  const compare=$("historyComparison");
  if(filter==="all"){compare.innerHTML='<b>Compare sessions</b><p class="muted">Choose a day above to compare its two most recent workouts.</p>'}
  else if(sessions.length<2){compare.innerHTML='<b>'+escapeHtml(filter)+" progression</b><p class=\"muted\">Save two "+escapeHtml(filter)+" workouts to compare them here.</p>"}
- else if(filter==="Weekend"){
+ else if(filter==="Weekend"||filter==="Tuesday"){
  const a=sessions[0],b=sessions[1],ra=a.run||{},rb=b.run||{};
  compare.innerHTML='<b>Long-run comparison</b><table class="historyCompareTable"><tr><th>Metric</th><th>Latest</th><th>Previous</th></tr>'+
- [['Distance',ra.distance,rb.distance,' km'],['Duration',ra.duration,rb.duration,' min'],['Average pace',paceLabel(ra.distance,ra.duration),paceLabel(rb.distance,rb.duration),''],['Effort',ra.effort,rb.effort,' /10']].map(x=>'<tr><td>'+escapeHtml(x[0])+'</td><td>'+escapeHtml(x[1]||"—")+x[3]+'</td><td>'+escapeHtml(x[2]||"—")+x[3]+'</td></tr>').join("")+'</table>';
+ [['Running distance',ra.distance,rb.distance,' km'],['Running duration',ra.duration,rb.duration,' min'],['Running pace',paceLabel(ra.distance,ra.duration),paceLabel(rb.distance,rb.duration),''],['Walking distance',ra.walkDistance,rb.walkDistance,' km'],['Effort',ra.effort,rb.effort,' /10']].map(x=>'<tr><td>'+escapeHtml(x[0])+'</td><td>'+escapeHtml(x[1]||"—")+x[3]+'</td><td>'+escapeHtml(x[2]||"—")+x[3]+'</td></tr>').join("")+'</table>';
  }else{
  const latest=sessions[0],previous=sessions[1],names=[...new Set([...(latest.ex||[]).map(x=>x.name),...(previous.ex||[]).map(x=>x.name)])];
  compare.innerHTML='<b>'+escapeHtml(filter)+' — last two sessions</b><table class="historyCompareTable"><tr><th>Exercise</th><th>Latest</th><th>Previous</th></tr>'+names.map(n=>{
@@ -618,10 +618,10 @@ function renderHistory(){
  const idx=S.history.indexOf(s),date=new Date(s.date).toLocaleString(undefined,{weekday:"short",day:"numeric",month:"short",year:"numeric",hour:"numeric",minute:"2-digit"});
  const empty=!sessionHasData(s);
  const summary=empty?"No workout data recorded":s.day==="Weekend"?(s.run?.distance?s.run.distance+" km · "+paceLabel(s.run.distance,s.run.duration):"Long run · legacy entry"):(s.ex||[]).filter(x=>x.quick?.done||(x.data||[]).some(y=>y.done)).length+" exercises completed";
- const detail=s.day==="Weekend"&&s.run?'<div class="historyExercise">Distance: '+escapeHtml(s.run.distance||"—")+' km · Time: '+escapeHtml(s.run.duration||"—")+' min · Pace: '+escapeHtml(paceLabel(s.run.distance,s.run.duration))+' · Effort: '+escapeHtml(s.run.effort||"—")+'/10</div><div class="muted">Terrain: '+escapeHtml(s.run.terrain||"—")+'<br>Recovery: '+escapeHtml(s.run.recovery||"—")+'</div>':"";
+ const detail=["Tuesday","Weekend"].includes(s.day)&&s.run?'<div class="historyExercise">Running: '+escapeHtml(s.run.distance||"—")+' km · '+escapeHtml(s.run.duration||"—")+' min · '+escapeHtml(paceLabel(s.run.distance,s.run.duration))+' · Walking: '+escapeHtml(s.run.walkDistance||"0")+' km · Effort: '+escapeHtml(s.run.effort||"—")+'/10</div><div class="muted">Terrain: '+escapeHtml(s.run.terrain||"—")+'<br>Recovery: '+escapeHtml(s.run.recovery||"—")+'</div>':"";
  return '<div class="card historyEntry '+(s.day==="Weekend"?"weekendEntry":"")+'"><details><summary>'+escapeHtml(s.day)+' · '+escapeHtml(date)+'</summary><div class="muted">'+escapeHtml(summary)+'</div><div class="historyDetail">'+detail+
  (s.ex||[]).filter(e=>e.quick?.done||e.quick?.comment||e.quick?.weight||e.quick?.reps||(e.data||[]).some(x=>x.done||x.w||x.r)).map(e=>'<div class="historyExercise"><b>'+escapeHtml(e.name)+'</b><div>'+escapeHtml(formatExercise(e))+'</div>'+(e.quick?.comment?'<div class="muted">Note: '+escapeHtml(e.quick.comment)+'</div>':"")+'</div>').join("")+
- (s.notes?'<p class="muted">Overall: '+escapeHtml(s.notes)+'</p>':"")+
+ (s.effort?'<p class="muted">Overall difficulty: '+escapeHtml(s.effort)+'/10</p>':"")+(s.notes?'<p class="muted">Workout feedback: '+escapeHtml(s.notes)+'</p>':"")+(s.planDone?'<p class="muted">Completed sections: '+escapeHtml(Object.keys(s.planDone).filter(k=>s.planDone[k]).join(', ')||'none')+'</p>':"")+
  (empty?'<div class="emptyHistoryLabel">Empty saved workout</div>':"")+
  '<div class="historyActions"><button onclick="copyOldSession('+idx+')">Copy report</button><button class="deleteHistoryBtn" onclick="deleteOldSession('+idx+')">Delete workout</button></div></div></details></div>';
  }).join("");
@@ -646,25 +646,34 @@ async function copyOldSession(i){
  catch(err){const e=$("historyCopyFallback");e.value=report;e.style.display="block";e.focus();e.select();toast("Select and copy the report below")}
 }
 function formatReport(record){
- let day=record.day||D[S.day][0],date=record.date?new Date(record.date).toLocaleDateString():"Draft / not yet saved";
- let lines=["CUT PHASE — WORKOUT REPORT","Day: "+day,"Date: "+date,"Goal: Build/maintain strength and muscle, lose fat, sub-2-hour half marathon in February.",""];
- if(day==="Weekend"&&record.run){let r=record.run;lines.push("LONG RUN","Distance: "+(r.distance||"?")+" km","Time: "+(r.duration||"?")+" minutes","Average pace: "+paceLabel(r.distance,r.duration),"Effort: "+(r.effort||"?")+"/10","Planned distance: "+(r.target||"not set")+" km","Terrain: "+(r.terrain||"not recorded"),"Recovery/soreness: "+(r.recovery||"not recorded"),"");}
- for(let e of record.ex||[]){
-  lines.push(e.name+" | target "+e.n+" sets × "+e.min+"–"+e.max+" reps");
-  let q=e.quick||{};if(q.weight!==undefined&&(q.weight!==""||q.reps!==""||q.rir!==""||q.done||q.comment))lines.push("  Exercise summary: "+(q.weight!==""?q.weight+" kg":"BW / unspecified")+"; "+(q.reps||"reps not entered")+" reps per set"+(q.rir!==""&&q.rir!==undefined?"; "+q.rir+" RIR":"")+(q.done?"; marked complete":""));
-  if(q.comment)lines.push("  Exercise comments: "+q.comment);
-  let found=false;
-  for(let i=0;i<(e.data||[]).length;i++){
-   let s=e.data[i];
-   if(s.done||s.w!==""||s.r!==""||s.rir!==""){
-    found=true;
-    lines.push("  Set "+(i+1)+": "+(s.w!==""?s.w+" kg":"BW / not entered")+" × "+(s.r!==""?s.r:"?")+" reps"+(s.rir!==""?", "+s.rir+" RIR":"")+(s.done?" [completed]":" [not marked completed]"));
+ const day=record.day||D[S.day][0],date=record.date?new Date(record.date).toLocaleDateString():"Draft / not yet saved";
+ const lines=["CUT PHASE — WORKOUT REPORT","Day: "+day,"Date: "+date,"Goal: Maintain strength and muscle, improve conditioning, lose fat, sub-2-hour half marathon.",""];
+ if(["Tuesday","Weekend"].includes(day)&&record.run){
+  const r=record.run;
+  lines.push("RUN / WALK","Running distance: "+(r.distance||"not entered")+" km","Running time: "+(r.duration||"not entered")+" minutes","Running pace: "+paceLabel(r.distance,r.duration),"Walking distance: "+(r.walkDistance||"0")+" km","Walking time: "+(r.walkDuration||"not entered")+" minutes","Run effort: "+(r.effort||"not entered")+"/10","Target: "+(r.target||"not set")+" km","Terrain: "+(r.terrain||"not recorded"),"Recovery: "+(r.recovery||"not recorded"),"");
+ }
+ if(record.planDone)lines.push("Completed plan sections: "+(Object.keys(record.planDone).filter(k=>record.planDone[k]).join("; ")||"none marked"),"");
+ if(record.effort)lines.push("Overall workout difficulty: "+record.effort+"/10","");
+ for(const e of record.ex||[]){
+  const unit=e.unit==="minutes"?"minutes":"reps";
+  lines.push(e.name+" | target "+e.n+" sets × "+e.min+"–"+e.max+" "+unit+(e.optional?" [optional extra]":e.legacy?" [older programme]":""));
+  const q=e.quick||{};
+  if(q.done||["weight","reps","rir","comment"].some(k=>String(q[k]??"").trim())){
+   lines.push("  Summary: "+(q.weight!==""&&q.weight!==undefined?q.weight+(e.unit==="minutes"?" km":" kg"):"BW / not entered")+"; "+(q.reps||"reps/time not entered")+" "+unit+(q.rir!==""&&q.rir!==undefined?"; "+q.rir+" RIR":"")+(q.done?"; marked complete":""));
+  }
+  if(q.comment)lines.push("  Comments: "+q.comment);
+  let any=false;
+  for(let idx=0;idx<(e.data||[]).length;idx++){
+   const s=e.data[idx];
+   if(s.done||String(s.w??"").trim()||String(s.r??"").trim()||String(s.rir??"").trim()){
+    any=true;lines.push("  Set "+(idx+1)+": "+(s.w!==""?s.w+" "+(e.unit==="minutes"?"km":"kg"):"load not entered")+" × "+(s.r!==""?s.r:"?")+" "+unit+(s.rir!==""?", "+s.rir+" RIR":"")+(s.done?" [done]":""));
    }
   }
-  if(!found&&!(day==="Weekend"&&record.run))lines.push("  No sets logged");
-  if(e.comment)lines.push("  Exercise feedback: "+e.comment);
+  for(const x of e.previousSets||[]){lines.push("  Preserved set from older plan: "+(x.w||"not entered")+" kg × "+(x.r||"?")+" reps"+(x.done?" [done]":""));}
+  if(!any&&!q.done&&!q.comment)lines.push("  No individual sets logged");
+  if(e.comment)lines.push("  Legacy exercise comments: "+e.comment);
  }
- lines.push("","Session comments: "+(record.notes||"(none)"),"","Please evaluate exercise technique notes, weights, rep progression, fatigue and running recovery; recommend precise changes for next time and flag any assumptions. Treat this week's values as provisional baseline.");
+ lines.push("","Session feedback: "+(record.notes||"(none)"),"","Please review the effort, available time, weights, reps, running/walking and interruptions. Recommend precise changes to training load and intensity without sacrificing recovery or half-marathon preparation.");
  return lines.join("\n");
 }
 async function copyReport(){
