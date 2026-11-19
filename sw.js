@@ -1,4 +1,4 @@
-const CACHE="mtl-v11-final-amrap-ux";
+const CACHE="mtl-v12-clean-single-completion";
 const ASSETS=["./","./index.html","./manifest.webmanifest"];
 
 self.addEventListener("install",event=>{
