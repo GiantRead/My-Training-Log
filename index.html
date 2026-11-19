@@ -258,7 +258,7 @@ body.victoryOpen{overflow:hidden}
 
 
 
-<div class="card instructionsCard"><div class="row"><h3>Full workout instructions</h3><span class="muted" id="planProgress">One check per task</span></div><div id="plan"></div></div>
+<div class="card instructionsCard"><div class="row"><h3>Workout plan</h3><span class="muted" id="planProgress" hidden></span></div><div id="plan"></div></div>
 <div class="card" id="mainTimerCard"><div class="row"><b>60-minute workout clock</b><span class="muted" id="clockState">Ready · 60-minute countdown</span></div><div class="clock" id="clock" aria-live="off">60:00</div><div class="clockButtons"><button class="primary" onclick="start()">Start</button><button onclick="stop()">Pause</button><button onclick="reset()">Reset</button></div><p class="muted">Keeps accurate elapsed time while your screen is locked or you switch apps. When you return, it shows the correct remaining time, stopping at 00:00. iPhone web apps cannot reliably sound an alarm while fully closed.</p></div>
 <div class="card" id="intervalCard"></div>
 <div class="card runCard" id="runCard" style="display:none"><div class="row"><h3 id="runCardTitle">🏃 Run tracker</h3><span class="muted" id="runCardSubtitle">Distance · time · pace</span></div>
@@ -272,8 +272,8 @@ body.victoryOpen{overflow:hidden}
 </div>
 <label class="runLabel">Route / terrain<input id="runTerrain" type="text" placeholder="Road, treadmill, hills, weather…" oninput="runMetric('terrain',this.value)"></label>
 <label class="runLabel">Recovery & soreness<textarea id="runRecovery" rows="3" placeholder="Calves, Achilles, knees, energy, how the final kilometres felt…" oninput="runMetric('recovery',this.value)"></textarea></label>
-<div id="runProgress"></div><button id="runDoneBtn" onclick="toggleRunDone()">✓ Mark run / walk complete</button><p class="muted">Track your distance and mark the run complete here. You do not need to tick it again in the instructions.</p></div>
-<div class="card logCard" id="gymLogCard"><div class="row"><h3>💪 Workout log</h3><span class="muted">Weight · reps · notes</span></div><p class="muted">Record each exercise once here. Your steps above update automatically; no second tick required. Detailed sets stay optional.</p><div id="sets"></div><button onclick="add()" id="addExerciseBtn">+ Add exercise</button><div id="addExercisePicker" class="addPicker" hidden><h3>Supplementary exercise</h3><p class="muted">Choose a suggested option for this day or add your own. Sets, reps and starting-load guidance will fill in automatically.</p><select id="addChoice" onchange="changeAddChoice()"></select><div id="addPreview" class="muted"></div><div id="customAdd" hidden><label>Exercise name<input id="customName" type="text" placeholder="Exercise name"></label><div class="runGrid"><label>Sets<input id="customSets" type="number" inputmode="numeric" min="1" max="20" value="3"></label><label>Minimum reps / time<input id="customMin" type="number" inputmode="numeric" min="1" value="8"></label><label>Maximum reps / time<input id="customMax" type="number" inputmode="numeric" min="1" value="12"></label><label>Starting-load note<input id="customLoad" type="text" placeholder="e.g. light / 12–18 kg"></label></div></div><div class="actionrow"><button class="primary" onclick="confirmAddExercise()">Add to workout</button><button onclick="closeAddExercise()">Cancel</button></div></div></div>
+<div id="runProgress"></div><button id="runDoneBtn" onclick="toggleRunDone()">✓ Mark run / walk complete</button></div>
+<div class="card logCard" id="gymLogCard"><div class="row"><h3>💪 Workout log</h3><span class="muted">Weight · reps · notes</span></div><p class="muted"></p><div id="sets"></div><button onclick="add()" id="addExerciseBtn">+ Add exercise</button><div id="addExercisePicker" class="addPicker" hidden><h3>Supplementary exercise</h3><p class="muted">Choose a suggested option for this day or add your own. Sets, reps and starting-load guidance will fill in automatically.</p><select id="addChoice" onchange="changeAddChoice()"></select><div id="addPreview" class="muted"></div><div id="customAdd" hidden><label>Exercise name<input id="customName" type="text" placeholder="Exercise name"></label><div class="runGrid"><label>Sets<input id="customSets" type="number" inputmode="numeric" min="1" max="20" value="3"></label><label>Minimum reps / time<input id="customMin" type="number" inputmode="numeric" min="1" value="8"></label><label>Maximum reps / time<input id="customMax" type="number" inputmode="numeric" min="1" value="12"></label><label>Starting-load note<input id="customLoad" type="text" placeholder="e.g. light / 12–18 kg"></label></div></div><div class="actionrow"><button class="primary" onclick="confirmAddExercise()">Add to workout</button><button onclick="closeAddExercise()">Cancel</button></div></div></div>
 
 
 <div class="card finishCard" id="finishWorkout"><div class="row"><h3>✓ Finish workout</h3><span class="muted">Feedback · save · share</span></div><h3>How hard was the workout?</h3><div class="runGrid"><label>Overall difficulty (1–10)<select id="sessionEffort" onchange="saveFeedback()"><option value="">Select difficulty</option><option value="1">1 — Very easy</option><option value="2">2 — Easy</option><option value="3">3 — Light</option><option value="4">4 — Some effort</option><option value="5">5 — Moderate</option><option value="6">6 — Challenging</option><option value="7">7 — Hard</option><option value="8">8 — Very hard</option><option value="9">9 — Extremely hard</option><option value="10">10 — Maximum effort</option></select></label></div><label class="runLabel"><b>Workout feedback / what should change next week?</b><textarea id="notes" rows="4" oninput="saveFeedback()" placeholder="e.g. Not hard enough; heart rate too low. Run interrupted by work. Increase circuit pace or add 10 minutes conditioning."></textarea></label><p class="muted">Feedback saves as you type, and is included in History and Copy report.</p><div class="actionrow"><button class="primary" onclick="saveSession()">Save workout</button><button onclick="copyReport()">Copy report</button></div><button class="newWorkoutBtn" onclick="newWorkout()">+ Start New Workout</button><p class="muted">Starting a new workout clears this day's active entries only. Your saved history and measurements stay intact.</p><p class="muted">Copy the report into ChatGPT for detailed coaching. Your records stay on this device unless you share them.</p><textarea id="reportFallback" rows="7" style="display:none;margin-top:8px" readonly aria-label="Workout report to copy"></textarea></div>
@@ -382,7 +382,14 @@ function init(){
    if(extra.some(s=>s.done||["w","r","rir"].some(k=>String(s[k]??"").trim())))existing.previousSets=(existing.previousSets||[]).concat(extra);
   }
  }
- w.ex.forEach(e=>{if(!d[3].some(s=>s[0]===e.name)&&!e.optional)e.legacy=true});
+ w.ex.forEach(e=>{
+  // Convert existing set ticks into one exercise-level check without erasing historical sets.
+  if(!e.completionMigrated){
+   if((e.data||[]).some(s=>s.done))quick(e).done=true;
+   e.completionMigrated=true;
+  }
+  if(!d[3].some(s=>s[0]===e.name)&&!e.optional)e.legacy=true;
+ });
  w.ex.sort((a,b)=>{let ia=d[3].findIndex(s=>s[0]===a.name),ib=d[3].findIndex(s=>s[0]===b.name);return (ia<0?9999:ia)-(ib<0?9999:ib)});
  save();
  $("title").textContent=d[0];$("focus").textContent=d[1];$("notes").value=w.notes||"";$("sessionEffort").value=w.effort||"";
@@ -411,7 +418,7 @@ function stepSource(day,index){
  };
  return maps[day]?.[index]??null;
 }
-function isExerciseComplete(e){return !!(e&&(e.quick?.done||(e.data||[]).some(x=>x.done)))}
+function isExerciseComplete(e){return !!e?.quick?.done}
 function isStepDone(index){
  const day=D[S.day][0],w=S.work[day],section=D[S.day][2][index];
  if(!section)return false;
@@ -422,34 +429,33 @@ function isStepDone(index){
  if(source==="notes")return !!(w.notes?.trim()||w.run?.recovery?.trim());
  return !!w.planDone?.[section[0]];
 }
+// The plan shows the order and prescription; no duplicate checkboxes.
 function renderPlan(){
  const d=D[S.day];
- $("plan").innerHTML=d[2].map((x,i)=>{
-  const source=stepSource(d[0],i),done=isStepDone(i),manual=source===null||source==="undefined";
-  const cta=manual?'<button type="button" class="planTick '+(done?'isDone':'')+'" onclick="togglePlan('+i+',this)" aria-label="'+escapeHtml(done?'Undo '+x[0]:'Mark '+x[0]+' done')+'">'+(done?'✓ Done':'Mark done')+'</button>':'<span class="stepAuto">'+(done?'✓ Logged':source==="run"?'Track below ↓':source==="amrap"?'Count below ↓':source==="notes"?'Notes below ↓':'Log below ↓')+'</span>';
-  return '<div id="step-'+i+'" class="planGroup '+(done?'isDone':'')+'" data-type="'+planType(x[0])+'"><div class="planHead"><span class="stepNumber">'+(i+1)+'</span><div class="stepText"><div class="planTitle">'+escapeHtml(x[0])+'</div><span class="stepState" id="stepStatus-'+i+'">'+(done?'Completed':manual?'Tap when finished':'One check only')+'</span></div>'+cta+'</div><div class="stepPrescription">'+escapeHtml(x[1])+'</div><details class="stepTips"><summary>Technique / setup tips</summary><p class="muted">'+escapeHtml(x[2])+'</p></details></div>';
- }).join("");
+ $("plan").innerHTML=d[2].map((x,i)=>(
+ '<div class="planGroup" data-type="'+planType(x[0])+'">'+
+ '<div class="planHead"><span class="stepNumber">'+(i+1)+'</span><div class="stepText"><div class="planTitle">'+escapeHtml(x[0])+'</div></div></div>'+
+ '<p class="stepPrescription">'+escapeHtml(x[1])+'</p>'+
+ '<details class="stepTips"><summary>Tips</summary><p class="muted">'+escapeHtml(x[2])+'</p></details></div>'
+ )).join("");
  renderPlanCount();
 }
 function renderPlanCount(){
- const d=D[S.day],w=S.work[d[0]],completed=d[2].filter((_,i)=>isStepDone(i)).length;
- $("planProgress").textContent=completed+" / "+d[2].length+" steps completed";
- $("count").textContent=completed+" / "+d[2].length+" steps";
- $("bar").style.width=d[2].length?(completed/d[2].length*100)+"%":"0%";
- d[2].forEach((x,i)=>{
-  const done=isStepDone(i),node=$("step-"+i),state=$("stepStatus-"+i),btn=node?.querySelector?.(".planTick"),auto=node?.querySelector?.(".stepAuto");
-  node?.classList?.toggle("isDone",done);
-  if(state)state.textContent=done?"Completed":stepSource(d[0],i)===null?"Tap when finished":"Track once below";
-  if(btn){btn.textContent=done?"✓ Done":"Mark done";btn.classList.toggle("isDone",done);btn.setAttribute?.("aria-label",done?"Undo "+x[0]:"Mark "+x[0]+" done")}
-  if(auto)auto.textContent=done?"✓ Logged":stepSource(d[0],i)==="run"?"Track below ↓":stepSource(d[0],i)==="amrap"?"Count below ↓":"Log below ↓";
- });
- const btn=$("runDoneBtn"),runIndex=d[2].findIndex(x=>/Running|Run \/ walk|Long run/i.test(x[0]));
- if(btn&&runIndex>=0){const done=isStepDone(runIndex);btn.textContent=done?"✓ Run complete":"✓ Mark run complete";btn.classList.toggle("primary",done)}
-}
-function togglePlan(i){
- const d=D[S.day],section=d[2][i],mode=stepSource(d[0],i);
- if(!section||mode!==null)return;
- const w=S.work[d[0]];w.planDone ||= {};w.planDone[section[0]]=!w.planDone[section[0]];save();renderPlanCount();
+ const day=D[S.day][0],w=S.work[day],d=D[S.day];
+ const amrapNames=["Barbell push press","Barbell row","Burpee"];
+ const planned=d[3].filter(spec=>!(day==="Friday"&&amrapNames.includes(spec[0])));
+ const completed=planned.filter(spec=>isExerciseComplete(w.ex.find(e=>e.name===spec[0]))).length;
+ const rounds=Math.max(0,Number(w.amrapRounds)||0);
+ const run=day==="Tuesday"||day==="Weekend";
+ const runDone=run&&d[2].some(x=>/Running|Run \/ walk|Long run/i.test(x[0])&&w.planDone?.[x[0]]);
+ let extra=0,target=planned.length,label=completed+" / "+planned.length+" exercises";
+ if(day==="Friday"){target++;if(rounds>0)extra++;label=completed+" / "+planned.length+" lifts · "+rounds+" rounds"}
+ if(day==="Tuesday"){target++;if(runDone)extra++;label=completed+" / "+planned.length+" exercises · "+(runDone?"run done":"run pending")}
+ if(day==="Weekend"){target=1;extra=runDone?1:0;label=runDone?"Run complete":"Long run"}
+ $("count").textContent=label;
+ $("bar").style.width=(target?(completed+extra)/target*100:0)+"%";
+ const btn=$("runDoneBtn");
+ if(btn&&run){btn.textContent=runDone?"✓ Run complete":"Mark run complete";btn.classList.toggle("primary",runDone)}
 }
 function toggleRunDone(){
  const day=D[S.day][0],d=D[S.day],i=d[2].findIndex(x=>/Running|Run \/ walk|Long run/i.test(x[0]));
@@ -545,7 +551,7 @@ function renderSets(){
   '<label>'+(isRun?'Minutes / set':'Reps / set')+'<input type="text" inputmode="numeric" pattern="[0-9]*" placeholder="'+(isRun?'15':'e.g. 8')+'" value="'+escapeHtml(q.reps)+'" oninput="quickVal('+ei+',\'reps\',this.value)"></label>'+
   '<label>RIR <span class="muted">(opt.)</span><input type="number" inputmode="numeric" min="0" max="10" placeholder="2" value="'+escapeHtml(q.rir)+'" oninput="quickVal('+ei+',\'rir\',this.value)"></label></div>'+
   '<label class="small"><b>Exercise comments</b></label><textarea rows="2" placeholder="Effort, loads, technique, interruptions..." oninput="exerciseComment('+ei+',this.value)">'+escapeHtml(q.comment||e.comment||"")+'</textarea>'+
-  '<details><summary>Detailed sets (optional) · '+logged+' logged</summary><p class="muted">Ticking sets keeps this section expanded.</p>'+detailedPrevious+
+  '<details><summary>Detailed sets (optional) · '+logged+' logged</summary>'+detailedPrevious+
   '<div class="sets"><small>#</small><small>'+(isRun?'km':'kg')+'</small><small>'+(isRun?'min':'reps')+'</small><small>RIR</small><small>✓</small>'+
   (e.data||[]).map((x,si)=>'<span>'+(si+1)+'</span><input type="number" inputmode="decimal" step=".5" value="'+escapeHtml(x.w)+'" onchange="val('+ei+','+si+',\'w\',this.value)"><input type="number" inputmode="numeric" value="'+escapeHtml(x.r)+'" onchange="val('+ei+','+si+',\'r\',this.value)"><input type="number" inputmode="numeric" value="'+escapeHtml(x.rir)+'" onchange="val('+ei+','+si+',\'rir\',this.value)"><button class="'+(x.done?"active":"")+' done" onclick="toggle('+ei+','+si+',this)">'+(x.done?"✓":"")+'</button>').join("")+'</div></details></div>'+suffix;
  }).join("");
