@@ -376,7 +376,12 @@ function quick(e){
 function quickHasData(e){let q=quick(e);return q.done||q.weight!==""||q.reps!==""||q.rir!==""||!!q.comment.trim()}
 function exerciseComment(i,v){let e=S.work[D[S.day][0]].ex[i];quick(e).comment=v;save()}
 function quickVal(i,k,v){let e=S.work[D[S.day][0]].ex[i];quick(e)[k]=v;save()}
-function markExercise(i){let e=S.work[D[S.day][0]].ex[i];quick(e).done=!quick(e).done;save();renderSets()}
+function markExercise(i,button){
+ const e=S.work[D[S.day][0]].ex[i],q=quick(e);q.done=!q.done;save();
+ if(button){button.classList.toggle("primary",q.done);button.textContent=q.done?"✓ Done":"Mark done"}
+ renderCompletion();
+}
+
 function last(name){
  for(let h of S.history){let e=(h.ex||[]).find(x=>x.name===name);if(e){let q=e.quick;
  if(q&&(q.weight!==""||q.reps!==""))return [q.weight?q.weight+"kg":"BW",q.reps?q.reps+" reps":"",q.rir!==""?q.rir+" RIR":""].filter(Boolean).join(" · ");
@@ -385,25 +390,114 @@ function last(name){
  }}return "";
 }
 function renderSets(){
- let w=S.work[D[S.day][0]],done=0,total=w.ex.length;
- let previousGroup="";$("sets").innerHTML=w.ex.map((e,ei)=>{
- let q=quick(e),logged=e.data.filter(x=>x.done).length;
- if(q.done||logged)done++;
- let prev=last(e.name);
- const g=exerciseGroup(D[S.day][0],ei),next=exerciseGroup(D[S.day][0],ei+1);let prefix="",suffix="";if(g&&g[0]!==previousGroup)prefix='<div class="exerciseGroup '+g[1]+'"><div class="groupHeader">↪ '+escapeHtml(g[0])+'</div>';if(g&&(!next||next[0]!==g[0]))suffix="</div>";previousGroup=g?g[0]:"";return prefix+'<div class="exerciseCard"><div class="row"><div><div class="exTitle">'+escapeHtml(e.name)+'</div><div class="muted">Plan: '+e.n+' sets × '+e.min+'–'+e.max+' reps'+(prev?' · Last: '+escapeHtml(prev):'')+'</div></div><button class="markDone '+(q.done?"primary":"")+'" onclick="markExercise('+ei+')">'+(q.done?"✓ Done":"Mark done")+'</button></div>'+
- '<div class="quickGrid"><label>Weight (kg)<input type="number" inputmode="decimal" step=".5" placeholder="BW / kg" value="'+escapeHtml(q.weight)+'" oninput="quickVal('+ei+',\'weight\',this.value)"></label>'+
- '<label>Reps / set<input type="text" inputmode="numeric" pattern="[0-9]*" placeholder="e.g. 8" value="'+escapeHtml(q.reps)+'" oninput="quickVal('+ei+',\'reps\',this.value)"></label>'+
- '<label>RIR <span class="muted">(opt.)</span><input type="number" inputmode="numeric" min="0" max="10" placeholder="2" value="'+escapeHtml(q.rir)+'" oninput="quickVal('+ei+',\'rir\',this.value)"></label></div>'+
- '<label class="small"><b>Exercise comments</b></label><textarea rows="2" placeholder="Too easy, increase next week, lighter last set, technique, pain..." oninput="exerciseComment('+ei+',this.value)">'+escapeHtml(q.comment||e.comment||"")+'</textarea>'+
- '<details><summary>Detailed sets (optional) · '+logged+' logged</summary><p class="muted">Use this when weights or reps varied. It preserves your existing set-by-set history.</p><div class="sets"><small>#</small><small>kg</small><small>reps</small><small>RIR</small><small>✓</small>'+
- e.data.map((x,si)=>'<span>'+(si+1)+'</span><input type="number" inputmode="decimal" step=".5" value="'+escapeHtml(x.w)+'" onchange="val('+ei+','+si+',\'w\',this.value)"><input type="number" inputmode="numeric" value="'+escapeHtml(x.r)+'" onchange="val('+ei+','+si+',\'r\',this.value)"><input type="number" inputmode="numeric" value="'+escapeHtml(x.rir)+'" onchange="val('+ei+','+si+',\'rir\',this.value)"><button class="'+(x.done?"active":"")+' done" onclick="toggle('+ei+','+si+')">'+(x.done?"✓":"")+'</button>').join("")+'</div></details></div>'+suffix
+ const day=D[S.day][0],d=D[S.day],w=S.work[day];
+ const planned=d[3].map(spec=>w.ex.findIndex(e=>e.name===spec[0])).filter(i=>i>=0);
+ const extras=w.ex.map((e,i)=>({e,i})).filter(o=>!planned.includes(o.i)&&o.e.optional).map(o=>o.i);
+ const legacy=w.ex.map((e,i)=>({e,i})).filter(o=>!planned.includes(o.i)&&!o.e.optional).map(o=>o.i);
+ const items=[...planned.map((i,pos)=>({i,kind:"planned",position:pos})),...extras.map(i=>({i,kind:"optional",position:-1})),...legacy.map(i=>({i,kind:"legacy",position:-1}))];
+ let previousGroup="",previousKind="";
+ $("sets").innerHTML=items.map((item,itemIndex)=>{
+  const ei=item.i,e=w.ex[ei],q=quick(e),logged=(e.data||[]).filter(x=>x.done).length;
+  const g=item.kind==="planned"?exerciseGroup(day,item.position):null;
+  const next=items[itemIndex+1];
+  const nextGroup=next?.kind==="planned"?exerciseGroup(day,next.position):null;
+  let prefix="",suffix="";
+  if(item.kind==="optional"&&previousKind!=="optional")prefix+='<div class="optionalHeader">➕ Optional extra exercises</div>';
+  if(item.kind==="legacy"&&previousKind!=="legacy")prefix+='<details class="legacyGroup"><summary>Older / previous-plan exercises ('+legacy.length+') — tap to view</summary><p class="muted">These entries are not in the current plan. Previous records remain available; nothing has been deleted.</p>';
+  if(g&&g[0]!==previousGroup)prefix+='<div class="exerciseGroup '+g[1]+'"><div class="groupHeader">↪ '+escapeHtml(g[0])+'</div>';
+  if(g&&(!nextGroup||nextGroup[0]!==g[0]))suffix+='</div>';
+  if(item.kind==="legacy"&&(!next||next.kind!=="legacy"))suffix+='</details>';
+  previousGroup=g?g[0]:"";previousKind=item.kind;
+  const previous=last(e.name),isRun=e.unit==="minutes",targetUnit=isRun?"minutes":"reps";
+  const loadHint=e.loadHint?'<p class="plannedLoad">Suggested starting load: '+escapeHtml(e.loadHint)+'</p>':"";
+  const detailedPrevious=(e.previousSets||[]).length?'<p class="muted">'+e.previousSets.length+' additional logged set(s) from an earlier programme are preserved in the session record.</p>':"";
+  return prefix+'<div class="exerciseCard"><div class="row"><div><div class="exTitle">'+escapeHtml(e.name)+'</div><div class="muted">Plan: '+e.n+' sets × '+e.min+'–'+e.max+' '+targetUnit+(previous?' · Last: '+escapeHtml(previous):'')+'</div></div><button class="markDone '+(q.done?"primary":"")+'" onclick="markExercise('+ei+',this)">'+(q.done?"✓ Done":"Mark done")+'</button></div>'+loadHint+
+  '<div class="quickGrid"><label>'+(isRun?'Distance (km)':'Weight (kg)')+'<input type="number" inputmode="decimal" step="'+(isRun?'.1':'.5')+'" placeholder="'+(isRun?'km':'BW / kg')+'" value="'+escapeHtml(q.weight)+'" oninput="quickVal('+ei+',\'weight\',this.value)"></label>'+
+  '<label>'+(isRun?'Minutes / set':'Reps / set')+'<input type="text" inputmode="numeric" pattern="[0-9]*" placeholder="'+(isRun?'15':'e.g. 8')+'" value="'+escapeHtml(q.reps)+'" oninput="quickVal('+ei+',\'reps\',this.value)"></label>'+
+  '<label>RIR <span class="muted">(opt.)</span><input type="number" inputmode="numeric" min="0" max="10" placeholder="2" value="'+escapeHtml(q.rir)+'" oninput="quickVal('+ei+',\'rir\',this.value)"></label></div>'+
+  '<label class="small"><b>Exercise comments</b></label><textarea rows="2" placeholder="Effort, loads, technique, interruptions..." oninput="exerciseComment('+ei+',this.value)">'+escapeHtml(q.comment||e.comment||"")+'</textarea>'+
+  '<details><summary>Detailed sets (optional) · '+logged+' logged</summary><p class="muted">Ticking sets keeps this section expanded.</p>'+detailedPrevious+
+  '<div class="sets"><small>#</small><small>'+(isRun?'km':'kg')+'</small><small>'+(isRun?'min':'reps')+'</small><small>RIR</small><small>✓</small>'+
+  (e.data||[]).map((x,si)=>'<span>'+(si+1)+'</span><input type="number" inputmode="decimal" step=".5" value="'+escapeHtml(x.w)+'" onchange="val('+ei+','+si+',\'w\',this.value)"><input type="number" inputmode="numeric" value="'+escapeHtml(x.r)+'" onchange="val('+ei+','+si+',\'r\',this.value)"><input type="number" inputmode="numeric" value="'+escapeHtml(x.rir)+'" onchange="val('+ei+','+si+',\'rir\',this.value)"><button class="'+(x.done?"active":"")+' done" onclick="toggle('+ei+','+si+',this)">'+(x.done?"✓":"")+'</button>').join("")+'</div></details></div>'+suffix;
  }).join("");
- $("count").textContent=done+" / "+total+" exercises";
- $("bar").style.width=(total?done/total*100:0)+"%";
+ renderCompletion();
 }
+function renderCompletion(){
+ const day=D[S.day][0],d=D[S.day],w=S.work[day];
+ const planned=d[3].map(s=>w.ex.find(e=>e.name===s[0])).filter(Boolean);
+ const done=planned.filter(e=>quick(e).done||(e.data||[]).some(s=>s.done)).length;
+ $("count").textContent=done+" / "+planned.length+" planned exercises";
+ $("bar").style.width=(planned.length?done/planned.length*100:0)+"%";
+}
+
 function val(e,s,k,v){S.work[D[S.day][0]].ex[e].data[s][k]=v;save()}
-function toggle(e,s){let x=S.work[D[S.day][0]].ex[e].data[s];x.done=!x.done;save();renderSets()}
-function add(){let n=prompt("Exercise name");if(!n)return;let a=+(prompt("Sets","3")||3),b=+(prompt("Minimum reps","8")||8),c=+(prompt("Maximum reps","12")||12);S.work[D[S.day][0]].ex.push({name:n,n:a,min:b,max:c,data:Array.from({length:a},()=>({w:"",r:"",rir:"",done:false}))});save();renderSets()}
+function toggle(e,s,button){
+ let x=S.work[D[S.day][0]].ex[e]?.data[s];if(!x)return;
+ x.done=!x.done;save();
+ if(button){
+  button.classList.toggle("active",x.done);button.textContent=x.done?"✓":"";
+  const details=button.closest("details");
+  if(details){const total=details.querySelectorAll(".sets button.active").length;const summary=details.querySelector("summary");if(summary)summary.textContent="Detailed sets (optional) · "+total+" logged"}
+ }
+ renderCompletion();
+}
+const BONUS_OPTIONS={
+ Monday:[
+  {name:"Incline DB press",sets:2,min:8,max:12,load:"Moderate dumbbells; 2–3 reps in reserve"},
+  {name:"DB hammer curl",sets:3,min:10,max:15,load:"12–20 kg per hand to trial; strict form"},
+  {name:"Easy treadmill run (minutes)",sets:1,min:10,max:15,unit:"minutes",load:"Conversational pace; optional after lifting"}
+ ],
+ Tuesday:[
+  {name:"Incline treadmill walk (minutes)",sets:1,min:10,max:20,unit:"minutes",load:"Brisk walk; easy enough to recover"},
+  {name:"DB biceps curls",sets:3,min:10,max:15,load:"12–20 kg per hand to trial; strict form"},
+  {name:"Lat pulldown",sets:3,min:8,max:12,load:"Choose a load with 2 reps in reserve; machine scales vary"}
+ ],
+ Wednesday:[
+  {name:"Easy treadmill run (minutes)",sets:1,min:10,max:20,unit:"minutes",load:"Conversational effort; avoid another hard interval session after deadlifts"},
+  {name:"DB biceps curls",sets:3,min:10,max:15,load:"12–20 kg per hand to trial; strict form"},
+  {name:"Lat pulldown",sets:3,min:8,max:12,load:"Trial 50–75 kg depending on machine; 2–3 reps in reserve"},
+  {name:"DB hammer curls",sets:3,min:10,max:12,load:"12–20 kg per hand to trial; strict form"}
+ ],
+ Thursday:[
+  {name:"DB biceps curls",sets:3,min:10,max:15,load:"12–20 kg per hand to trial"},
+  {name:"Incline treadmill walk (minutes)",sets:1,min:10,max:15,unit:"minutes",load:"Easy-moderate cardiovascular work"},
+  {name:"Cable face pull",sets:3,min:12,max:20,load:"Light-moderate; focus on shoulder blades"}
+ ],
+ Friday:[
+  {name:"Incline treadmill walk (minutes)",sets:1,min:10,max:15,unit:"minutes",load:"Easy-moderate cardiovascular work"},
+  {name:"Standing calf raise",sets:3,min:10,max:15,load:"Controlled range; avoid excessive soreness before long run"},
+  {name:"DB hammer curls",sets:3,min:10,max:15,load:"12–20 kg per hand to trial"}
+ ],
+ Weekend:[]
+};
+function add(){
+ const list=BONUS_OPTIONS[D[S.day][0]]||[];
+ $("addChoice").innerHTML=list.map((x,i)=>'<option value="'+i+'">'+escapeHtml(x.name)+'</option>').join("")+'<option value="other">Other — create my own</option>';
+ $("addExercisePicker").hidden=false;changeAddChoice();$("addExercisePicker").scrollIntoView?.({block:"nearest",behavior:"smooth"});
+}
+function closeAddExercise(){$("addExercisePicker").hidden=true}
+function changeAddChoice(){
+ const choice=$("addChoice").value,isOther=choice==="other",list=BONUS_OPTIONS[D[S.day][0]]||[];
+ $("customAdd").hidden=!isOther;
+ $("addPreview").textContent=isOther?"Enter your exercise name, number of sets, rep or time range, and optional starting-load guidance.":(()=>{
+  const o=list[Number(choice)];return o?o.sets+" sets × "+o.min+"–"+o.max+(o.unit==="minutes"?" minutes":" reps")+" · "+o.load:"Choose an option";
+ })();
+}
+function confirmAddExercise(){
+ const list=BONUS_OPTIONS[D[S.day][0]]||[],choice=$("addChoice").value;
+ let a;
+ if(choice==="other"){
+  const name=$("customName").value.trim(),sets=Number($("customSets").value),min=Number($("customMin").value),max=Number($("customMax").value);
+  if(!name||!Number.isInteger(sets)||sets<1||sets>20||!Number.isInteger(min)||min<1||!Number.isInteger(max)||max<min){toast("Enter a name and a valid sets/reps range");return}
+  a={name,sets,min,max,load:$("customLoad").value.trim()};
+ }else a=list[Number(choice)];
+ if(!a){toast("Choose an exercise first");return}
+ const w=S.work[D[S.day][0]];
+ if(w.ex.some(e=>e.name.toLowerCase()===a.name.toLowerCase())){toast("That exercise is already in this workout");return}
+ w.ex.push({...freshExercise([a.name,a.sets,a.min,a.max]),optional:true,unit:a.unit||"reps",loadHint:a.load||""});
+ save();closeAddExercise();renderSets();toast(a.name+" added to this workout");
+}
+
 function sessionHasData(record){
  if(String(record?.notes||"").trim())return true;
  const r=record?.run||{};
