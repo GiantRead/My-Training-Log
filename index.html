@@ -273,18 +273,69 @@ function freshExercise(spec){return {name:spec[0],n:spec[1],min:spec[2],max:spec
 function newWorkout(){
  const day=D[S.day][0],w=S.work[day];
  if(!confirm("Start a new "+day+" workout? Current entries and checkmarks for this day will be cleared. Saved workouts in History will stay intact. Save this workout first if you want to keep it."))return;
- S.work[day]={ex:D[S.day][3].map(freshExercise),notes:"",run:{distance:"",duration:"",target:"",effort:"",terrain:"",recovery:""},sessionId:""};
+ S.work[day]={ex:D[S.day][3].map(freshExercise),notes:"",effort:"",planDone:{},run:{distance:"",duration:"",walkDistance:"",walkDuration:"",target:"",effort:"",terrain:"",recovery:""},sessionId:""};
  save();stop();reset();stopI();init();toast("New "+day+" session ready. Saved history preserved.");
 }
-function saveDayNotes(){if($("notes")&&S.work[D[S.day][0]]){S.work[D[S.day][0]].notes=$("notes").value;save()}}
+function saveDayNotes(){if($("notes")&&S.work[D[S.day][0]])saveFeedback()}
 function init(){
- tabs.innerHTML=D.map((x,i)=>'<button class="'+(i===S.day?"active":"")+'" onclick="saveDayNotes();S.day='+i+';save();init();showScreen(&quot;workout&quot;)">'+(x[0]==="Weekend"?"Weekend":x[0].slice(0,3))+'</button>').join("");
- let d=D[S.day],w=S.work[d[0]]||(S.work[d[0]]={ex:[],notes:""});for(let spec of d[3]){let existing=w.ex.find(x=>x.name===spec[0]);if(!existing){w.ex.push({name:spec[0],n:spec[1],min:spec[2],max:spec[3],data:Array.from({length:spec[1]},()=>({w:"",r:"",rir:"",done:false}))})}else{existing.min=spec[2];existing.max=spec[3];while(existing.data.length<spec[1])existing.data.push({w:"",r:"",rir:"",done:false});existing.n=existing.data.length}}w.ex.sort((a,b)=>{let ia=d[3].findIndex(s=>s[0]===a.name),ib=d[3].findIndex(s=>s[0]===b.name);return (ia<0?9999:ia)-(ib<0?9999:ib)});save();
- $("title").textContent=d[0];$("focus").textContent=d[1];$("notes").value=w.notes;
- plan.innerHTML=d[2].map((x,i)=>{let type=planType(x[0]),grp=planGroupName(d[0],i,x[0]);return '<div class="planGroup" data-type="'+type+'"><div class="groupHeader"><span>'+escapeHtml(grp)+'</span></div><div class="move"><details open><summary>'+escapeHtml(x[0])+'</summary><p>'+escapeHtml(x[1])+'</p><p class="muted">'+escapeHtml(x[2])+'</p></details></div></div>'}).join("");
- $("overviewBanner").dataset.day=d[0];document.documentElement.style.setProperty("--dayAccent",["#4cbcf2","#ef8c4a","#65cfc6","#24b987","#f3b064","#68d5b4"][S.day]);document.querySelectorAll(".dayArt").forEach((img)=>{if(img.src!==DAILY_ART)img.src=DAILY_ART;img.style.transform="translateY(calc("+(-S.day*100/6)+"% + "+(img.closest(".artRibbon")?"-34px":"0px")+"))"});
- renderOverview();renderSets();renderRun();$("gymLogCard").style.display=d[0]==="Weekend"?"none":"block";$("runCard").style.display=d[0]==="Weekend"?"block":"none";$("historyCount").textContent="("+S.history.length+")";$("reportFallback").style.display="none";interval(d[4]);let b=S.body.at(-1)||{};weight.value=b.weight||"";waist.value=b.waist||"";protein.value=b.protein||190;goal.value=b.goal||"";
+ $("tabs").innerHTML=D.map((x,i)=>'<button class="'+(i===S.day?"active":"")+'" onclick="saveDayNotes();S.day='+i+';save();init();showScreen(&quot;workout&quot;)">'+(x[0]==="Weekend"?"Weekend":x[0].slice(0,3))+'</button>').join("");
+ const d=D[S.day],w=S.work[d[0]]||(S.work[d[0]]={ex:[],notes:""});
+ w.ex ||= [];w.planDone ||= {};w.effort ||= "";
+ for(const spec of d[3]){
+  let existing=w.ex.find(x=>x.name===spec[0]);
+  if(!existing){w.ex.push(freshExercise(spec));continue}
+  existing.min=spec[2];existing.max=spec[3];existing.n=spec[1];existing.data ||= [];
+  while(existing.data.length<spec[1])existing.data.push({w:"",r:"",rir:"",done:false});
+  if(existing.data.length>spec[1]){
+   const extra=existing.data.splice(spec[1]);
+   if(extra.some(s=>s.done||["w","r","rir"].some(k=>String(s[k]??"").trim())))existing.previousSets=(existing.previousSets||[]).concat(extra);
+  }
+ }
+ w.ex.forEach(e=>{if(!d[3].some(s=>s[0]===e.name)&&!e.optional)e.legacy=true});
+ w.ex.sort((a,b)=>{let ia=d[3].findIndex(s=>s[0]===a.name),ib=d[3].findIndex(s=>s[0]===b.name);return (ia<0?9999:ia)-(ib<0?9999:ib)});
+ save();
+ $("title").textContent=d[0];$("focus").textContent=d[1];$("notes").value=w.notes||"";$("sessionEffort").value=w.effort||"";
+ renderPlan();
+ $("overviewBanner").dataset.day=d[0];
+ document.documentElement.style.setProperty("--dayAccent",["#4cbcf2","#ef8c4a","#65cfc6","#24b987","#f3b064","#68d5b4"][S.day]);
+ document.querySelectorAll(".dayArt").forEach((img)=>{if(img.src!==DAILY_ART)img.src=DAILY_ART;img.style.transform="translateY(calc("+(-S.day*100/6)+"% + "+(img.closest(".artRibbon")?"-34px":"0px")+"))"});
+ renderOverview();renderSets();
+ $("gymLogCard").style.display=d[0]==="Weekend"?"none":"block";
+ $("runCard").style.display=["Tuesday","Weekend"].includes(d[0])?"block":"none";
+ if(["Tuesday","Weekend"].includes(d[0]))renderRun();
+ $("historyCount").textContent="("+S.history.length+")";$("reportFallback").style.display="none";
+ $("addExercisePicker").hidden=true;interval(d[4]);
+ const b=S.body.at(-1)||{};$("weight").value=b.weight||"";$("waist").value=b.waist||"";$("protein").value=b.protein||190;$("goal").value=b.goal||"";
 }
+function renderPlan(){
+ const d=D[S.day],w=S.work[d[0]];w.planDone ||= {};
+ $("plan").innerHTML=d[2].map((x,i)=>{
+ const type=planType(x[0]),grp=planGroupName(d[0],i,x[0]),done=!!w.planDone[x[0]];
+ return '<div class="planGroup '+(done?'isDone':'')+'" data-type="'+type+'"><div class="planHead"><div class="groupHeader"><span>'+escapeHtml(grp)+'</span></div><button type="button" class="planTick '+(done?'isDone':'')+'" onclick="togglePlan('+i+',this)">'+(done?'✓ Completed':'Mark done')+'</button></div><div class="move"><details open><summary>'+escapeHtml(x[0])+'</summary><p>'+escapeHtml(x[1])+'</p><p class="muted">'+escapeHtml(x[2])+'</p></details></div></div>';
+ }).join("");
+ renderPlanCount();
+}
+function renderPlanCount(){
+ const w=S.work[D[S.day][0]],d=D[S.day],completed=d[2].filter(x=>w.planDone?.[x[0]]).length;
+ $("planProgress").textContent=completed+" / "+d[2].length+" sections complete";
+ const btn=$("runDoneBtn");
+ if(btn){const r=d[2].find(x=>/Running|Run \/ walk|Long run/i.test(x[0]));const done=r&&w.planDone?.[r[0]];btn.textContent=done?"✓ Run completed":"Mark run / walk complete";btn.classList.toggle("primary",!!done)}
+}
+function togglePlan(i,btn){
+ const d=D[S.day],w=S.work[d[0]],section=d[2][i];if(!section)return;
+ w.planDone ||= {};w.planDone[section[0]]=!w.planDone[section[0]];save();
+ if(btn){btn.textContent=w.planDone[section[0]]?"✓ Completed":"Mark done";btn.classList.toggle("isDone",!!w.planDone[section[0]]);btn.closest(".planGroup")?.classList.toggle("isDone",!!w.planDone[section[0]])}
+ renderPlanCount();renderCompletion();
+}
+function toggleRunDone(){
+ const idx=D[S.day][2].findIndex(x=>/Running|Run \/ walk|Long run/i.test(x[0]));
+ if(idx<0)return;togglePlan(idx,null);
+ const btn=$("plan")?.querySelectorAll?.(".planTick")?.[idx];if(btn){const done=!!S.work[D[S.day][0]].planDone[D[S.day][2][idx][0]];btn.textContent=done?"✓ Completed":"Mark done";btn.classList.toggle("isDone",done);btn.closest(".planGroup")?.classList.toggle("isDone",done)}
+}
+function saveFeedback(){
+ const w=S.work[D[S.day][0]];w.notes=$("notes").value;w.effort=$("sessionEffort").value;save();
+}
+
 function last(name){for(let h of S.history){let e=h.ex.find(x=>x.name===name);if(e)return e.data.filter(x=>x.done).map(x=>x.w+"kg × "+x.r+" @ "+x.rir+" RIR").join(" | ")}return ""}
 
 function escapeHtml(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
@@ -297,7 +348,8 @@ function planGroupName(day,i,name){
  if(day==="Tuesday"&&i===2)return "Circuit B · Core";
  if(day==="Wednesday"&&i===2)return "Circuit A · Power";
  if(day==="Thursday"&&i===2)return "Circuit A · Shoulder / back";
- if(day==="Thursday"&&i===3)return "Circuit B · DB complex";
+ if(day==="Thursday"&&i===3)return "Rear delts · standalone";
+ if(day==="Thursday"&&i===4)return "Circuit B · DB complex";
  if(day==="Friday"&&i===2)return "Circuit A · 10-minute AMRAP";
  return /stretch|mobility|recovery/i.test(name)?"Recovery":/warm-up/i.test(name)?"Preparation":/run/i.test(name)?"Endurance":"Strength & technique"
 }
@@ -306,8 +358,8 @@ function exerciseGroup(day,i){
  if(day==="Monday"&&i===6)return ["Finisher · 40s hard / 20s rest","circuit"];
  if(day==="Tuesday"&&[0,1,2].includes(i))return ["Circuit B · Core","circuit"];
  if(day==="Wednesday"&&[1,2].includes(i))return ["Circuit A · Power","circuit"];
- if(day==="Thursday"&&[2,3,4].includes(i))return ["Circuit A · Shoulders & back","circuit"];
- if(day==="Thursday"&&[5,6,7,8].includes(i))return ["Circuit B · DB complex","circuit"];
+ if(day==="Thursday"&&[2,3].includes(i))return ["Circuit A · Shoulders & back · 3 rounds","circuit"];
+ if(day==="Thursday"&&[5,6,7,8].includes(i))return ["Circuit B · DB complex · 5 rounds","circuit"];
  if(day==="Friday"&&[1,2,3].includes(i))return ["Circuit A · AMRAP","circuit"];
  if(day==="Weekend")return ["Long run · endurance","run"];
  return null;
