@@ -509,7 +509,7 @@ function exerciseComment(i,v){let e=S.work[D[S.day][0]].ex[i];quick(e).comment=v
 function quickVal(i,k,v){let e=S.work[D[S.day][0]].ex[i];quick(e)[k]=v;save()}
 function markExercise(i,button){
  const e=S.work[D[S.day][0]].ex[i],q=quick(e);q.done=!q.done;save();
- if(button){button.classList.toggle("primary",q.done);button.textContent=q.done?"✓ Done":"Mark done"}
+ if(button){button.classList.toggle("primary",q.done);button.textContent=q.done?"✓ Done":"Mark done";button.setAttribute("aria-pressed",String(q.done))}
  renderCompletion();
 }
 
@@ -545,31 +545,25 @@ function renderSets(){
   const isAmrapComponent=day==="Friday"&&item.kind==="planned"&&["Barbell push press","Barbell row","Burpee"].includes(e.name);
   if(isAmrapComponent&&e.name==="Barbell push press")prefix+='<details class="amrapLogDetails"><summary>Optional: AMRAP exercise details</summary><p class="muted">Your rounds are counted above. Individual entries are optional.</p>';
   if(isAmrapComponent&&e.name==="Burpee")suffix+='</details>';
-  const action=isAmrapComponent?'<span class="amrapInfo">Count rounds above ↑</span>':'<button class="markDone '+(q.done?"primary":"")+'" onclick="markExercise('+ei+',this)">'+(q.done?"✓ Done":"Mark done")+'</button>';
-  return prefix+'<div class="exerciseCard"><div class="row"><div><div class="exTitle">'+escapeHtml(e.name)+'</div><div class="muted">Plan: '+e.n+' sets × '+e.min+'–'+e.max+' '+targetUnit+(previous?' · Last: '+escapeHtml(previous):'')+'</div></div>'+action+'</div>'+loadHint+
+  // ONE completion button per exercise. Detailed sets are just data fields, not extra ticks.
+  const action=isAmrapComponent?'':'<button type="button" class="markDone '+(q.done?"primary":"")+'" onclick="markExercise('+ei+',this)" aria-pressed="'+(q.done?"true":"false")+'">'+(q.done?"✓ Done":"Mark done")+'</button>';
+  const detailsSaved=!!(q.comment||e.comment||(e.data||[]).some(x=>["w","r","rir"].some(k=>String(x[k]??"").trim())));
+  return prefix+'<div class="exerciseCard"><div class="row"><div><div class="exTitle">'+escapeHtml(e.name)+'</div><div class="muted">'+e.n+' sets · '+e.min+'–'+e.max+' '+targetUnit+(previous?' · Last: '+escapeHtml(previous):'')+'</div></div>'+action+'</div>'+loadHint+
   '<div class="quickGrid"><label>'+(isRun?'Distance (km)':'Weight (kg)')+'<input type="number" inputmode="decimal" step="'+(isRun?'.1':'.5')+'" placeholder="'+(isRun?'km':'BW / kg')+'" value="'+escapeHtml(q.weight)+'" oninput="quickVal('+ei+',\'weight\',this.value)"></label>'+
   '<label>'+(isRun?'Minutes / set':'Reps / set')+'<input type="text" inputmode="numeric" pattern="[0-9]*" placeholder="'+(isRun?'15':'e.g. 8')+'" value="'+escapeHtml(q.reps)+'" oninput="quickVal('+ei+',\'reps\',this.value)"></label>'+
   '<label>RIR <span class="muted">(opt.)</span><input type="number" inputmode="numeric" min="0" max="10" placeholder="2" value="'+escapeHtml(q.rir)+'" oninput="quickVal('+ei+',\'rir\',this.value)"></label></div>'+
-  '<label class="small"><b>Exercise comments</b></label><textarea rows="2" placeholder="Effort, loads, technique, interruptions..." oninput="exerciseComment('+ei+',this.value)">'+escapeHtml(q.comment||e.comment||"")+'</textarea>'+
-  '<details><summary>Detailed sets (optional) · '+logged+' logged</summary>'+detailedPrevious+
-  '<div class="sets"><small>#</small><small>'+(isRun?'km':'kg')+'</small><small>'+(isRun?'min':'reps')+'</small><small>RIR</small><small>✓</small>'+
-  (e.data||[]).map((x,si)=>'<span>'+(si+1)+'</span><input type="number" inputmode="decimal" step=".5" value="'+escapeHtml(x.w)+'" onchange="val('+ei+','+si+',\'w\',this.value)"><input type="number" inputmode="numeric" value="'+escapeHtml(x.r)+'" onchange="val('+ei+','+si+',\'r\',this.value)"><input type="number" inputmode="numeric" value="'+escapeHtml(x.rir)+'" onchange="val('+ei+','+si+',\'rir\',this.value)"><button class="'+(x.done?"active":"")+' done" onclick="toggle('+ei+','+si+',this)">'+(x.done?"✓":"")+'</button>').join("")+'</div></details></div>'+suffix;
+  '<details class="exerciseMore"><summary>Details &amp; notes'+(detailsSaved?' · saved':'')+'</summary>'+
+  '<label class="small"><b>Exercise notes</b></label><textarea rows="2" placeholder="Load changes, technique, interruptions…" oninput="exerciseComment('+ei+',this.value)">'+escapeHtml(q.comment||e.comment||"")+'</textarea>'+
+  '<p class="setHeading">Individual sets (optional)</p>'+detailedPrevious+
+  '<div class="sets"><small>#</small><small>'+(isRun?'km':'kg')+'</small><small>'+(isRun?'min':'reps')+'</small><small>RIR</small>'+
+  (e.data||[]).map((x,si)=>'<span>'+(si+1)+'</span><input aria-label="Set '+(si+1)+' weight" type="number" inputmode="decimal" step=".5" value="'+escapeHtml(x.w)+'" onchange="val('+ei+','+si+',\'w\',this.value)"><input aria-label="Set '+(si+1)+' reps" type="number" inputmode="numeric" value="'+escapeHtml(x.r)+'" onchange="val('+ei+','+si+',\'r\',this.value)"><input aria-label="Set '+(si+1)+' RIR" type="number" inputmode="numeric" value="'+escapeHtml(x.rir)+'" onchange="val('+ei+','+si+',\'rir\',this.value)">').join("")+
+  '</div></details></div>'+suffix;
  }).join("");
  renderCompletion();
 }
 function renderCompletion(){renderPlanCount()}
 
 function val(e,s,k,v){S.work[D[S.day][0]].ex[e].data[s][k]=v;save()}
-function toggle(e,s,button){
- let x=S.work[D[S.day][0]].ex[e]?.data[s];if(!x)return;
- x.done=!x.done;save();
- if(button){
-  button.classList.toggle("active",x.done);button.textContent=x.done?"✓":"";
-  const details=button.closest("details");
-  if(details){const total=details.querySelectorAll(".sets button.active").length;const summary=details.querySelector("summary");if(summary)summary.textContent="Detailed sets (optional) · "+total+" logged"}
- }
- renderCompletion();
-}
 const BONUS_OPTIONS={
  Monday:[
   {name:"Incline DB press",sets:2,min:8,max:12,load:"Moderate dumbbells; 2–3 reps in reserve"},
@@ -782,7 +776,7 @@ function formatReport(record){
   const r=record.run;
   lines.push("RUN / WALK","Running distance: "+(r.distance||"not entered")+" km","Running time: "+(r.duration||"not entered")+" minutes","Running pace: "+paceLabel(r.distance,r.duration),"Walking distance: "+(r.walkDistance||"0")+" km","Walking time: "+(r.walkDuration||"not entered")+" minutes","Run effort: "+(r.effort||"not entered")+"/10","Target: "+(r.target||"not set")+" km","Terrain: "+(r.terrain||"not recorded"),"Recovery: "+(r.recovery||"not recorded"),"");
  }
- if(record.planDone)lines.push("Completed plan sections: "+(Object.keys(record.planDone).filter(k=>record.planDone[k]).join("; ")||"none marked"),"");
+
  if(record.effort)lines.push("Overall workout difficulty: "+record.effort+"/10","");
  if(day==="Friday"&&(record.amrapRounds>0||record.amrapNotes)){lines.push("FRIDAY AMRAP","One full prescribed round: barbell push press × 6 → barbell row × 8 → burpees × 6","Complete circuit rounds counted: "+(record.amrapRounds||0),"Circuit modifications: "+(record.amrapNotes||"none recorded"),"");}
  for(const e of record.ex||[]){
