@@ -216,7 +216,7 @@ const D=[
 ],[
 ["Bench press",3,4,6],["Weighted pull-up",3,6,10],["Explosive push-up",4,8,10],["DB push press",4,8,10],["DB row (per side)",4,10,10],["DB lateral raise",3,12,20],["Battle ropes (40s work intervals)",8,1,1]],["rope",8]],
 ["Tuesday","Functional Conditioning + Core + Half-Marathon Running",[
-["Functional Five","5 rounds: battle ropes 40 sec → push-ups 20–25 → farmer's carry 20 m → pull-ups 5–8 → farmer's carry 20 m back.","Rest 60–90 seconds between rounds. Stay in one functional area; do not reserve half the gym."],
+["Functional Five","5 rounds: battle ropes 40 sec → push-ups 20–25 → farmer's carry 20 m → pull-ups 5–8 → farmer's carry 20 m back.","Aim for a challenging, repeatable 7–8/10 effort, resting about 60–75 seconds between rounds. Keep technique solid. Stay in one functional area; do not reserve half the gym."],
 ["Run / walk","15–25 minutes of easy running, or run/walk intervals when needed.","Keep it genuinely aerobic: you should be able to speak in sentences. Track running and walking separately in the tracker below. If interrupted, record what you actually completed."],
 ["Core","3 rounds: hanging knee raises 10–15 → dead bugs 8–10/side → plank 45–60 sec.","Dead bug: lie on your back with hips/knees at 90°, slowly lower opposite arm and leg while keeping your lower back controlled."],
 ["Mobility","5 minutes: hip flexors, hamstrings and thoracic rotations.","Mobility is part of the workout, not optional."]],[
@@ -510,14 +510,14 @@ function sessionHasData(record){
  });
 }
 function saveSession(){
- const day=D[S.day][0],w=S.work[day];w.notes=$("notes").value;
+ const day=D[S.day][0],w=S.work[day];w.notes=$("notes").value;w.effort=$("sessionEffort").value;
  if(!sessionHasData(w)){toast("Nothing logged yet — workout not saved");return;}
  if(day==="Weekend"&&(!(Number(w.run?.distance)>0)||!(Number(w.run?.duration)>0))&&!confirm("Distance or duration is missing. Save this long run anyway?"))return;
  if(!w.sessionId)w.sessionId=new Date().toISOString()+"-"+Math.random().toString(36).slice(2,8);
  const record={date:new Date().toISOString(),day,ex:structuredClone(w.ex),notes:w.notes,effort:w.effort||"",planDone:structuredClone(w.planDone||{}),run:w.run?structuredClone(w.run):null,sessionId:w.sessionId};
  const existing=S.history.findIndex(x=>x.sessionId===w.sessionId);
  if(existing>=0){record.date=S.history[existing].date;S.history[existing]=record}else{S.history.unshift(record)}
- save();$("historyCount").textContent="("+S.history.length+")";if(day==="Weekend")renderRun();toast(existing>=0?"Saved workout updated":"Workout saved to History");
+ save();$("historyCount").textContent="("+S.history.length+")";if(["Tuesday","Weekend"].includes(day))renderRun();toast(existing>=0?"Saved workout updated":"Workout saved to History");
 }
 
 
@@ -617,7 +617,7 @@ function renderHistory(){
  $("historyEntries").innerHTML=sessions.map((s)=>{
  const idx=S.history.indexOf(s),date=new Date(s.date).toLocaleString(undefined,{weekday:"short",day:"numeric",month:"short",year:"numeric",hour:"numeric",minute:"2-digit"});
  const empty=!sessionHasData(s);
- const summary=empty?"No workout data recorded":s.day==="Weekend"?(s.run?.distance?s.run.distance+" km · "+paceLabel(s.run.distance,s.run.duration):"Long run · legacy entry"):(s.ex||[]).filter(x=>x.quick?.done||(x.data||[]).some(y=>y.done)).length+" exercises completed";
+ const summary=empty?"No workout data recorded":["Tuesday","Weekend"].includes(s.day)&&s.run?.distance?("Run "+s.run.distance+" km · Walk "+(s.run.walkDistance||"0")+" km · "+paceLabel(s.run.distance,s.run.duration)):(s.ex||[]).filter(x=>x.quick?.done||(x.data||[]).some(y=>y.done)).length+" exercises completed";
  const detail=["Tuesday","Weekend"].includes(s.day)&&s.run?'<div class="historyExercise">Running: '+escapeHtml(s.run.distance||"—")+' km · '+escapeHtml(s.run.duration||"—")+' min · '+escapeHtml(paceLabel(s.run.distance,s.run.duration))+' · Walking: '+escapeHtml(s.run.walkDistance||"0")+' km · Effort: '+escapeHtml(s.run.effort||"—")+'/10</div><div class="muted">Terrain: '+escapeHtml(s.run.terrain||"—")+'<br>Recovery: '+escapeHtml(s.run.recovery||"—")+'</div>':"";
  return '<div class="card historyEntry '+(s.day==="Weekend"?"weekendEntry":"")+'"><details><summary>'+escapeHtml(s.day)+' · '+escapeHtml(date)+'</summary><div class="muted">'+escapeHtml(summary)+'</div><div class="historyDetail">'+detail+
  (s.ex||[]).filter(e=>e.quick?.done||e.quick?.comment||e.quick?.weight||e.quick?.reps||(e.data||[]).some(x=>x.done||x.w||x.r)).map(e=>'<div class="historyExercise"><b>'+escapeHtml(e.name)+'</b><div>'+escapeHtml(formatExercise(e))+'</div>'+(e.quick?.comment?'<div class="muted">Note: '+escapeHtml(e.quick.comment)+'</div>':"")+'</div>').join("")+
