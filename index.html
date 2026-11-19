@@ -163,6 +163,65 @@ button:focus-visible,summary:focus-visible,input:focus-visible,textarea:focus-vi
 .deleteHistoryBtn{border:1px solid #f0a9a9;color:#9f2626;background:#fff6f6}
 .emptyHistoryLabel{display:inline-block;padding:5px 9px;background:#fff0d6;color:#86551b;border-radius:7px;font-weight:800;font-size:12px;margin-top:9px}
 @media(max-width:390px){.runGrid{grid-template-columns:1fr 1fr;gap:8px}.runGrid label{font-size:12px}.computedPace{font-size:19px}}
+
+/* One-tap, legible mobile workout flow. */
+button{min-height:48px;touch-action:manipulation}
+.planGroup{padding:12px 13px;margin:9px 0;border-radius:13px}
+.planGroup .planHead{display:flex;align-items:center;gap:9px;margin:0}
+.planGroup .stepNumber{display:grid;place-items:center;flex-shrink:0;width:32px;height:32px;border-radius:50%;font-size:15px;font-weight:900;background:#dbe8f8;color:#234f7d}
+.planGroup .stepText{min-width:0;flex:1}
+.planTitle{font-size:15px;font-weight:900;color:#123c68;line-height:1.25}
+.stepState{font-size:11px;color:#65778d;font-weight:700}
+.planGroup .planTick{flex:0 0 auto;min-width:84px;min-height:48px;padding:8px;font-size:13px}
+.planGroup .stepAuto{min-width:85px;max-width:100px;text-align:right;color:#336b8a;font-size:12px;font-weight:900}
+.planGroup .stepPrescription{margin:9px 0 5px;color:#253d58;font-size:14px;font-weight:600;line-height:1.45}
+.stepTips{margin:8px 0 0;border-top:1px solid #d3dfea;padding-top:5px}
+.stepTips summary{min-height:44px;color:#346da0;font-size:12px;font-weight:750;cursor:pointer}
+.planGroup.isDone .stepNumber{background:#15926f;color:white}
+.planGroup.isDone .stepAuto,.planGroup.isDone .stepState{color:#14845c}
+#runDoneBtn{width:100%;margin-top:12px;min-height:56px}
+.amrapTimerGrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(135px,1fr);gap:12px;align-items:stretch;margin:14px 0}
+.amrapClockPane{min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;border-radius:13px;border:1px solid #c6daec;background:#f6faff;padding:14px 7px}
+.amrapClockPane .clock{font-size:clamp(39px,11vw,65px);margin:8px 0}
+.amrapClockPane .status{text-align:center;font-size:15px}
+.timerEyebrow{font-size:10px;letter-spacing:.1em;color:#50739d;font-weight:900}
+.roundPane{min-width:0;display:flex}
+.roundTap{width:100%;min-height:178px;border-radius:16px;border:3px solid #2e78be;background:linear-gradient(140deg,#2369c5,#0a3b94);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;box-shadow:0 6px 0 #0d3882}
+.roundTap span{font-size:20px;letter-spacing:.05em}
+.roundTap strong{font-size:clamp(55px,14vw,83px);line-height:1;font-variant-numeric:tabular-nums}
+.roundTap small{font-size:11px;color:#e1f3ff}
+.roundTap:active,.roundTap.roundPop{transform:translateY(3px);box-shadow:0 3px 0 #0d3882}
+.roundAux{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.roundAux button{min-height:48px;padding:9px 6px;font-size:14px}
+.roundAux button:disabled{opacity:.5}
+.circuitRecipe{background:#ecf6ff;border:2px solid #8cbbea;border-radius:13px;padding:11px}
+.recipeHeading{font-size:11px;font-weight:950;color:#124982;letter-spacing:.07em;margin:0 0 8px}
+.recipeStep{display:flex;align-items:center;gap:10px;background:#fff;border-radius:9px;padding:7px 10px;margin:6px 0;min-height:42px;font-size:15px}
+.recipeIndex{width:26px;height:26px;display:grid;place-items:center;background:#2563a9;color:white;border-radius:50%;font-weight:900;flex-shrink:0}
+.recipeStep b{flex:1}.recipeStep strong{color:#105f9b;white-space:nowrap}
+.recipeFoot{font-size:12px;font-weight:800;margin-top:10px;color:#195488;line-height:1.35}
+.amrapLogDetails{margin:14px 0;padding:10px 12px;border-radius:12px;background:#f2f7fd;border:1px solid #c7d9ea}
+.amrapLogDetails summary{min-height:48px;color:#1f5081;font-weight:900}
+.amrapInfo{font-size:11px;font-weight:850;color:#427ca7;max-width:110px;text-align:right}
+.victoryOverlay{position:fixed;inset:0;background:#06162cbd;z-index:100;display:grid;place-items:center;padding:20px;backdrop-filter:blur(6px)}
+.victoryOverlay[hidden]{display:none}
+.victoryCard{background:#fff;border-radius:20px;overflow:hidden;width:min(100%,420px);box-shadow:0 20px 70px #0006;animation:questArrival .3s ease-out}
+.victoryContent{text-align:center;padding:17px 20px 24px}
+.victoryEyebrow{font-size:11px;letter-spacing:.18em;font-weight:900;color:#9c691e}
+.victoryContent h2{font-size:28px;margin:6px 0 8px}
+.victoryContent p{color:#48627b;line-height:1.45;margin:0 0 17px}
+.victoryContent button{width:100%;min-height:58px}
+body.victoryOpen{overflow:hidden}
+@keyframes questArrival{from{opacity:.2;transform:translateY(24px) scale(.94)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){.victoryCard{animation:none}}
+@media(max-width:380px){.amrapTimerGrid{gap:8px;grid-template-columns:minmax(0,1fr) 135px}.roundTap{min-height:168px}.roundTap span{font-size:17px}.roundTap small{font-size:10px}.recipeStep{font-size:14px}}
+/* Three fresh manhwa scenes are packaged into a lightweight WebP strip. */
+.bonusStrip{position:relative;height:103px;margin:13px 0;border-radius:15px;overflow:hidden;background:#101d39;isolation:isolate}
+.bonusStrip .bonusViewport,.bonusVictory{position:relative;overflow:hidden;width:100%;height:100%;background:#132f58}
+.bonusStrip img,.bonusVictory img{position:absolute;top:0;left:0;width:100%;height:auto;max-width:none;display:block}
+.bonusStrip:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#04172bbd,transparent 70%);pointer-events:none}
+.bonusStrip span{position:absolute;z-index:2;left:14px;bottom:13px;color:#fff;font-size:12px;font-weight:900;letter-spacing:.09em;text-shadow:0 2px 8px #000b}
+.bonusVictory{height:145px}.bonusVictory img{width:100%;height:auto}
 </style></head><body>
 <header><div><b>Cut Phase</b><div class="muted">“Fall in love with the grind.”</div></div><div class="tabs" id="tabs"></div></header>
 <main>
@@ -172,6 +231,7 @@ button:focus-visible,summary:focus-visible,input:focus-visible,textarea:focus-vi
 
 
 
+<div class="bonusStrip bonusTop" id="bonusTop" aria-hidden="true"><div class="bonusViewport"><img class="bonusArt" src="" alt="" loading="lazy"></div><span>YOUR NEXT LEVEL STARTS HERE</span></div>
 <div class="card instructionsCard"><div class="row"><h3>Full workout instructions</h3><span class="muted" id="planProgress">One check per task</span></div><div id="plan"></div></div>
 <div class="card" id="mainTimerCard"><div class="row"><b>60-minute workout clock</b><span class="muted" id="clockState">Ready · 60-minute countdown</span></div><div class="clock" id="clock" aria-live="off">60:00</div><div class="clockButtons"><button class="primary" onclick="start()">Start</button><button onclick="stop()">Pause</button><button onclick="reset()">Reset</button></div><p class="muted">Keeps accurate elapsed time while your screen is locked or you switch apps. When you return, it shows the correct remaining time, stopping at 00:00. iPhone web apps cannot reliably sound an alarm while fully closed.</p></div>
 <div class="card" id="intervalCard"></div>
@@ -190,7 +250,7 @@ button:focus-visible,summary:focus-visible,input:focus-visible,textarea:focus-vi
 <div class="artDivider artDividerOne" aria-hidden="true"><div class="artViewport artRibbon"><img class="dayArt" src="" alt="" loading="lazy"></div><span>TRAIN · ADAPT · LEVEL UP</span></div><div class="card logCard" id="gymLogCard"><div class="row"><h3>💪 Workout log</h3><span class="muted">Weight · reps · notes</span></div><p class="muted">Record each exercise once here. Your steps above update automatically; no second tick required. Detailed sets stay optional.</p><div id="sets"></div><button onclick="add()" id="addExerciseBtn">+ Add exercise</button><div id="addExercisePicker" class="addPicker" hidden><h3>Supplementary exercise</h3><p class="muted">Choose a suggested option for this day or add your own. Sets, reps and starting-load guidance will fill in automatically.</p><select id="addChoice" onchange="changeAddChoice()"></select><div id="addPreview" class="muted"></div><div id="customAdd" hidden><label>Exercise name<input id="customName" type="text" placeholder="Exercise name"></label><div class="runGrid"><label>Sets<input id="customSets" type="number" inputmode="numeric" min="1" max="20" value="3"></label><label>Minimum reps / time<input id="customMin" type="number" inputmode="numeric" min="1" value="8"></label><label>Maximum reps / time<input id="customMax" type="number" inputmode="numeric" min="1" value="12"></label><label>Starting-load note<input id="customLoad" type="text" placeholder="e.g. light / 12–18 kg"></label></div></div><div class="actionrow"><button class="primary" onclick="confirmAddExercise()">Add to workout</button><button onclick="closeAddExercise()">Cancel</button></div></div></div>
 
 
-<div class="artDivider artDividerTwo" aria-hidden="true"><div class="artViewport artRibbon"><img class="dayArt" src="" alt="" loading="lazy"></div><span>PROGRESS IS EARNED</span></div><div class="card finishCard" id="finishWorkout"><div class="row"><h3>✓ Finish workout</h3><span class="muted">Feedback · save · share</span></div><h3>How hard was the workout?</h3><div class="runGrid"><label>Overall difficulty (1–10)<select id="sessionEffort" onchange="saveFeedback()"><option value="">Select difficulty</option><option value="1">1 — Very easy</option><option value="2">2 — Easy</option><option value="3">3 — Light</option><option value="4">4 — Some effort</option><option value="5">5 — Moderate</option><option value="6">6 — Challenging</option><option value="7">7 — Hard</option><option value="8">8 — Very hard</option><option value="9">9 — Extremely hard</option><option value="10">10 — Maximum effort</option></select></label></div><label class="runLabel"><b>Workout feedback / what should change next week?</b><textarea id="notes" rows="4" oninput="saveFeedback()" placeholder="e.g. Not hard enough; heart rate too low. Run interrupted by work. Increase circuit pace or add 10 minutes conditioning."></textarea></label><p class="muted">Feedback saves as you type, and is included in History and Copy report.</p><div class="actionrow"><button class="primary" onclick="saveSession()">Save workout</button><button onclick="copyReport()">Copy report</button></div><button class="newWorkoutBtn" onclick="newWorkout()">+ Start New Workout</button><p class="muted">Starting a new workout clears this day's active entries only. Your saved history and measurements stay intact.</p><p class="muted">Copy the report into ChatGPT for detailed coaching. Your records stay on this device unless you share them.</p><textarea id="reportFallback" rows="7" style="display:none;margin-top:8px" readonly aria-label="Workout report to copy"></textarea></div>
+<div class="bonusStrip" id="bonusFinish" aria-hidden="true"><div class="bonusViewport"><img class="bonusArt" src="" alt="" loading="lazy"></div><span>RECOVER · RETURN · RISE</span></div><div class="card finishCard" id="finishWorkout"><div class="row"><h3>✓ Finish workout</h3><span class="muted">Feedback · save · share</span></div><h3>How hard was the workout?</h3><div class="runGrid"><label>Overall difficulty (1–10)<select id="sessionEffort" onchange="saveFeedback()"><option value="">Select difficulty</option><option value="1">1 — Very easy</option><option value="2">2 — Easy</option><option value="3">3 — Light</option><option value="4">4 — Some effort</option><option value="5">5 — Moderate</option><option value="6">6 — Challenging</option><option value="7">7 — Hard</option><option value="8">8 — Very hard</option><option value="9">9 — Extremely hard</option><option value="10">10 — Maximum effort</option></select></label></div><label class="runLabel"><b>Workout feedback / what should change next week?</b><textarea id="notes" rows="4" oninput="saveFeedback()" placeholder="e.g. Not hard enough; heart rate too low. Run interrupted by work. Increase circuit pace or add 10 minutes conditioning."></textarea></label><p class="muted">Feedback saves as you type, and is included in History and Copy report.</p><div class="actionrow"><button class="primary" onclick="saveSession()">Save workout</button><button onclick="copyReport()">Copy report</button></div><button class="newWorkoutBtn" onclick="newWorkout()">+ Start New Workout</button><p class="muted">Starting a new workout clears this day's active entries only. Your saved history and measurements stay intact.</p><p class="muted">Copy the report into ChatGPT for detailed coaching. Your records stay on this device unless you share them.</p><textarea id="reportFallback" rows="7" style="display:none;margin-top:8px" readonly aria-label="Workout report to copy"></textarea></div>
 
 
 
@@ -451,7 +511,11 @@ function renderSets(){
   const previous=last(e.name),isRun=e.unit==="minutes",targetUnit=isRun?"minutes":"reps";
   const loadHint=e.loadHint?'<p class="plannedLoad">Suggested starting load: '+escapeHtml(e.loadHint)+'</p>':"";
   const detailedPrevious=(e.previousSets||[]).length?'<p class="muted">'+e.previousSets.length+' additional logged set(s) from an earlier programme are preserved in the session record.</p>':"";
-  return prefix+'<div class="exerciseCard"><div class="row"><div><div class="exTitle">'+escapeHtml(e.name)+'</div><div class="muted">Plan: '+e.n+' sets × '+e.min+'–'+e.max+' '+targetUnit+(previous?' · Last: '+escapeHtml(previous):'')+'</div></div><button class="markDone '+(q.done?"primary":"")+'" onclick="markExercise('+ei+',this)">'+(q.done?"✓ Done":"Mark done")+'</button></div>'+loadHint+
+  const isAmrapComponent=day==="Friday"&&item.kind==="planned"&&["Barbell push press","Barbell row","Burpee"].includes(e.name);
+  if(isAmrapComponent&&e.name==="Barbell push press")prefix+='<details class="amrapLogDetails"><summary>Optional: AMRAP exercise details</summary><p class="muted">Your rounds are counted above. Individual entries are optional.</p>';
+  if(isAmrapComponent&&e.name==="Burpee")suffix+='</details>';
+  const action=isAmrapComponent?'<span class="amrapInfo">Count rounds above ↑</span>':'<button class="markDone '+(q.done?"primary":"")+'" onclick="markExercise('+ei+',this)">'+(q.done?"✓ Done":"Mark done")+'</button>';
+  return prefix+'<div class="exerciseCard"><div class="row"><div><div class="exTitle">'+escapeHtml(e.name)+'</div><div class="muted">Plan: '+e.n+' sets × '+e.min+'–'+e.max+' '+targetUnit+(previous?' · Last: '+escapeHtml(previous):'')+'</div></div>'+action+'</div>'+loadHint+
   '<div class="quickGrid"><label>'+(isRun?'Distance (km)':'Weight (kg)')+'<input type="number" inputmode="decimal" step="'+(isRun?'.1':'.5')+'" placeholder="'+(isRun?'km':'BW / kg')+'" value="'+escapeHtml(q.weight)+'" oninput="quickVal('+ei+',\'weight\',this.value)"></label>'+
   '<label>'+(isRun?'Minutes / set':'Reps / set')+'<input type="text" inputmode="numeric" pattern="[0-9]*" placeholder="'+(isRun?'15':'e.g. 8')+'" value="'+escapeHtml(q.reps)+'" oninput="quickVal('+ei+',\'reps\',this.value)"></label>'+
   '<label>RIR <span class="muted">(opt.)</span><input type="number" inputmode="numeric" min="0" max="10" placeholder="2" value="'+escapeHtml(q.rir)+'" oninput="quickVal('+ei+',\'rir\',this.value)"></label></div>'+
