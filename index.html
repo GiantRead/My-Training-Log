@@ -140,6 +140,25 @@ button:focus-visible,summary:focus-visible,input:focus-visible,textarea:focus-vi
 .historyCompareTable th:first-child{width:36%}
 .historyEmpty{padding:20px;color:#637690;text-align:center}
 .historyActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.planGroup .planHead{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:1px 0 9px}
+.planGroup .planHead button{font-size:13px;padding:8px 10px;min-height:40px;flex-shrink:0}
+.planGroup.isDone{border-color:#83c6a5!important;box-shadow:inset 0 0 0 1px #62b88d}
+.planGroup .planTick.isDone{background:#0f8767!important;border-color:#0f8767;color:white}
+#planProgress{font-weight:800}
+.runStopwatch{padding:12px;border:1px solid #b9d8d3;border-radius:13px;background:#ebf7f2;margin:12px 0}
+.runTime{font-size:38px;text-align:center;letter-spacing:1px;font-weight:900;color:#176a5b;font-variant-numeric:tabular-nums;padding:2px 0 10px}
+.useTimeBtn{margin-top:8px;min-height:44px;width:100%;font-size:14px;color:#15675a}
+.addPicker{margin-top:10px;padding:13px;border:1px solid #aec7e0;border-radius:12px;background:#f1f7ff}
+.addPicker select,.addPicker input{width:100%;min-height:46px;font-size:16px;margin:6px 0 10px}
+.addPicker #addPreview{background:#fff;padding:10px;border-radius:9px}
+.addPicker .actionrow button{min-width:120px}
+.optionalHeader{margin:14px 0 7px;font-weight:900;color:#346386}
+.legacyGroup{margin:13px 0;padding:12px;border-radius:12px;background:#f6f7fa;border:1px solid #dae2ea}
+.legacyGroup summary{font-weight:800;color:#586a7d}
+.exerciseCard .plannedLoad{font-size:12px;background:#eef6ff;color:#24578a;padding:6px 8px;border-radius:8px;margin:9px 0}
+.exerciseCard details[open] summary{color:#205fab}
+.finishCard h3{margin:12px 0 5px}
+.finishCard select{min-height:47px;width:100%;font-size:16px;padding:8px;border-radius:8px;border:1px solid #b9cbdd;background:#fff}
 .historyActions button{flex:1;min-width:135px}
 .deleteHistoryBtn{border:1px solid #f0a9a9;color:#9f2626;background:#fff6f6}
 .emptyHistoryLabel{display:inline-block;padding:5px 9px;background:#fff0d6;color:#86551b;border-radius:7px;font-weight:800;font-size:12px;margin-top:9px}
@@ -153,25 +172,25 @@ button:focus-visible,summary:focus-visible,input:focus-visible,textarea:focus-vi
 
 
 
-<div class="card instructionsCard"><div class="row"><h3>Full workout instructions</h3><span class="muted">Tap a section for details</span></div><div id="plan"></div></div>
+<div class="card instructionsCard"><div class="row"><h3>Full workout instructions</h3><span class="muted" id="planProgress">Mark sections done as you go</span></div><div id="plan"></div></div>
 <div class="card" id="mainTimerCard"><div class="row"><b>60-minute workout clock</b><span class="muted" id="clockState">Ready · 60-minute countdown</span></div><div class="clock" id="clock" aria-live="off">60:00</div><div class="clockButtons"><button class="primary" onclick="start()">Start</button><button onclick="stop()">Pause</button><button onclick="reset()">Reset</button></div><p class="muted">Keeps accurate elapsed time while your screen is locked or you switch apps. When you return, it shows the correct remaining time, stopping at 00:00. iPhone web apps cannot reliably sound an alarm while fully closed.</p></div>
 <div class="card" id="intervalCard"></div>
-<div class="card runCard" id="runCard" style="display:none"><div class="row"><h3>🏃 Long run tracker</h3><span class="muted">Half-marathon preparation</span></div>
-<p class="muted">Record the actual run. Pace calculates automatically. Your weekly distance target is optional and is not increased automatically.</p>
+<div class="card runCard" id="runCard" style="display:none"><div class="row"><h3 id="runCardTitle">🏃 Run tracker</h3><span class="muted" id="runCardSubtitle">Distance · time · pace</span></div>
+<p class="muted">Record what you actually completed, even if you were interrupted. The clock uses real elapsed time when the screen locks. Tap “Use elapsed time” to put it into your running duration field.</p><div class="runStopwatch"><div id="runElapsed" class="runTime">00:00</div><div class="clockButtons"><button onclick="startRunTimer()" class="primary">Start</button><button onclick="pauseRunTimer()">Pause</button><button onclick="resetRunTimer()">Reset</button></div><button class="useTimeBtn" onclick="useRunTime()">Use elapsed time as running duration</button></div>
 <div class="runGrid">
-<label>Distance (km)<input id="runDistance" type="number" min="0" step="0.1" inputmode="decimal" placeholder="e.g. 10.0" oninput="runMetric('distance',this.value)"></label>
-<label>Duration (minutes)<input id="runDuration" type="number" min="0" step="0.1" inputmode="decimal" placeholder="e.g. 62" oninput="runMetric('duration',this.value)"></label>
-<label>Average pace<div class="computedPace" id="runPace">—</div></label>
+<label>Running distance (km)<input id="runDistance" type="number" min="0" step="0.1" inputmode="decimal" placeholder="e.g. 10.0" oninput="runMetric('distance',this.value)"></label>
+<label>Running time (minutes)<input id="runDuration" type="number" min="0" step="0.1" inputmode="decimal" placeholder="e.g. 62" oninput="runMetric('duration',this.value)"></label>
+<label>Running pace<div class="computedPace" id="runPace">—</div></label>
 <label>Effort / 10<select id="runEffort" onchange="runMetric('effort',this.value)"><option value="">Choose</option><option value="1">1 - Very easy</option><option value="2">2</option><option value="3">3 - Easy</option><option value="4">4</option><option value="5">5 - Moderate</option><option value="6">6</option><option value="7">7 - Hard</option><option value="8">8</option><option value="9">9</option><option value="10">10 - Maximum</option></select></label>
-<label>Planned distance (km) · optional<input id="runTarget" type="number" min="0" step="0.1" inputmode="decimal" placeholder="Set your own target" oninput="runMetric('target',this.value)"></label>
+<label>Walking distance (km)<input id="runWalkDistance" type="number" min="0" step="0.1" inputmode="decimal" placeholder="e.g. 2.5" oninput="runMetric('walkDistance',this.value)"></label><label>Walking time (minutes)<input id="runWalkDuration" type="number" min="0" step="0.1" inputmode="decimal" placeholder="optional" oninput="runMetric('walkDuration',this.value)"></label><label>Total distance<div id="runTotalDistance" class="computedPace">—</div></label><label>Planned distance (km) · optional<input id="runTarget" type="number" min="0" step="0.1" inputmode="decimal" placeholder="Set your own target" oninput="runMetric('target',this.value)"></label>
 </div>
 <label class="runLabel">Route / terrain<input id="runTerrain" type="text" placeholder="Road, treadmill, hills, weather…" oninput="runMetric('terrain',this.value)"></label>
 <label class="runLabel">Recovery & soreness<textarea id="runRecovery" rows="3" placeholder="Calves, Achilles, knees, energy, how the final kilometres felt…" oninput="runMetric('recovery',this.value)"></textarea></label>
 <div id="runProgress"></div></div>
-<div class="artDivider artDividerOne" aria-hidden="true"><div class="artViewport artRibbon"><img class="dayArt" src="" alt="" loading="lazy"></div><span>TRAIN · ADAPT · LEVEL UP</span></div><div class="card logCard" id="gymLogCard"><div class="row"><h3>💪 Workout log</h3><span class="muted">Weight · reps · notes</span></div><p class="muted">Log your usual working weight and reps, then note any changes. Detailed sets are optional.</p><div id="sets"></div><button onclick="add()">+ Add exercise</button></div>
+<div class="artDivider artDividerOne" aria-hidden="true"><div class="artViewport artRibbon"><img class="dayArt" src="" alt="" loading="lazy"></div><span>TRAIN · ADAPT · LEVEL UP</span></div><div class="card logCard" id="gymLogCard"><div class="row"><h3>💪 Workout log</h3><span class="muted">Weight · reps · notes</span></div><p class="muted">Log your usual working weight and reps, then note any changes. Detailed sets are optional.</p><div id="sets"></div><button onclick="add()" id="addExerciseBtn">+ Add exercise</button><div id="addExercisePicker" class="addPicker" hidden><h3>Supplementary exercise</h3><p class="muted">Choose a suggested option for this day or add your own. Sets, reps and starting-load guidance will fill in automatically.</p><select id="addChoice" onchange="changeAddChoice()"></select><div id="addPreview" class="muted"></div><div id="customAdd" hidden><label>Exercise name<input id="customName" type="text" placeholder="Exercise name"></label><div class="runGrid"><label>Sets<input id="customSets" type="number" inputmode="numeric" min="1" max="20" value="3"></label><label>Minimum reps / time<input id="customMin" type="number" inputmode="numeric" min="1" value="8"></label><label>Maximum reps / time<input id="customMax" type="number" inputmode="numeric" min="1" value="12"></label><label>Starting-load note<input id="customLoad" type="text" placeholder="e.g. light / 12–18 kg"></label></div></div><div class="actionrow"><button class="primary" onclick="confirmAddExercise()">Add to workout</button><button onclick="closeAddExercise()">Cancel</button></div></div></div>
 
 
-<div class="artDivider artDividerTwo" aria-hidden="true"><div class="artViewport artRibbon"><img class="dayArt" src="" alt="" loading="lazy"></div><span>PROGRESS IS EARNED</span></div><div class="card finishCard"><div class="row"><h3>✓ Finish workout</h3><span class="muted">Save · share · progress</span></div><details><summary><b>Overall session notes (optional)</b></summary><textarea id="notes" rows="3" placeholder="Overall energy, fatigue, running, recovery..." style="margin-top:10px"></textarea></details><div class="actionrow"><button class="primary" onclick="saveSession()">Save workout</button><button onclick="copyReport()">Copy report</button></div><button class="newWorkoutBtn" onclick="newWorkout()">+ Start New Workout</button><p class="muted">Starting a new workout clears this day's active entries only. Your saved history and measurements stay intact.</p><p class="muted">Copy the report into ChatGPT for detailed coaching. Your records stay on this device unless you share them.</p><textarea id="reportFallback" rows="7" style="display:none;margin-top:8px" readonly aria-label="Workout report to copy"></textarea></div>
+<div class="artDivider artDividerTwo" aria-hidden="true"><div class="artViewport artRibbon"><img class="dayArt" src="" alt="" loading="lazy"></div><span>PROGRESS IS EARNED</span></div><div class="card finishCard" id="finishWorkout"><div class="row"><h3>✓ Finish workout</h3><span class="muted">Feedback · save · share</span></div><h3>How hard was the workout?</h3><div class="runGrid"><label>Overall difficulty (1–10)<select id="sessionEffort" onchange="saveFeedback()"><option value="">Select difficulty</option><option value="1">1 — Very easy</option><option value="2">2 — Easy</option><option value="3">3 — Light</option><option value="4">4 — Some effort</option><option value="5">5 — Moderate</option><option value="6">6 — Challenging</option><option value="7">7 — Hard</option><option value="8">8 — Very hard</option><option value="9">9 — Extremely hard</option><option value="10">10 — Maximum effort</option></select></label></div><label class="runLabel"><b>Workout feedback / what should change next week?</b><textarea id="notes" rows="4" oninput="saveFeedback()" placeholder="e.g. Not hard enough; heart rate too low. Run interrupted by work. Increase circuit pace or add 10 minutes conditioning."></textarea></label><p class="muted">Feedback saves as you type, and is included in History and Copy report.</p><div class="actionrow"><button class="primary" onclick="saveSession()">Save workout</button><button onclick="copyReport()">Copy report</button></div><button class="newWorkoutBtn" onclick="newWorkout()">+ Start New Workout</button><p class="muted">Starting a new workout clears this day's active entries only. Your saved history and measurements stay intact.</p><p class="muted">Copy the report into ChatGPT for detailed coaching. Your records stay on this device unless you share them.</p><textarea id="reportFallback" rows="7" style="display:none;margin-top:8px" readonly aria-label="Workout report to copy"></textarea></div>
 
 
 
@@ -198,7 +217,7 @@ const D=[
 ["Bench press",3,4,6],["Weighted pull-up",3,6,10],["Explosive push-up",4,8,10],["DB push press",4,8,10],["DB row (per side)",4,10,10],["DB lateral raise",3,12,20],["Battle ropes (40s work intervals)",8,1,1]],["rope",8]],
 ["Tuesday","Functional Conditioning + Core + Half-Marathon Running",[
 ["Functional Five","5 rounds: battle ropes 40 sec → push-ups 20–25 → farmer's carry 20 m → pull-ups 5–8 → farmer's carry 20 m back.","Rest 60–90 seconds between rounds. Stay in one functional area; do not reserve half the gym."],
-["Running","15–25 minutes easy Zone 2 running.","Keep it genuinely aerobic: you should be able to speak in sentences. The circuit is already your high-intensity work."],
+["Run / walk","15–25 minutes of easy running, or run/walk intervals when needed.","Keep it genuinely aerobic: you should be able to speak in sentences. Track running and walking separately in the tracker below. If interrupted, record what you actually completed."],
 ["Core","3 rounds: hanging knee raises 10–15 → dead bugs 8–10/side → plank 45–60 sec.","Dead bug: lie on your back with hips/knees at 90°, slowly lower opposite arm and leg while keeping your lower back controlled."],
 ["Mobility","5 minutes: hip flexors, hamstrings and thoracic rotations.","Mobility is part of the workout, not optional."]],[
 ["Hanging knee raise",3,10,15],["Dead bug (per side)",3,8,10],["Plank (seconds)",3,45,60]],null],
@@ -206,19 +225,19 @@ const D=[
 ["Wednesday","Heavy Deadlift + Back + Power",[
 ["Warm-up & ramp-up","Cat-cow, unloaded hip hinges, thoracic rotations and gentle hamstring mobility, then progressive deadlift warm-up sets.","Hip hinge: push hips backwards while keeping your spine controlled; this rehearses the deadlift pattern."],
 ["Main lift","Straight-bar deadlift — 3 × 3–5 working sets.","Rest 2–4 minutes. Heavy enough to preserve strength; avoid unnecessary junk volume."],
-["Power circuit","3–4 rounds: burpees 8–10 → broad jumps 5.","Rest about 90 seconds. Broad jump = jump forward explosively and land softly under control. Use the space you can safely find."],
+["Power circuit","3 rounds: burpees 8–10 → broad jumps 5.","Rest about 90 seconds. Broad jump = jump forward explosively and land softly under control. Use the space you can safely find."],
 ["Back hypertrophy","Chest-supported dumbbell row or dumbbell row — 3 × 8–12.","This adds horizontal pulling for back thickness."],
 ["Rear delts","Rear delt fly — 2–3 × 12–20.","Hinge forward lightly or use a bench; sweep arms out under control to target the rear shoulders."],
 ["Stretch","5 minutes: hamstrings, hip flexors, lats and thoracic rotations.","Comfortable stretching, not aggressive."]],[
-["Straight-bar deadlift",3,3,5],["Burpee",4,8,10],["Broad jump",4,5,5],["DB row",3,8,12],["Rear delt fly",3,12,20]],null],
+["Straight-bar deadlift",3,3,5],["Burpee",3,8,10],["Broad jump",3,5,5],["DB row",3,8,12],["Rear delt fly",3,12,20]],null],
 
 ["Thursday","Shoulders + Back + Functional Strength",[
 ["Shoulder strength","Standing dumbbell overhead press — 4 × 6–10.","Stand tall and press the dumbbells overhead under control. This is your main shoulder strength movement."],
-["Back strength","Pull-ups or weighted pull-ups — 4 × 6–10.","Use a load you can control through a full range."],
-["Shoulder/back circuit","3 rounds: dumbbell lateral raises 12–20 → dumbbell rows 10–12/side → rear delt fly 12–20.","Minimal equipment: dumbbells and ideally one bench/area. Rest about 60–90 seconds."],
-["Functional finisher","5 rounds: DB Romanian deadlift × 6–10 (test 40 kg per hand) → DB hang clean × 6 (26 kg per hand) → DB push press × 6 (26 kg per hand) → bodyweight squat × 10.","Use TWO pairs of dumbbells if available, and put them down for squats. Rest 60–75 sec between rounds. 40 kg RDL is a provisional test weight: warm up and prioritise hinge technique. Keep cleans and presses crisp."],
-["Stretch","5 minutes: shoulders, chest, lats and thoracic rotations.","Finish with mobility rather than skipping it."]],[
-["DB overhead press",4,6,10],["Pull-up / weighted pull-up",5,6,10],["DB lateral raise",4,10,15],["DB row (per side)",3,10,12],["Rear delt fly",3,12,20],["DB RDL (kg per hand)",5,6,10],["DB hang clean (kg per hand)",5,6,6],["DB push press (kg per hand)",5,6,6],["Bodyweight squat",5,10,15]],null],
+["Back strength","Pull-ups or weighted pull-ups — 4 × 6–10.","At your bodyweight, unweighted pull-ups are demanding. Use a controlled full range."],
+["Shoulder/back circuit","3 rounds: dumbbell lateral raises 12–20 → dumbbell rows 10–12/side.","Stay in one dumbbell area and rest 60–90 seconds after each round. Both exercises are 3 sets in the log."],
+["Functional finisher","5 rounds: DB Romanian deadlift × 6–10 (test 40 kg per hand) → DB hang clean × 6 (26 kg per hand) → DB push press × 6 (26 kg per hand) → bodyweight squat × 10.","All four exercises have 5 sets in the log. Use two pairs of dumbbells if available. Rest 60–75 sec between rounds. Warm up for 40 kg RDL and prioritise controlled technique."],
+["Rear delts (separate from circuit)","Reverse pec-deck / machine rear-delt fly — 3 × 12–20.","Do this as a standalone exercise, away from the dumbbell circuit. Machine stability makes it easier to focus on rear delts; dumbbells are also effective, so use whichever you can progress comfortably."] ,["Stretch","5 minutes: shoulders, chest, lats and thoracic rotations.","Finish with mobility rather than skipping it."]],[
+["DB overhead press",4,6,10],["Pull-up / weighted pull-up",4,6,10],["DB lateral raise",3,12,20],["DB row (per side)",3,10,12],["Rear delt fly",3,12,20],["DB RDL (kg per hand)",5,6,10],["DB hang clean (kg per hand)",5,6,6],["DB push press (kg per hand)",5,6,6],["Bodyweight squat",5,10,15]],null],
 
 ["Friday","Heavy Squat + Athletic Conditioning",[
 ["Warm-up & ramp-up","General mobility followed by progressive squat warm-up sets.","Your ramp-up should prepare you without exhausting you before working sets."],
