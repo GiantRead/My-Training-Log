@@ -1,4 +1,4 @@
-const CACHE="mtl-v9-feedback-run-tracking";
+const CACHE="mtl-v10-amrap-ergonomics";
 const ASSETS=["./","./index.html","./manifest.webmanifest"];
 
 self.addEventListener("install",event=>{
