@@ -444,7 +444,7 @@ function renderPlan(){
  const d=D[S.day];
  $("plan").innerHTML=d[2].map((x,i)=>{
   const source=stepSource(d[0],i),done=isStepDone(i),manual=source===null||source==="undefined";
-  const cta=manual?'<button type="button" class="planTick '+(done?'isDone':'')+'" onclick="togglePlan('+i+',this)" aria-label="'+escapeHtml(done?'Undo '+x[0]:'Mark '+x[0]+' done')+'">'+(done?'✓ Done':'✓ Done?')+'</button>':'<span class="stepAuto">'+(done?'✓ Logged':source==="run"?'Track below ↓':source==="amrap"?'Count below ↓':source==="notes"?'Notes below ↓':'Log below ↓')+'</span>';
+  const cta=manual?'<button type="button" class="planTick '+(done?'isDone':'')+'" onclick="togglePlan('+i+',this)" aria-label="'+escapeHtml(done?'Undo '+x[0]:'Mark '+x[0]+' done')+'">'+(done?'✓ Done':'Mark done')+'</button>':'<span class="stepAuto">'+(done?'✓ Logged':source==="run"?'Track below ↓':source==="amrap"?'Count below ↓':source==="notes"?'Notes below ↓':'Log below ↓')+'</span>';
   return '<div id="step-'+i+'" class="planGroup '+(done?'isDone':'')+'" data-type="'+planType(x[0])+'"><div class="planHead"><span class="stepNumber">'+(i+1)+'</span><div class="stepText"><div class="planTitle">'+escapeHtml(x[0])+'</div><span class="stepState" id="stepStatus-'+i+'">'+(done?'Completed':manual?'Tap when finished':'One check only')+'</span></div>'+cta+'</div><div class="stepPrescription">'+escapeHtml(x[1])+'</div><details class="stepTips"><summary>Technique / setup tips</summary><p class="muted">'+escapeHtml(x[2])+'</p></details></div>';
  }).join("");
  renderPlanCount();
@@ -458,7 +458,7 @@ function renderPlanCount(){
   const done=isStepDone(i),node=$("step-"+i),state=$("stepStatus-"+i),btn=node?.querySelector?.(".planTick"),auto=node?.querySelector?.(".stepAuto");
   node?.classList?.toggle("isDone",done);
   if(state)state.textContent=done?"Completed":stepSource(d[0],i)===null?"Tap when finished":"Track once below";
-  if(btn){btn.textContent=done?"✓ Done":"✓ Done?";btn.classList.toggle("isDone",done);btn.setAttribute?.("aria-label",done?"Undo "+x[0]:"Mark "+x[0]+" done")}
+  if(btn){btn.textContent=done?"✓ Done":"Mark done";btn.classList.toggle("isDone",done);btn.setAttribute?.("aria-label",done?"Undo "+x[0]:"Mark "+x[0]+" done")}
   if(auto)auto.textContent=done?"✓ Logged":stepSource(d[0],i)==="run"?"Track below ↓":stepSource(d[0],i)==="amrap"?"Count below ↓":"Log below ↓";
  });
  const btn=$("runDoneBtn"),runIndex=d[2].findIndex(x=>/Running|Run \/ walk|Long run/i.test(x[0]));
