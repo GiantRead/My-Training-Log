@@ -186,7 +186,7 @@ button:focus-visible,summary:focus-visible,input:focus-visible,textarea:focus-vi
 </div>
 <label class="runLabel">Route / terrain<input id="runTerrain" type="text" placeholder="Road, treadmill, hills, weather…" oninput="runMetric('terrain',this.value)"></label>
 <label class="runLabel">Recovery & soreness<textarea id="runRecovery" rows="3" placeholder="Calves, Achilles, knees, energy, how the final kilometres felt…" oninput="runMetric('recovery',this.value)"></textarea></label>
-<div id="runProgress"></div></div>
+<div id="runProgress"></div><button id="runDoneBtn" onclick="toggleRunDone()">Mark run / walk complete</button></div>
 <div class="artDivider artDividerOne" aria-hidden="true"><div class="artViewport artRibbon"><img class="dayArt" src="" alt="" loading="lazy"></div><span>TRAIN · ADAPT · LEVEL UP</span></div><div class="card logCard" id="gymLogCard"><div class="row"><h3>💪 Workout log</h3><span class="muted">Weight · reps · notes</span></div><p class="muted">Log your usual working weight and reps, then note any changes. Detailed sets are optional.</p><div id="sets"></div><button onclick="add()" id="addExerciseBtn">+ Add exercise</button><div id="addExercisePicker" class="addPicker" hidden><h3>Supplementary exercise</h3><p class="muted">Choose a suggested option for this day or add your own. Sets, reps and starting-load guidance will fill in automatically.</p><select id="addChoice" onchange="changeAddChoice()"></select><div id="addPreview" class="muted"></div><div id="customAdd" hidden><label>Exercise name<input id="customName" type="text" placeholder="Exercise name"></label><div class="runGrid"><label>Sets<input id="customSets" type="number" inputmode="numeric" min="1" max="20" value="3"></label><label>Minimum reps / time<input id="customMin" type="number" inputmode="numeric" min="1" value="8"></label><label>Maximum reps / time<input id="customMax" type="number" inputmode="numeric" min="1" value="12"></label><label>Starting-load note<input id="customLoad" type="text" placeholder="e.g. light / 12–18 kg"></label></div></div><div class="actionrow"><button class="primary" onclick="confirmAddExercise()">Add to workout</button><button onclick="closeAddExercise()">Cancel</button></div></div></div>
 
 
@@ -499,7 +499,7 @@ function confirmAddExercise(){
 }
 
 function sessionHasData(record){
- if(String(record?.notes||"").trim())return true;
+ if(String(record?.notes||"").trim()||String(record?.effort||"").trim()||Object.values(record?.planDone||{}).some(Boolean))return true;
  const r=record?.run||{};
  if(["distance","duration","target","effort","terrain","recovery"].some(k=>String(r[k]??"").trim()))return true;
  return (record?.ex||[]).some(e=>{
@@ -514,7 +514,7 @@ function saveSession(){
  if(!sessionHasData(w)){toast("Nothing logged yet — workout not saved");return;}
  if(day==="Weekend"&&(!(Number(w.run?.distance)>0)||!(Number(w.run?.duration)>0))&&!confirm("Distance or duration is missing. Save this long run anyway?"))return;
  if(!w.sessionId)w.sessionId=new Date().toISOString()+"-"+Math.random().toString(36).slice(2,8);
- const record={date:new Date().toISOString(),day,ex:structuredClone(w.ex),notes:w.notes,run:w.run?structuredClone(w.run):null,sessionId:w.sessionId};
+ const record={date:new Date().toISOString(),day,ex:structuredClone(w.ex),notes:w.notes,effort:w.effort||"",planDone:structuredClone(w.planDone||{}),run:w.run?structuredClone(w.run):null,sessionId:w.sessionId};
  const existing=S.history.findIndex(x=>x.sessionId===w.sessionId);
  if(existing>=0){record.date=S.history[existing].date;S.history[existing]=record}else{S.history.unshift(record)}
  save();$("historyCount").textContent="("+S.history.length+")";if(day==="Weekend")renderRun();toast(existing>=0?"Saved workout updated":"Workout saved to History");
@@ -527,32 +527,67 @@ function paceLabel(distance,duration){
  const sec=Math.round(mins*60/km);return Math.floor(sec/60)+":"+String(sec%60).padStart(2,"0")+"/km";
 }
 function runMetric(field,value){
- const w=S.work["Weekend"];if(!w)return;
- if(!w.run)w.run={distance:"",duration:"",target:"",effort:"",terrain:"",recovery:""};
- w.run[field]=value;save();
- if(field==="distance"||field==="duration")updateRunPace();
+ const w=S.work[D[S.day][0]];if(!w)return;
+ w.run ||= {};w.run[field]=value;save();
+ if(["distance","duration","walkDistance","walkDuration"].includes(field))updateRunPace();
 }
 function updateRunPace(){
- const r=S.work.Weekend?.run||{};
+ const r=S.work[D[S.day][0]]?.run||{};
  $("runPace").textContent=paceLabel(r.distance,r.duration);
+ const total=(Number(r.distance)||0)+(Number(r.walkDistance)||0);
+ $("runTotalDistance").textContent=total>0?Number(total.toFixed(2))+" km":"—";
 }
+let runTicker=null;
+function runElapsedMs(r){
+ return Math.max(0,Number(r.elapsedMs)||0)+(Number.isFinite(r.timerStartedAt)?Math.max(0,Date.now()-r.timerStartedAt):0);
+}
+function renderRunClock(){
+ if(!["Tuesday","Weekend"].includes(D[S.day][0]))return;
+ const r=S.work[D[S.day][0]]?.run||{},sec=Math.floor(runElapsedMs(r)/1000);
+ $("runElapsed").textContent=sec>=3600?Math.floor(sec/3600)+":"+fmt(sec%3600):fmt(sec);
+ if(Number.isFinite(r.timerStartedAt)){if(!runTicker)runTicker=setInterval(renderRunClock,1000)}
+ else{clearInterval(runTicker);runTicker=null}
+}
+function startRunTimer(){
+ const w=S.work[D[S.day][0]];if(!w||!["Tuesday","Weekend"].includes(D[S.day][0]))return;
+ w.run ||= {};if(!Number.isFinite(w.run.timerStartedAt)){w.run.timerStartedAt=Date.now();save()}renderRunClock();
+}
+function pauseRunTimer(){
+ const r=S.work[D[S.day][0]]?.run;if(!r)return;
+ if(Number.isFinite(r.timerStartedAt)){r.elapsedMs=runElapsedMs(r);r.timerStartedAt=null;save()}renderRunClock();
+}
+function resetRunTimer(){
+ const r=S.work[D[S.day][0]]?.run;if(!r)return;
+ if(runElapsedMs(r)>0&&!confirm("Reset the run timer? The recorded running duration remains unchanged."))return;
+ r.elapsedMs=0;r.timerStartedAt=null;save();renderRunClock();
+}
+function useRunTime(){
+ const r=S.work[D[S.day][0]]?.run;if(!r)return;
+ if(Number.isFinite(r.timerStartedAt))pauseRunTimer();
+ const minutes=Math.round(runElapsedMs(r)/6000)/10;
+ if(!minutes){toast("Start the run timer first");return}
+ r.duration=String(minutes);$("runDuration").value=r.duration;save();updateRunPace();toast("Running time recorded: "+minutes+" minutes");
+}
+document.addEventListener("visibilitychange",renderRunClock);
+window.addEventListener("pageshow",renderRunClock);
 function renderRun(){
- if(D[S.day][0]!=="Weekend")return;
- const w=S.work.Weekend,r=w.run||(w.run={distance:"",duration:"",target:"",effort:"",terrain:"",recovery:""});
- for(const [field,id] of Object.entries({distance:"runDistance",duration:"runDuration",target:"runTarget",effort:"runEffort",terrain:"runTerrain",recovery:"runRecovery"}))$(id).value=r[field]??"";
- updateRunPace();
- const runs=S.history.filter(x=>x.day==="Weekend"&&Number(x.run?.distance)>0).slice(0,6),max=Math.max(1,...runs.map(x=>Number(x.run.distance)));
- let panel="";
- if(runs.length){
- const last=runs[0].run;
- panel='<div class="runTrend"><b>Recent long runs</b><p class="muted">Saved history · track distance and pace before setting a weekly progression</p>'+runs.map(x=>{
- let date=new Date(x.date).toLocaleDateString(undefined,{day:"numeric",month:"short"});
- let width=Math.max(2,Math.round(Number(x.run.distance)/max*100));
- return '<div class="runTrendRow"><span>'+escapeHtml(date)+'</span><div class="runTrendBar"><div style="width:'+width+'%"></div></div><strong>'+escapeHtml(x.run.distance)+' km</strong></div>';
- }).join("")+'<p class="muted">Most recent: '+escapeHtml(last.distance)+' km at '+escapeHtml(paceLabel(last.distance,last.duration))+'. Increase weekly distance only when recovery and total running volume support it.</p></div>';
- }else panel='<p class="muted">Your first saved long run will start your distance and pace history.</p>';
- $("runProgress").innerHTML=panel;
- $("count").textContent=r.distance?escapeHtml(r.distance)+" km planned/logged":"Long-run session";
+ const day=D[S.day][0];
+ if(!["Tuesday","Weekend"].includes(day)){clearInterval(runTicker);runTicker=null;return}
+ const w=S.work[day],r=w.run||(w.run={distance:"",duration:"",walkDistance:"",walkDuration:"",target:"",effort:"",terrain:"",recovery:""});
+ $("runCardTitle").textContent=day==="Tuesday"?"🏃 Tuesday run / walk":"🏃 Weekend long run";
+ $("runCardSubtitle").textContent=day==="Tuesday"?"Running + walking":"Half-marathon preparation";
+ for(const [field,id] of Object.entries({distance:"runDistance",duration:"runDuration",walkDistance:"runWalkDistance",walkDuration:"runWalkDuration",target:"runTarget",effort:"runEffort",terrain:"runTerrain",recovery:"runRecovery"}))$(id).value=r[field]??"";
+ updateRunPace();renderRunClock();renderPlanCount();
+ const runs=S.history.filter(x=>x.day===day&&(Number(x.run?.distance)>0||Number(x.run?.walkDistance)>0)).slice(0,8);
+ if(!runs.length){$("runProgress").innerHTML='<p class="muted">Your first saved run starts the week-by-week comparison.</p>';return}
+ const max=Math.max(1,...runs.map(x=>(Number(x.run.distance)||0)+(Number(x.run.walkDistance)||0)));
+ $("runProgress").innerHTML='<div class="runTrend"><b>Recent '+(day==="Tuesday"?"Tuesday run / walk":"weekend long")+' sessions</b><p class="muted">Total distance includes walking; running pace does not.</p>'+
+ runs.map(x=>{
+  const date=new Date(x.date).toLocaleDateString(undefined,{day:"numeric",month:"short"});
+  const total=(Number(x.run.distance)||0)+(Number(x.run.walkDistance)||0);
+  const width=Math.max(2,Math.round(total/max*100));
+  return '<div class="runTrendRow"><span>'+escapeHtml(date)+'</span><div class="runTrendBar"><div style="width:'+width+'%"></div></div><strong>'+total.toFixed(1)+' km</strong></div><p class="muted">Run '+escapeHtml(x.run.distance||0)+' km · '+escapeHtml(paceLabel(x.run.distance,x.run.duration))+' · Walk '+escapeHtml(x.run.walkDistance||0)+' km</p>';
+ }).join("")+'</div>';
 }
 function formatExercise(e){
  const q=e.quick||{},entries=(e.data||[]).filter(s=>s.done||s.w!==""||s.r!==""||s.rir!=="");
@@ -635,10 +670,10 @@ function formatReport(record){
 async function copyReport(){
  let day=D[S.day][0],w=S.work[day];
  // Prioritise current work if it has any recorded sets; otherwise use latest saved session.
- let hasDraft=w.ex.some(e=>quickHasData(e)||e.data.some(s=>s.done||s.w!==""||s.r!==""||s.rir!==""))||!!$("notes").value.trim()|| (day==="Weekend"&&!!(w.run?.distance||w.run?.duration||w.run?.recovery));
- const draft={day,ex:w.ex,notes:$("notes").value,run:w.run};
+ let hasDraft=sessionHasData({...w,notes:$("notes").value});
+ const draft={day,ex:w.ex,notes:$("notes").value,effort:w.effort,planDone:w.planDone,run:w.run};
  const saved=w.sessionId?S.history.find(x=>x.sessionId===w.sessionId):null;
- const unchanged=saved&&JSON.stringify({ex:draft.ex,notes:draft.notes,run:draft.run||null})===JSON.stringify({ex:saved.ex,notes:saved.notes,run:saved.run||null});
+ const unchanged=saved&&JSON.stringify({ex:draft.ex,notes:draft.notes,effort:draft.effort,planDone:draft.planDone,run:draft.run||null})===JSON.stringify({ex:saved.ex,notes:saved.notes,effort:saved.effort,planDone:saved.planDone,run:saved.run||null});
  let record=unchanged?saved:(hasDraft?draft:(saved||S.history.find(x=>x.day===day)||draft));
  let report=formatReport(record);
  try{if(!navigator.clipboard?.writeText)throw Error("clipboard unavailable");await navigator.clipboard.writeText(report);toast("Workout report copied — paste into ChatGPT");$("reportFallback").style.display="none"}
