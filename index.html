@@ -172,7 +172,7 @@ button:focus-visible,summary:focus-visible,input:focus-visible,textarea:focus-vi
 
 
 
-<div class="card instructionsCard"><div class="row"><h3>Full workout instructions</h3><span class="muted" id="planProgress">Mark sections done as you go</span></div><div id="plan"></div></div>
+<div class="card instructionsCard"><div class="row"><h3>Full workout instructions</h3><span class="muted" id="planProgress">One check per task</span></div><div id="plan"></div></div>
 <div class="card" id="mainTimerCard"><div class="row"><b>60-minute workout clock</b><span class="muted" id="clockState">Ready · 60-minute countdown</span></div><div class="clock" id="clock" aria-live="off">60:00</div><div class="clockButtons"><button class="primary" onclick="start()">Start</button><button onclick="stop()">Pause</button><button onclick="reset()">Reset</button></div><p class="muted">Keeps accurate elapsed time while your screen is locked or you switch apps. When you return, it shows the correct remaining time, stopping at 00:00. iPhone web apps cannot reliably sound an alarm while fully closed.</p></div>
 <div class="card" id="intervalCard"></div>
 <div class="card runCard" id="runCard" style="display:none"><div class="row"><h3 id="runCardTitle">🏃 Run tracker</h3><span class="muted" id="runCardSubtitle">Distance · time · pace</span></div>
@@ -186,8 +186,8 @@ button:focus-visible,summary:focus-visible,input:focus-visible,textarea:focus-vi
 </div>
 <label class="runLabel">Route / terrain<input id="runTerrain" type="text" placeholder="Road, treadmill, hills, weather…" oninput="runMetric('terrain',this.value)"></label>
 <label class="runLabel">Recovery & soreness<textarea id="runRecovery" rows="3" placeholder="Calves, Achilles, knees, energy, how the final kilometres felt…" oninput="runMetric('recovery',this.value)"></textarea></label>
-<div id="runProgress"></div><button id="runDoneBtn" onclick="toggleRunDone()">Mark run / walk complete</button></div>
-<div class="artDivider artDividerOne" aria-hidden="true"><div class="artViewport artRibbon"><img class="dayArt" src="" alt="" loading="lazy"></div><span>TRAIN · ADAPT · LEVEL UP</span></div><div class="card logCard" id="gymLogCard"><div class="row"><h3>💪 Workout log</h3><span class="muted">Weight · reps · notes</span></div><p class="muted">Log your usual working weight and reps, then note any changes. Detailed sets are optional.</p><div id="sets"></div><button onclick="add()" id="addExerciseBtn">+ Add exercise</button><div id="addExercisePicker" class="addPicker" hidden><h3>Supplementary exercise</h3><p class="muted">Choose a suggested option for this day or add your own. Sets, reps and starting-load guidance will fill in automatically.</p><select id="addChoice" onchange="changeAddChoice()"></select><div id="addPreview" class="muted"></div><div id="customAdd" hidden><label>Exercise name<input id="customName" type="text" placeholder="Exercise name"></label><div class="runGrid"><label>Sets<input id="customSets" type="number" inputmode="numeric" min="1" max="20" value="3"></label><label>Minimum reps / time<input id="customMin" type="number" inputmode="numeric" min="1" value="8"></label><label>Maximum reps / time<input id="customMax" type="number" inputmode="numeric" min="1" value="12"></label><label>Starting-load note<input id="customLoad" type="text" placeholder="e.g. light / 12–18 kg"></label></div></div><div class="actionrow"><button class="primary" onclick="confirmAddExercise()">Add to workout</button><button onclick="closeAddExercise()">Cancel</button></div></div></div>
+<div id="runProgress"></div><button id="runDoneBtn" onclick="toggleRunDone()">✓ Mark run / walk complete</button><p class="muted">Track your distance and mark the run complete here. You do not need to tick it again in the instructions.</p></div>
+<div class="artDivider artDividerOne" aria-hidden="true"><div class="artViewport artRibbon"><img class="dayArt" src="" alt="" loading="lazy"></div><span>TRAIN · ADAPT · LEVEL UP</span></div><div class="card logCard" id="gymLogCard"><div class="row"><h3>💪 Workout log</h3><span class="muted">Weight · reps · notes</span></div><p class="muted">Record each exercise once here. Your steps above update automatically; no second tick required. Detailed sets stay optional.</p><div id="sets"></div><button onclick="add()" id="addExerciseBtn">+ Add exercise</button><div id="addExercisePicker" class="addPicker" hidden><h3>Supplementary exercise</h3><p class="muted">Choose a suggested option for this day or add your own. Sets, reps and starting-load guidance will fill in automatically.</p><select id="addChoice" onchange="changeAddChoice()"></select><div id="addPreview" class="muted"></div><div id="customAdd" hidden><label>Exercise name<input id="customName" type="text" placeholder="Exercise name"></label><div class="runGrid"><label>Sets<input id="customSets" type="number" inputmode="numeric" min="1" max="20" value="3"></label><label>Minimum reps / time<input id="customMin" type="number" inputmode="numeric" min="1" value="8"></label><label>Maximum reps / time<input id="customMax" type="number" inputmode="numeric" min="1" value="12"></label><label>Starting-load note<input id="customLoad" type="text" placeholder="e.g. light / 12–18 kg"></label></div></div><div class="actionrow"><button class="primary" onclick="confirmAddExercise()">Add to workout</button><button onclick="closeAddExercise()">Cancel</button></div></div></div>
 
 
 <div class="artDivider artDividerTwo" aria-hidden="true"><div class="artViewport artRibbon"><img class="dayArt" src="" alt="" loading="lazy"></div><span>PROGRESS IS EARNED</span></div><div class="card finishCard" id="finishWorkout"><div class="row"><h3>✓ Finish workout</h3><span class="muted">Feedback · save · share</span></div><h3>How hard was the workout?</h3><div class="runGrid"><label>Overall difficulty (1–10)<select id="sessionEffort" onchange="saveFeedback()"><option value="">Select difficulty</option><option value="1">1 — Very easy</option><option value="2">2 — Easy</option><option value="3">3 — Light</option><option value="4">4 — Some effort</option><option value="5">5 — Moderate</option><option value="6">6 — Challenging</option><option value="7">7 — Hard</option><option value="8">8 — Very hard</option><option value="9">9 — Extremely hard</option><option value="10">10 — Maximum effort</option></select></label></div><label class="runLabel"><b>Workout feedback / what should change next week?</b><textarea id="notes" rows="4" oninput="saveFeedback()" placeholder="e.g. Not hard enough; heart rate too low. Run interrupted by work. Increase circuit pace or add 10 minutes conditioning."></textarea></label><p class="muted">Feedback saves as you type, and is included in History and Copy report.</p><div class="actionrow"><button class="primary" onclick="saveSession()">Save workout</button><button onclick="copyReport()">Copy report</button></div><button class="newWorkoutBtn" onclick="newWorkout()">+ Start New Workout</button><p class="muted">Starting a new workout clears this day's active entries only. Your saved history and measurements stay intact.</p><p class="muted">Copy the report into ChatGPT for detailed coaching. Your records stay on this device unless you share them.</p><textarea id="reportFallback" rows="7" style="display:none;margin-top:8px" readonly aria-label="Workout report to copy"></textarea></div>
@@ -273,14 +273,14 @@ function freshExercise(spec){return {name:spec[0],n:spec[1],min:spec[2],max:spec
 function newWorkout(){
  const day=D[S.day][0],w=S.work[day];
  if(!confirm("Start a new "+day+" workout? Current entries and checkmarks for this day will be cleared. Saved workouts in History will stay intact. Save this workout first if you want to keep it."))return;
- S.work[day]={ex:D[S.day][3].map(freshExercise),notes:"",effort:"",planDone:{},run:{distance:"",duration:"",walkDistance:"",walkDuration:"",target:"",effort:"",terrain:"",recovery:""},sessionId:""};
+ S.work[day]={ex:D[S.day][3].map(freshExercise),notes:"",effort:"",planDone:{},amrapRounds:0,amrapNotes:"",run:{distance:"",duration:"",walkDistance:"",walkDuration:"",target:"",effort:"",terrain:"",recovery:""},sessionId:""};
  save();stop();reset();stopI();init();toast("New "+day+" session ready. Saved history preserved.");
 }
 function saveDayNotes(){if($("notes")&&S.work[D[S.day][0]])saveFeedback()}
 function init(){
  $("tabs").innerHTML=D.map((x,i)=>'<button class="'+(i===S.day?"active":"")+'" onclick="saveDayNotes();S.day='+i+';save();init();showScreen(&quot;workout&quot;)">'+(x[0]==="Weekend"?"Weekend":x[0].slice(0,3))+'</button>').join("");
  const d=D[S.day],w=S.work[d[0]]||(S.work[d[0]]={ex:[],notes:""});
- w.ex ||= [];w.planDone ||= {};w.effort ||= "";
+ w.ex ||= [];w.planDone ||= {};w.effort ||= "";w.amrapRounds ||= 0;
  for(const spec of d[3]){
   let existing=w.ex.find(x=>x.name===spec[0]);
   if(!existing){w.ex.push(freshExercise(spec));continue}
@@ -307,31 +307,65 @@ function init(){
  $("addExercisePicker").hidden=true;interval(d[4]);
  const b=S.body.at(-1)||{};$("weight").value=b.weight||"";$("waist").value=b.waist||"";$("protein").value=b.protein||190;$("goal").value=b.goal||"";
 }
+// One completion control per activity: exercises are checked in the log, run in its tracker,
+// and only warm-ups/recovery/unlogged circuits use manual plan checkboxes.
+function stepSource(day,index){
+ const maps={
+  Monday:[null,["Bench press"],["Weighted pull-up"],["Explosive push-up","DB push press","DB row (per side)"],["DB lateral raise"],["Battle ropes (40s work intervals)"],null],
+  Tuesday:[null,"run",["Hanging knee raise","Dead bug (per side)","Plank (seconds)"],null],
+  Wednesday:[null,["Straight-bar deadlift"],["Burpee","Broad jump"],["DB row"],["Rear delt fly"],null],
+  Thursday:[["DB overhead press"],["Pull-up / weighted pull-up"],["DB lateral raise","DB row (per side)"],["DB RDL (kg per hand)","DB hang clean (kg per hand)","DB push press (kg per hand)","Bodyweight squat"],["Rear delt fly"],null],
+  Friday:[null,["Squat"],"amrap",null],
+  Weekend:[null,"run",null,"notes"]
+ };
+ return maps[day]?.[index]??null;
+}
+function isExerciseComplete(e){return !!(e&&(e.quick?.done||(e.data||[]).some(x=>x.done)))}
+function isStepDone(index){
+ const day=D[S.day][0],w=S.work[day],section=D[S.day][2][index];
+ if(!section)return false;
+ const source=stepSource(day,index);
+ if(Array.isArray(source))return source.every(name=>isExerciseComplete(w.ex.find(e=>e.name===name)));
+ if(source==="amrap")return (Number(w.amrapRounds)||0)>0;
+ if(source==="run")return !!w.planDone?.[section[0]];
+ if(source==="notes")return !!(w.notes?.trim()||w.run?.recovery?.trim());
+ return !!w.planDone?.[section[0]];
+}
 function renderPlan(){
- const d=D[S.day],w=S.work[d[0]];w.planDone ||= {};
+ const d=D[S.day];
  $("plan").innerHTML=d[2].map((x,i)=>{
- const type=planType(x[0]),grp=planGroupName(d[0],i,x[0]),done=!!w.planDone[x[0]];
- return '<div class="planGroup '+(done?'isDone':'')+'" data-type="'+type+'"><div class="planHead"><div class="groupHeader"><span>'+escapeHtml(grp)+'</span></div><button type="button" class="planTick '+(done?'isDone':'')+'" onclick="togglePlan('+i+',this)">'+(done?'✓ Completed':'Mark done')+'</button></div><div class="move"><details open><summary>'+escapeHtml(x[0])+'</summary><p>'+escapeHtml(x[1])+'</p><p class="muted">'+escapeHtml(x[2])+'</p></details></div></div>';
+  const source=stepSource(d[0],i),done=isStepDone(i),manual=source===null||source==="undefined";
+  const cta=manual?'<button type="button" class="planTick '+(done?'isDone':'')+'" onclick="togglePlan('+i+',this)" aria-label="'+escapeHtml(done?'Undo '+x[0]:'Mark '+x[0]+' done')+'">'+(done?'✓ Done':'✓ Done?')+'</button>':'<span class="stepAuto">'+(done?'✓ Logged':source==="run"?'Track below ↓':source==="amrap"?'Count below ↓':source==="notes"?'Notes below ↓':'Log below ↓')+'</span>';
+  return '<div id="step-'+i+'" class="planGroup '+(done?'isDone':'')+'" data-type="'+planType(x[0])+'"><div class="planHead"><span class="stepNumber">'+(i+1)+'</span><div class="stepText"><div class="planTitle">'+escapeHtml(x[0])+'</div><span class="stepState" id="stepStatus-'+i+'">'+(done?'Completed':manual?'Tap when finished':'One check only')+'</span></div>'+cta+'</div><div class="stepPrescription">'+escapeHtml(x[1])+'</div><details class="stepTips"><summary>Technique / setup tips</summary><p class="muted">'+escapeHtml(x[2])+'</p></details></div>';
  }).join("");
  renderPlanCount();
 }
 function renderPlanCount(){
- const w=S.work[D[S.day][0]],d=D[S.day],completed=d[2].filter(x=>w.planDone?.[x[0]]).length;
- $("planProgress").textContent=completed+" / "+d[2].length+" sections complete";
- const btn=$("runDoneBtn");
- if(btn){const r=d[2].find(x=>/Running|Run \/ walk|Long run/i.test(x[0]));const done=r&&w.planDone?.[r[0]];btn.textContent=done?"✓ Run completed":"Mark run / walk complete";btn.classList.toggle("primary",!!done)}
+ const d=D[S.day],w=S.work[d[0]],completed=d[2].filter((_,i)=>isStepDone(i)).length;
+ $("planProgress").textContent=completed+" / "+d[2].length+" steps completed";
+ $("count").textContent=completed+" / "+d[2].length+" steps";
+ $("bar").style.width=d[2].length?(completed/d[2].length*100)+"%":"0%";
+ d[2].forEach((x,i)=>{
+  const done=isStepDone(i),node=$("step-"+i),state=$("stepStatus-"+i),btn=node?.querySelector?.(".planTick"),auto=node?.querySelector?.(".stepAuto");
+  node?.classList?.toggle("isDone",done);
+  if(state)state.textContent=done?"Completed":stepSource(d[0],i)===null?"Tap when finished":"Track once below";
+  if(btn){btn.textContent=done?"✓ Done":"✓ Done?";btn.classList.toggle("isDone",done);btn.setAttribute?.("aria-label",done?"Undo "+x[0]:"Mark "+x[0]+" done")}
+  if(auto)auto.textContent=done?"✓ Logged":stepSource(d[0],i)==="run"?"Track below ↓":stepSource(d[0],i)==="amrap"?"Count below ↓":"Log below ↓";
+ });
+ const btn=$("runDoneBtn"),runIndex=d[2].findIndex(x=>/Running|Run \/ walk|Long run/i.test(x[0]));
+ if(btn&&runIndex>=0){const done=isStepDone(runIndex);btn.textContent=done?"✓ Run complete":"✓ Mark run complete";btn.classList.toggle("primary",done)}
 }
-function togglePlan(i,btn){
- const d=D[S.day],w=S.work[d[0]],section=d[2][i];if(!section)return;
- w.planDone ||= {};w.planDone[section[0]]=!w.planDone[section[0]];save();
- if(btn){btn.textContent=w.planDone[section[0]]?"✓ Completed":"Mark done";btn.classList.toggle("isDone",!!w.planDone[section[0]]);btn.closest(".planGroup")?.classList.toggle("isDone",!!w.planDone[section[0]])}
- renderPlanCount();renderCompletion();
+function togglePlan(i){
+ const d=D[S.day],section=d[2][i],mode=stepSource(d[0],i);
+ if(!section||mode!==null)return;
+ const w=S.work[d[0]];w.planDone ||= {};w.planDone[section[0]]=!w.planDone[section[0]];save();renderPlanCount();
 }
 function toggleRunDone(){
- const idx=D[S.day][2].findIndex(x=>/Running|Run \/ walk|Long run/i.test(x[0]));
- if(idx<0)return;togglePlan(idx,null);
- const btn=$("plan")?.querySelectorAll?.(".planTick")?.[idx];if(btn){const done=!!S.work[D[S.day][0]].planDone[D[S.day][2][idx][0]];btn.textContent=done?"✓ Completed":"Mark done";btn.classList.toggle("isDone",done);btn.closest(".planGroup")?.classList.toggle("isDone",done)}
+ const day=D[S.day][0],d=D[S.day],i=d[2].findIndex(x=>/Running|Run \/ walk|Long run/i.test(x[0]));
+ if(i<0)return;
+ const w=S.work[day];w.planDone ||= {};w.planDone[d[2][i][0]]=!w.planDone[d[2][i][0]];save();renderPlanCount();
 }
+
 function saveFeedback(){
  const w=S.work[D[S.day][0]];w.notes=$("notes").value;w.effort=$("sessionEffort").value;save();
 }
@@ -422,13 +456,7 @@ function renderSets(){
  }).join("");
  renderCompletion();
 }
-function renderCompletion(){
- const day=D[S.day][0],d=D[S.day],w=S.work[day];
- const planned=d[3].map(s=>w.ex.find(e=>e.name===s[0])).filter(Boolean);
- const done=planned.filter(e=>quick(e).done||(e.data||[]).some(s=>s.done)).length;
- $("count").textContent=done+" / "+planned.length+" planned exercises";
- $("bar").style.width=(planned.length?done/planned.length*100:0)+"%";
-}
+function renderCompletion(){renderPlanCount()}
 
 function val(e,s,k,v){S.work[D[S.day][0]].ex[e].data[s][k]=v;save()}
 function toggle(e,s,button){
