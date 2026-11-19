@@ -498,9 +498,9 @@ function renderSets(){
  let previousGroup="",previousKind="";
  $("sets").innerHTML=items.map((item,itemIndex)=>{
   const ei=item.i,e=w.ex[ei],q=quick(e),logged=(e.data||[]).filter(x=>x.done).length;
-  const g=item.kind==="planned"?exerciseGroup(day,item.position):null;
+  const g=item.kind==="planned"&&!(day==="Friday"&&[1,2,3].includes(item.position))?exerciseGroup(day,item.position):null;
   const next=items[itemIndex+1];
-  const nextGroup=next?.kind==="planned"?exerciseGroup(day,next.position):null;
+  const nextGroup=next?.kind==="planned"&&!(day==="Friday"&&[1,2,3].includes(next.position))?exerciseGroup(day,next.position):null;
   let prefix="",suffix="";
   if(item.kind==="optional"&&previousKind!=="optional")prefix+='<div class="optionalHeader">➕ Optional extra exercises</div>';
   if(item.kind==="legacy"&&previousKind!=="legacy")prefix+='<details class="legacyGroup"><summary>Older / previous-plan exercises ('+legacy.length+') — tap to view</summary><p class="muted">These entries are not in the current plan. Previous records remain available; nothing has been deleted.</p>';
