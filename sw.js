@@ -1,4 +1,4 @@
-const CACHE="mtl-v10-amrap-ergonomics";
+const CACHE="mtl-v11-final-amrap-ux";
 const ASSETS=["./","./index.html","./manifest.webmanifest"];
 
 self.addEventListener("install",event=>{
