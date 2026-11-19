@@ -852,13 +852,41 @@ function resetI(){stopI();elapsed=0;renderI()}
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&icfg)renderI()});
 window.addEventListener("pageshow",()=>{if(icfg)renderI()});
 
+const VICTORY_PENDING_KEY="cutphase-victory-pending";
+function celebrate(kind){
+ if(document.visibilityState==="hidden"){localStorage[VICTORY_PENDING_KEY]=kind;return}
+ localStorage.removeItem(VICTORY_PENDING_KEY);
+ const isRound=kind==="interval"&&icfg?.[0]==="amrap";
+ const jokes=isRound?[
+ "The stopwatch tried to escape. You caught it. Your rounds are saved.",
+ "Quest cleared. The dungeon's HR department requests a rest break.",
+ "One more boss defeated. This one was wearing a barbell."
+ ]:[
+ "Your muscles have submitted a formal complaint. Well played.",
+ "Achievement unlocked: you showed up, again. The sofa is furious.",
+ "Even the villain said, 'Respectfully, that's enough cardio.'"
+ ];
+ const title=isRound?"AMRAP complete!":kind==="workout"?"60 minutes complete!":"Interval complete!";
+ $("victoryTitle").textContent=title;
+ $("victoryJoke").textContent=jokes[Math.floor(Math.random()*jokes.length)];
+ const modal=$("victoryOverlay");if(!modal)return;
+ modal.hidden=false;document.body.classList.add("victoryOpen");
+ $("victoryClose")?.focus?.();
+}
+function closeVictory(){$("victoryOverlay").hidden=true;document.body.classList.remove("victoryOpen")}
+function flushVictory(){if(document.visibilityState==="hidden")return;const pending=localStorage[VICTORY_PENDING_KEY];if(pending)celebrate(pending)}
+document.addEventListener("visibilitychange",flushVictory);
+window.addEventListener("pageshow",flushVictory);
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("victoryOverlay").hidden)closeVictory()});
 function persistClock(){localStorage[CLOCK_KEY]=JSON.stringify(workoutClock)}
 function remainingClockMs(now=Date.now()){
  if(!workoutClock.running)return Math.max(0,workoutClock.remainingMs);
  const remaining=Math.max(0,workoutClock.endAt-now);
  if(remaining===0){
+  const finishId=String(workoutClock.endAt);
   workoutClock.running=false;workoutClock.endAt=null;workoutClock.remainingMs=0;
   persistClock();clearInterval(tid);tid=null;
+  if(localStorage.cutphaseLastVictory!==finishId){localStorage.cutphaseLastVictory=finishId;setTimeout(()=>celebrate("workout"),0)}
  }
  return remaining;
 }
@@ -879,7 +907,7 @@ function stop(){
  clearInterval(tid);tid=null;show();
 }
 function reset(){clearInterval(tid);tid=null;workoutClock={remainingMs:WORKOUT_DURATION_MS,running:false,endAt:null};persistClock();show()}
-function resumeClockDisplay(){show();if(workoutClock.running&&!tid)armClock()}
+function resumeClockDisplay(){show();if(workoutClock.running&&!tid)armClock();flushVictory()}
 document.addEventListener("visibilitychange",resumeClockDisplay);
 window.addEventListener("pageshow",resumeClockDisplay);
 window.addEventListener("focus",resumeClockDisplay);
