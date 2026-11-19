@@ -1,4 +1,4 @@
-const CACHE="mtl-v12-clean-single-completion";
+const CACHE="mtl-v13-extra-set-rows";
 const ASSETS=["./","./index.html","./manifest.webmanifest"];
 
 self.addEventListener("install",event=>{
