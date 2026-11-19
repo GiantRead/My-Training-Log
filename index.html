@@ -203,6 +203,12 @@ button:focus-visible,summary:focus-visible,input:focus-visible,textarea:focus-vi
 <select id="historyFilter" onchange="renderHistory()"><option value="all">All days</option><option value="Monday">Monday</option><option value="Tuesday">Tuesday</option><option value="Wednesday">Wednesday</option><option value="Thursday">Thursday</option><option value="Friday">Friday</option><option value="Weekend">Weekend long runs</option></select>
 </div><div class="card" id="historyComparison"></div><div id="historyEntries"></div><textarea id="historyCopyFallback" readonly style="display:none" rows="7" aria-label="Saved workout report"></textarea></section>
 </main><div class="toast" id="toast"></div>
+<div class="victoryOverlay" id="victoryOverlay" role="dialog" aria-modal="true" aria-labelledby="victoryTitle" hidden>
+ <div class="victoryCard">
+  <div class="bonusViewport bonusVictory" aria-hidden="true"><img class="bonusArt" alt=""></div>
+  <div class="victoryContent"><div class="victoryEyebrow">⚡ QUEST COMPLETED</div><h2 id="victoryTitle">Timer complete!</h2><p id="victoryJoke">A tiny goblin has been defeated.</p><button class="primary" id="victoryClose" onclick="closeVictory()">Claim victory ✓</button></div>
+ </div>
+</div>
 <script>
 const D=[
 ["Monday","Heavy Bench + High-Output Upper Body",[
@@ -527,7 +533,7 @@ function confirmAddExercise(){
 }
 
 function sessionHasData(record){
- if(String(record?.notes||"").trim()||String(record?.effort||"").trim()||Object.values(record?.planDone||{}).some(Boolean))return true;
+ if(String(record?.notes||"").trim()||String(record?.effort||"").trim()||Number(record?.amrapRounds)>0||String(record?.amrapNotes||"").trim()||Object.values(record?.planDone||{}).some(Boolean))return true;
  const r=record?.run||{};
  if(["distance","duration","target","effort","terrain","recovery"].some(k=>String(r[k]??"").trim()))return true;
  return (record?.ex||[]).some(e=>{
@@ -542,7 +548,8 @@ function saveSession(){
  if(!sessionHasData(w)){toast("Nothing logged yet — workout not saved");return;}
  if(day==="Weekend"&&(!(Number(w.run?.distance)>0)||!(Number(w.run?.duration)>0))&&!confirm("Distance or duration is missing. Save this long run anyway?"))return;
  if(!w.sessionId)w.sessionId=new Date().toISOString()+"-"+Math.random().toString(36).slice(2,8);
- const record={date:new Date().toISOString(),day,ex:structuredClone(w.ex),notes:w.notes,effort:w.effort||"",planDone:structuredClone(w.planDone||{}),run:w.run?structuredClone(w.run):null,sessionId:w.sessionId};
+ const derivedPlan={};D[S.day][2].forEach((sec,i)=>{derivedPlan[sec[0]]=isStepDone(i)});
+ const record={date:new Date().toISOString(),day,ex:structuredClone(w.ex),notes:w.notes,effort:w.effort||"",planDone:derivedPlan,amrapRounds:Number(w.amrapRounds)||0,amrapNotes:w.amrapNotes||"",run:w.run?structuredClone(w.run):null,sessionId:w.sessionId};
  const existing=S.history.findIndex(x=>x.sessionId===w.sessionId);
  if(existing>=0){record.date=S.history[existing].date;S.history[existing]=record}else{S.history.unshift(record)}
  save();$("historyCount").textContent="("+S.history.length+")";if(["Tuesday","Weekend"].includes(day))renderRun();toast(existing>=0?"Saved workout updated":"Workout saved to History");
@@ -645,11 +652,11 @@ function renderHistory(){
  $("historyEntries").innerHTML=sessions.map((s)=>{
  const idx=S.history.indexOf(s),date=new Date(s.date).toLocaleString(undefined,{weekday:"short",day:"numeric",month:"short",year:"numeric",hour:"numeric",minute:"2-digit"});
  const empty=!sessionHasData(s);
- const summary=empty?"No workout data recorded":["Tuesday","Weekend"].includes(s.day)&&s.run?.distance?("Run "+s.run.distance+" km · Walk "+(s.run.walkDistance||"0")+" km · "+paceLabel(s.run.distance,s.run.duration)):(s.ex||[]).filter(x=>x.quick?.done||(x.data||[]).some(y=>y.done)).length+" exercises completed";
+ const summary=empty?"No workout data recorded":s.day==="Friday"&&Number(s.amrapRounds)>0?(s.amrapRounds+" counted AMRAP rounds"):["Tuesday","Weekend"].includes(s.day)&&s.run?.distance?("Run "+s.run.distance+" km · Walk "+(s.run.walkDistance||"0")+" km · "+paceLabel(s.run.distance,s.run.duration)):(s.ex||[]).filter(x=>x.quick?.done||(x.data||[]).some(y=>y.done)).length+" exercises completed";
  const detail=["Tuesday","Weekend"].includes(s.day)&&s.run?'<div class="historyExercise">Running: '+escapeHtml(s.run.distance||"—")+' km · '+escapeHtml(s.run.duration||"—")+' min · '+escapeHtml(paceLabel(s.run.distance,s.run.duration))+' · Walking: '+escapeHtml(s.run.walkDistance||"0")+' km · Effort: '+escapeHtml(s.run.effort||"—")+'/10</div><div class="muted">Terrain: '+escapeHtml(s.run.terrain||"—")+'<br>Recovery: '+escapeHtml(s.run.recovery||"—")+'</div>':"";
  return '<div class="card historyEntry '+(s.day==="Weekend"?"weekendEntry":"")+'"><details><summary>'+escapeHtml(s.day)+' · '+escapeHtml(date)+'</summary><div class="muted">'+escapeHtml(summary)+'</div><div class="historyDetail">'+detail+
  (s.ex||[]).filter(e=>e.quick?.done||e.quick?.comment||e.quick?.weight||e.quick?.reps||(e.data||[]).some(x=>x.done||x.w||x.r)).map(e=>'<div class="historyExercise"><b>'+escapeHtml(e.name)+'</b><div>'+escapeHtml(formatExercise(e))+'</div>'+(e.quick?.comment?'<div class="muted">Note: '+escapeHtml(e.quick.comment)+'</div>':"")+'</div>').join("")+
- (s.effort?'<p class="muted">Overall difficulty: '+escapeHtml(s.effort)+'/10</p>':"")+(s.notes?'<p class="muted">Workout feedback: '+escapeHtml(s.notes)+'</p>':"")+(s.planDone?'<p class="muted">Completed sections: '+escapeHtml(Object.keys(s.planDone).filter(k=>s.planDone[k]).join(', ')||'none')+'</p>':"")+
+ (s.amrapRounds?'<p class="muted">AMRAP: '+escapeHtml(s.amrapRounds)+' rounds · '+escapeHtml(s.amrapNotes||'standard sequence')+'</p>':"")+(s.effort?'<p class="muted">Overall difficulty: '+escapeHtml(s.effort)+'/10</p>':"")+(s.notes?'<p class="muted">Workout feedback: '+escapeHtml(s.notes)+'</p>':"")+(s.planDone?'<p class="muted">Completed sections: '+escapeHtml(Object.keys(s.planDone).filter(k=>s.planDone[k]).join(', ')||'none')+'</p>':"")+
  (empty?'<div class="emptyHistoryLabel">Empty saved workout</div>':"")+
  '<div class="historyActions"><button onclick="copyOldSession('+idx+')">Copy report</button><button class="deleteHistoryBtn" onclick="deleteOldSession('+idx+')">Delete workout</button></div></div></details></div>';
  }).join("");
@@ -682,6 +689,7 @@ function formatReport(record){
  }
  if(record.planDone)lines.push("Completed plan sections: "+(Object.keys(record.planDone).filter(k=>record.planDone[k]).join("; ")||"none marked"),"");
  if(record.effort)lines.push("Overall workout difficulty: "+record.effort+"/10","");
+ if(day==="Friday"&&(record.amrapRounds>0||record.amrapNotes)){lines.push("FRIDAY AMRAP","Complete circuit rounds counted: "+(record.amrapRounds||0),"Circuit modifications: "+(record.amrapNotes||"none recorded"),"");}
  for(const e of record.ex||[]){
   const unit=e.unit==="minutes"?"minutes":"reps";
   lines.push(e.name+" | target "+e.n+" sets × "+e.min+"–"+e.max+" "+unit+(e.optional?" [optional extra]":e.legacy?" [older programme]":""));
@@ -708,31 +716,78 @@ async function copyReport(){
  let day=D[S.day][0],w=S.work[day];
  // Prioritise current work if it has any recorded sets; otherwise use latest saved session.
  let hasDraft=sessionHasData({...w,notes:$("notes").value});
- const draft={day,ex:w.ex,notes:$("notes").value,effort:w.effort,planDone:w.planDone,run:w.run};
+ const draft={day,ex:w.ex,notes:$("notes").value,effort:w.effort,planDone:w.planDone,amrapRounds:w.amrapRounds||0,amrapNotes:w.amrapNotes||"",run:w.run};
  const saved=w.sessionId?S.history.find(x=>x.sessionId===w.sessionId):null;
- const unchanged=saved&&JSON.stringify({ex:draft.ex,notes:draft.notes,effort:draft.effort,planDone:draft.planDone,run:draft.run||null})===JSON.stringify({ex:saved.ex,notes:saved.notes,effort:saved.effort,planDone:saved.planDone,run:saved.run||null});
+ const unchanged=saved&&JSON.stringify({ex:draft.ex,notes:draft.notes,effort:draft.effort,planDone:draft.planDone,amrapRounds:draft.amrapRounds,amrapNotes:draft.amrapNotes,run:draft.run||null})===JSON.stringify({ex:saved.ex,notes:saved.notes,effort:saved.effort,planDone:saved.planDone,amrapRounds:saved.amrapRounds,amrapNotes:saved.amrapNotes,run:saved.run||null});
  let record=unchanged?saved:(hasDraft?draft:(saved||S.history.find(x=>x.day===day)||draft));
  let report=formatReport(record);
  try{if(!navigator.clipboard?.writeText)throw Error("clipboard unavailable");await navigator.clipboard.writeText(report);toast("Workout report copied — paste into ChatGPT");$("reportFallback").style.display="none"}
  catch(err){let e=$("reportFallback");e.value=report;e.style.display="block";e.focus();e.select();toast("Select and copy the report below")}
 }
-function interval(c){stopI();icfg=c;ir=0;elapsed=0;intervalStartAt=null;if(!c){intervalCard.style.display="none";return}intervalCard.style.display="block";intervalCard.innerHTML='<b>'+(c[0]==="rope"?"Battle ropes · 40 sec work / 20 sec rest":"Workout interval timer")+'</b><div class="clock intervalClock" id="iclock">'+fmt(c[1]*60)+'</div><div class="status" id="istatus">READY</div><div class="muted" id="idesc">'+(c[0]==="rope"?"8 rounds — one battle-ropes station (or mountain climbers).":c[0]==="amrap"?"Complete as many quality rounds as possible.":"")+'</div><br><div class="clockButtons"><button class="primary" onclick="startI()">Start</button><button onclick="stopI()">Pause</button><button onclick="resetI()">Reset</button></div>'}
+function interval(c){
+ stopI();icfg=c;ir=0;elapsed=0;intervalStartAt=null;
+ if(!c){$("intervalCard").style.display="none";return}
+ const amrap=c[0]==="amrap";
+ $("intervalCard").style.display="block";
+ const recipe=amrap?
+  '<div class="circuitRecipe" aria-label="Friday AMRAP circuit. Complete all three exercises for one round."><div class="recipeHeading">ONE FULL ROUND · IN THIS ORDER</div>'+
+  '<div class="recipeStep"><span class="recipeIndex">1</span><b>Barbell push press</b><strong>6 reps</strong></div>'+
+  '<div class="recipeStep"><span class="recipeIndex">2</span><b>Barbell row</b><strong>8 reps</strong></div>'+
+  '<div class="recipeStep"><span class="recipeIndex">3</span><b>Burpees</b><strong>6 reps</strong></div>'+
+  '<div class="recipeFoot">Finish all three → tap the big +1 button ONCE → repeat until the 10 minutes ends.</div></div>':"";
+ const clock='<div class="amrapClockPane"><div class="timerEyebrow">REMAINING TIME</div><div class="clock intervalClock" id="iclock">'+fmt(c[1]*60)+'</div><div class="status" id="istatus">READY</div></div>';
+ const round=amrap?
+ '<div class="roundPane"><button type="button" class="roundTap" id="roundTap" onclick="addAmrapRound()" aria-label="Add one completed AMRAP circuit round"><span>+1 ROUND</span><strong id="roundCount">0</strong><small>Tap after 3 movements</small></button></div>':"";
+ const controls='<div class="clockButtons intervalControls"><button class="primary" onclick="startI()">Start</button><button onclick="stopI()">Pause</button><button onclick="resetI()">Reset time</button></div>';
+ const notes=amrap?'<div class="roundAux"><button onclick="undoAmrapRound()" id="undoRoundBtn">↶ Undo one round</button><button onclick="clearAmrapRounds()">Clear tally</button></div><label class="runLabel" for="amrapNotes"><b>Did you change the sequence?</b><input id="amrapNotes" type="text" placeholder="e.g. rows × 6 / skipped burpees" oninput="saveAmrapNotes(this.value)"></label><p class="muted">Round tally is saved with this workout. Resetting the timer does not clear rounds.</p>':"";
+ $("intervalCard").innerHTML='<h3>'+(amrap?"10-MINUTE AMRAP · COUNT YOUR ROUNDS":c[0]==="rope"?"Battle ropes · 40 sec work / 20 sec rest":"Workout timer")+'</h3>'+recipe+'<div class="amrapTimerGrid">'+clock+round+'</div><div class="muted" id="idesc">'+(c[0]==="rope"?"8 rounds: 40 seconds hard, 20 seconds rest.":amrap?"Count complete rounds, not individual exercises.":"")+'</div>'+controls+notes;
+ if(amrap){$("amrapNotes").value=S.work[D[S.day][0]].amrapNotes||"";renderRoundCounter()}
+ renderI();
+}
+function addAmrapRound(){
+ if(icfg?.[0]!=="amrap")return;
+ const w=S.work[D[S.day][0]],current=Math.max(0,Number(w.amrapRounds)||0);
+ w.amrapRounds=current+1;save();renderRoundCounter();renderPlanCount();
+ const button=$("roundTap");button?.classList.add("roundPop");setTimeout(()=>button?.classList.remove("roundPop"),180);
+ navigator.vibrate?.(18);
+}
+function undoAmrapRound(){
+ const w=S.work[D[S.day][0]];if(!w)return;
+ w.amrapRounds=Math.max(0,(Number(w.amrapRounds)||0)-1);save();renderRoundCounter();renderPlanCount();
+}
+function clearAmrapRounds(){
+ const w=S.work[D[S.day][0]];if(!w?.amrapRounds)return;
+ if(!confirm("Clear the AMRAP tally for this current workout? Your saved history is unchanged."))return;
+ w.amrapRounds=0;save();renderRoundCounter();renderPlanCount();
+}
+function saveAmrapNotes(v){const w=S.work[D[S.day][0]];if(!w)return;w.amrapNotes=v;save()}
+function renderRoundCounter(){
+ const count=Math.max(0,Number(S.work[D[S.day][0]]?.amrapRounds)||0);
+ if($("roundCount"))$("roundCount").textContent=count;
+ if($("undoRoundBtn"))$("undoRoundBtn").disabled=count===0;
+}
 let intervalStartAt=null;
 function renderI(){
  if(!icfg)return;
- if(intervalStartAt!==null){elapsed=Math.min(icfg[1]*60,Math.max(0,Math.floor((Date.now()-intervalStartAt)/1000)))}
+ if(intervalStartAt!==null)elapsed=Math.min(icfg[1]*60,Math.max(0,Math.floor((Date.now()-intervalStartAt)/1000)));
  const remain=Math.max(0,icfg[1]*60-elapsed);
  $("iclock").textContent=fmt(remain);
- if(remain===0){if(intervalStartAt!==null){stopI();toast("Interval complete")} $("istatus").textContent="COMPLETE";return}
+ if(remain===0){
+  if(intervalStartAt!==null){stopI();toast("Interval complete");celebrate("interval");renderPlanCount()}
+  $("istatus").textContent="COMPLETE";return;
+ }
  if(intervalStartAt===null){$("istatus").textContent=elapsed?"PAUSED":"READY";return}
  if(icfg[0]==="rope"){
   const inMinute=elapsed%60,round=Math.floor(elapsed/60)+1;
   $("istatus").textContent="Round "+round+" / "+icfg[1]+" · "+(inMinute<40?"WORK · "+(40-inMinute)+"s":"REST · "+(60-inMinute)+"s");
  }else $("istatus").textContent=icfg[0]==="amrap"?"AMRAP — GO":"RUNNING";
 }
-function startI(){if(iv||!icfg)return;if(elapsed>=icfg[1]*60){toast("Press Reset to restart intervals");return}intervalStartAt=Date.now()-elapsed*1000;renderI();iv=setInterval(renderI,250)}
+function startI(){if(iv||!icfg)return;if(elapsed>=icfg[1]*60){toast("Press Reset time to restart");return}intervalStartAt=Date.now()-elapsed*1000;renderI();iv=setInterval(renderI,250)}
 function stopI(){if(intervalStartAt!==null&&icfg)elapsed=Math.min(icfg[1]*60,Math.floor((Date.now()-intervalStartAt)/1000));intervalStartAt=null;clearInterval(iv);iv=null}
 function resetI(){stopI();elapsed=0;renderI()}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&icfg)renderI()});
+window.addEventListener("pageshow",()=>{if(icfg)renderI()});
+
 function persistClock(){localStorage[CLOCK_KEY]=JSON.stringify(workoutClock)}
 function remainingClockMs(now=Date.now()){
  if(!workoutClock.running)return Math.max(0,workoutClock.remainingMs);
