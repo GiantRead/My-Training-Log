@@ -261,14 +261,14 @@ body.victoryOpen{overflow:hidden}
 /* A single sprite contains six distinct clock scenes (left) and six finish scenes (right).
    Existing hero banners stay unchanged. No labels or controls overlay this art. */
 .sagaDivider{
-  position:relative;display:block;width:100%;aspect-ratio:5 / 3;
+  position:relative;display:block;width:100%;aspect-ratio:2 / 1;
   margin:14px 0;border-radius:15px;overflow:hidden;
   background-color:#132746;
-  background-image:url("./assets/cutphase-saga-12-v15.webp");
+  background-image:url("./assets/cutphase-saga-12-v17.webp");
   background-repeat:no-repeat;
-  /* Each source scene is 10:3. Doubling panel height means zooming 2× and cropping its sides, never stretching characters. */
-  background-size:400% 600%;
-  background-position:16.6667% 0;
+  /* Source scenes are now 2:1, with each original illustration fully visible in a taller atmospheric frame. */
+  background-size:200% 600%;
+  background-position:0% 0;
   box-shadow:0 5px 17px #132b4a27;
 }
 .sagaDivider--clock{border-bottom:3px solid var(--dayAccent,#63bee9)}
@@ -441,8 +441,8 @@ function updateSagaArt(){
  // Background sprite grid: 2 columns x 6 days, each cell 10:3 aspect ratio.
  const y=(S.day*20)+"%";
  const clock=$("clockScene"),finish=$("finishScene");
- if(clock)clock.style.backgroundPosition="16.6667% "+y;
- if(finish)finish.style.backgroundPosition="83.3333% "+y;
+ if(clock)clock.style.backgroundPosition="0% "+y;
+ if(finish)finish.style.backgroundPosition="100% "+y;
 }
 function init(){
  $("tabs").innerHTML=D.map((x,i)=>'<button class="'+(i===S.day?"active":"")+'" onclick="saveDayNotes();S.day='+i+';save();init();showScreen(&quot;workout&quot;)">'+(x[0]==="Weekend"?"Weekend":x[0].slice(0,3))+'</button>').join("");

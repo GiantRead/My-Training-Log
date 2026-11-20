@@ -1,5 +1,5 @@
-const CACHE="mtl-v16-tall-anime-scenes";
-const ASSETS=["./","./index.html","./manifest.webmanifest","./assets/cutphase-saga-12-v15.webp"];
+const CACHE="mtl-v17-uncropped-anime-scenes";
+const ASSETS=["./","./index.html","./manifest.webmanifest","./assets/cutphase-saga-12-v17.webp"];
 
 self.addEventListener("install",event=>{
   self.skipWaiting();
