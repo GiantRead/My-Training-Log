@@ -24,5 +24,9 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
+      # GitHub occasionally takes a few seconds to index newly uploaded
+      # artifacts; deploy-pages otherwise reports "No artifacts found".
+      - name: Allow Pages artifact to become available
+        run: sleep 15
       - id: deployment
         uses: actions/deploy-pages@v4
