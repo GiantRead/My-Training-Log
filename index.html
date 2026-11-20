@@ -258,6 +258,21 @@ body.victoryOpen{overflow:hidden}
 .victoryEyebrow{margin-bottom:7px}
 .victoryContent:before{content:"✦  ✧  ✦";display:block;color:#c99334;letter-spacing:.8em;font-size:27px;margin-bottom:15px}
 @media(max-width:400px){.planGroup{padding:10px}.exerciseGroup{padding:7px}.exerciseCard{padding:10px}.exerciseCard .quickGrid{gap:7px}}
+/* A single sprite contains six distinct clock scenes (left) and six finish scenes (right).
+   Existing hero banners stay unchanged. No labels or controls overlay this art. */
+.sagaDivider{
+  position:relative;display:block;width:100%;aspect-ratio:10 / 3;
+  margin:14px 0;border-radius:15px;overflow:hidden;
+  background-color:#132746;
+  background-image:url("./assets/cutphase-saga-12-v15.webp");
+  background-repeat:no-repeat;
+  background-size:200% 600%;
+  background-position:0 0;
+  box-shadow:0 5px 17px #132b4a27;
+}
+.sagaDivider--clock{border-bottom:3px solid var(--dayAccent,#63bee9)}
+.sagaDivider--finish{margin-top:18px;margin-bottom:12px;border-bottom:3px solid #e5b65f}
+@media(max-width:420px){.sagaDivider{margin:11px 0;border-radius:12px}.sagaDivider--finish{margin-top:15px;margin-bottom:10px}}
 </style></head><body>
 <header><div><b>Cut Phase</b><div class="muted">“Fall in love with the grind.”</div></div><div class="tabs" id="tabs"></div></header>
 <main>
@@ -269,6 +284,7 @@ body.victoryOpen{overflow:hidden}
 
 <div class="card instructionsCard"><div class="row"><h3>Workout plan</h3><span class="muted" id="planProgress" hidden></span></div><div id="plan"></div></div>
 <div class="card" id="mainTimerCard"><div class="row"><b>60-minute workout clock</b><span class="muted" id="clockState">Ready · 60-minute countdown</span></div><div class="clock" id="clock" aria-live="off">60:00</div><div class="clockButtons"><button class="primary" onclick="start()">Start</button><button onclick="stop()">Pause</button><button onclick="reset()">Reset</button></div><details class="timerHelp"><summary>About the countdown</summary><p class="muted">Elapsed time stays accurate across screen locks when reopened. iPhone web apps cannot reliably sound a background alarm.</p></details></div>
+<div class="sagaDivider sagaDivider--clock" id="clockScene" aria-hidden="true"></div>
 <div class="card" id="intervalCard"></div>
 <div class="card runCard" id="runCard" style="display:none"><div class="row"><h3 id="runCardTitle">🏃 Run tracker</h3><span class="muted" id="runCardSubtitle">Distance · time · pace</span></div>
 <p class="muted">Record running and walking separately. Tap “Use elapsed time” after your run.</p><div class="runStopwatch"><div id="runElapsed" class="runTime">00:00</div><div class="clockButtons"><button onclick="startRunTimer()" class="primary">Start</button><button onclick="pauseRunTimer()">Pause</button><button onclick="resetRunTimer()">Reset</button></div><button class="useTimeBtn" onclick="useRunTime()">Use elapsed time as running duration</button></div>
@@ -285,6 +301,7 @@ body.victoryOpen{overflow:hidden}
 <div class="card logCard" id="gymLogCard"><div class="row"><h3>💪 Workout log</h3><span class="muted">Weight · reps · notes</span></div><p class="muted"></p><div id="sets"></div><button onclick="add()" id="addExerciseBtn">+ Add exercise</button><div id="addExercisePicker" class="addPicker" hidden><h3>Supplementary exercise</h3><p class="muted">Choose a suggested option for this day or add your own. Sets, reps and starting-load guidance will fill in automatically.</p><select id="addChoice" onchange="changeAddChoice()"></select><div id="addPreview" class="muted"></div><div id="customAdd" hidden><label>Exercise name<input id="customName" type="text" placeholder="Exercise name"></label><div class="runGrid"><label>Sets<input id="customSets" type="number" inputmode="numeric" min="1" max="20" value="3"></label><label>Minimum reps / time<input id="customMin" type="number" inputmode="numeric" min="1" value="8"></label><label>Maximum reps / time<input id="customMax" type="number" inputmode="numeric" min="1" value="12"></label><label>Starting-load note<input id="customLoad" type="text" placeholder="e.g. light / 12–18 kg"></label></div></div><div class="actionrow"><button class="primary" onclick="confirmAddExercise()">Add to workout</button><button onclick="closeAddExercise()">Cancel</button></div></div></div>
 
 
+<div class="sagaDivider sagaDivider--finish" id="finishScene" aria-hidden="true"></div>
 <div class="card finishCard" id="finishWorkout"><div class="row"><h3>✓ Finish workout</h3><span class="muted">Feedback · save · share</span></div><h3>How hard was the workout?</h3><div class="runGrid"><label>Overall difficulty (1–10)<select id="sessionEffort" onchange="saveFeedback()"><option value="">Select difficulty</option><option value="1">1 — Very easy</option><option value="2">2 — Easy</option><option value="3">3 — Light</option><option value="4">4 — Some effort</option><option value="5">5 — Moderate</option><option value="6">6 — Challenging</option><option value="7">7 — Hard</option><option value="8">8 — Very hard</option><option value="9">9 — Extremely hard</option><option value="10">10 — Maximum effort</option></select></label></div><label class="runLabel"><b>Workout feedback / what should change next week?</b><textarea id="notes" rows="4" oninput="saveFeedback()" placeholder="e.g. Not hard enough; heart rate too low. Run interrupted by work. Increase circuit pace or add 10 minutes conditioning."></textarea></label><div class="actionrow"><button class="primary" onclick="saveSession()">Save workout</button><button onclick="copyReport()">Copy report</button></div><button class="newWorkoutBtn" onclick="newWorkout()">+ Start New Workout</button><p class="muted">New workout clears this day’s active entries, not saved History.</p><textarea id="reportFallback" rows="7" style="display:none;margin-top:8px" readonly aria-label="Workout report to copy"></textarea></div>
 
 
@@ -419,6 +436,13 @@ function newWorkout(){
  save();stop();reset();stopI();init();toast("New "+day+" session ready. Saved history preserved.");
 }
 function saveDayNotes(){if($("notes")&&S.work[D[S.day][0]])saveFeedback()}
+function updateSagaArt(){
+ // Background sprite grid: 2 columns x 6 days, each cell 10:3 aspect ratio.
+ const y=(S.day*20)+"%";
+ const clock=$("clockScene"),finish=$("finishScene");
+ if(clock)clock.style.backgroundPosition="0% "+y;
+ if(finish)finish.style.backgroundPosition="100% "+y;
+}
 function init(){
  $("tabs").innerHTML=D.map((x,i)=>'<button class="'+(i===S.day?"active":"")+'" onclick="saveDayNotes();S.day='+i+';save();init();showScreen(&quot;workout&quot;)">'+(x[0]==="Weekend"?"Weekend":x[0].slice(0,3))+'</button>').join("");
  const d=D[S.day],w=S.work[d[0]]||(S.work[d[0]]={ex:[],notes:""});
@@ -446,6 +470,7 @@ function init(){
  $("overviewBanner").dataset.day=d[0];
  document.documentElement.style.setProperty("--dayAccent",["#4cbcf2","#ef8c4a","#65cfc6","#24b987","#f3b064","#68d5b4"][S.day]);
  document.querySelectorAll(".dayArt").forEach((img)=>{if(img.src!==DAILY_ART)img.src=DAILY_ART;img.style.transform="translateY(calc("+(-S.day*100/6)+"% + "+(img.closest(".artRibbon")?"-34px":"0px")+"))"});
+ updateSagaArt();
  renderOverview();if(d[0]!=="Weekend")renderSets();else $("sets").innerHTML="";
  if(!RUN_DAYS.includes(d[0])&&runTicker){clearInterval(runTicker);runTicker=null;}
  $("gymLogCard").style.display=d[0]==="Weekend"?"none":"block";
