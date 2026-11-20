@@ -1,4 +1,4 @@
-const CACHE="mtl-v15-twelve-anime-scenes";
+const CACHE="mtl-v16-tall-anime-scenes";
 const ASSETS=["./","./index.html","./manifest.webmanifest","./assets/cutphase-saga-12-v15.webp"];
 
 self.addEventListener("install",event=>{
