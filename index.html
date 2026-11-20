@@ -410,7 +410,7 @@ function showScreen(screen){
  if(showingHistory){$("historyFilter").value=D[S.day][0];renderHistory()}
  window.scrollTo?.(0,0);
 }
-function freshExercise(spec){return {name:spec[0],n:spec[1],min:spec[2],max:spec[3],data:Array.from({length:spec[1]},()=>({w:"",r:"",rir:"",done:false}))}}
+function freshExercise(spec){return {name:spec[0],n:spec[1],min:spec[2],max:spec[3],loadHint:spec[4]||"",unit:spec[5]||"reps",data:Array.from({length:spec[1]},()=>({w:"",r:"",rir:"",done:false}))}}
 function newWorkout(){
  const day=D[S.day][0],w=S.work[day];
  if(!confirm("Start a new "+day+" workout? Current entries and checkmarks for this day will be cleared. Saved workouts in History will stay intact. Save this workout first if you want to keep it."))return;
@@ -425,7 +425,7 @@ function init(){
  for(const spec of d[3]){
   let existing=w.ex.find(x=>x.name===spec[0]);
   if(!existing){w.ex.push(freshExercise(spec));continue}
-  existing.min=spec[2];existing.max=spec[3];existing.n=spec[1];existing.data ||= [];
+  existing.min=spec[2];existing.max=spec[3];existing.n=spec[1];existing.loadHint=spec[4]||"";existing.unit=spec[5]||"reps";existing.optional=false;existing.legacy=false;existing.data ||= [];
   while(existing.data.length<spec[1])existing.data.push({w:"",r:"",rir:"",done:false});
   // Keep user-added sets beyond the prescribed count. They remain editable in this session.
   // Do not move or truncate them when switching tabs or returning to the PWA.
@@ -457,12 +457,12 @@ function init(){
 // and only warm-ups/recovery/unlogged circuits use manual plan checkboxes.
 function stepSource(day,index){
  const maps={
-  Monday:[null,["Bench press"],["Weighted pull-up"],["Explosive push-up","DB push press","DB row (per side)"],["DB lateral raise"],["Battle ropes (40s work intervals)"],null],
-  Tuesday:[null,"run",["Hanging knee raise","Dead bug (per side)","Plank (seconds)"],null],
-  Wednesday:[null,["Straight-bar deadlift"],["Burpee","Broad jump"],["DB row"],["Rear delt fly"],null],
-  Thursday:[["DB overhead press"],["Pull-up / weighted pull-up"],["DB lateral raise","DB row (per side)"],["DB RDL (kg per hand)","DB hang clean (kg per hand)","DB push press (kg per hand)","Bodyweight squat"],["Rear delt fly"],null],
-  Friday:[null,["Squat"],"amrap",null],
-  Weekend:[null,"run",null,"notes"]
+ Monday:[["Explosive push-up"],["Bench press"],["Weighted pull-up"],["Incline DB press","DB row (per side)","DB lateral raise"],["Battle ropes (40s work intervals)"],null],
+ Tuesday:["run",["Functional circuit"],["Cable crunch","Hanging knee raise"],null],
+ Wednesday:[["Vertical jump"],["Straight-bar deadlift"],["DB row"],["Rear delt fly","Cable rope bicep curls"],["Leg curl (machine)"]],
+ Thursday:[null,["DB overhead press"],["Pull-up / weighted pull-up"],["DB lateral raise","DB row (per side)"],"run",null],
+ Friday:[null,["Angled leg press"],"amrap",["Bulgarian split squat"],["Standing calf raise","Reverse crunch"],null],
+ Weekend:[null,null,"run",null]
  };
  return maps[day]?.[index]??null;
 }
@@ -494,11 +494,11 @@ function renderPlanCount(){
  const planned=d[3].filter(spec=>!(day==="Friday"&&amrapNames.includes(spec[0])));
  let completed=planned.filter(spec=>isExerciseComplete(w.ex.find(e=>e.name===spec[0]))).length;
  const rounds=Math.max(0,Number(w.amrapRounds)||0);
- const run=day==="Tuesday"||day==="Weekend";
+ const run=["Tuesday","Thursday","Weekend"].includes(day);
  const runDone=run&&d[2].some(x=>/Running|Run \/ walk|Long run/i.test(x[0])&&w.planDone?.[x[0]]);
  let extra=0,target=planned.length,label=completed+" / "+planned.length+" exercises";
  if(day==="Friday"){target++;if(rounds>0)extra++;label=completed+" / "+planned.length+" lifts · "+rounds+" rounds"}
- if(day==="Tuesday"){target++;if(runDone)extra++;label=completed+" / "+planned.length+" exercises · "+(runDone?"run done":"run pending")}
+ if(day==="Tuesday"||day==="Thursday"){target++;if(runDone)extra++;label=completed+" / "+planned.length+" exercises · "+(runDone?"run done":"run pending")}
  if(day==="Weekend"){completed=0;target=1;extra=runDone?1:0;label=runDone?"Run complete":"Long run"}
  $("count").textContent=label;
  $("bar").style.width=(target?(completed+extra)/target*100:0)+"%";
