@@ -258,36 +258,49 @@ body.victoryOpen{overflow:hidden}
 .victoryEyebrow{margin-bottom:7px}
 .victoryContent:before{content:"✦  ✧  ✦";display:block;color:#c99334;letter-spacing:.8em;font-size:27px;margin-bottom:15px}
 @media(max-width:400px){.planGroup{padding:10px}.exerciseGroup{padding:7px}.exerciseCard{padding:10px}.exerciseCard .quickGrid{gap:7px}}
-/* A single sprite contains six distinct clock scenes (left) and six finish scenes (right).
-   Existing hero banners stay unchanged. No labels or controls overlay this art. */
-/* Cut Phase art v18: use actual responsive images, never positioned sprite backgrounds. */
-.sagaDivider{
-  display:flex;align-items:center;justify-content:center;position:relative;
-  margin:14px 0;width:100%;overflow:hidden;border-radius:15px;
-  background:radial-gradient(ellipse at 50% 28%,#244772 0%,#142742 55%,#0b172a 100%);
-  box-shadow:0 5px 17px #132b4a27;
+/* Cut Phase v19: approved cinematic mobile layout. Full images, no sprite slicing. */
+#mainTimerCard{
+ margin-bottom:0;
+ border-radius:15px 15px 0 0;
+ box-shadow:none;
 }
-.sagaDivider--clock{border-bottom:3px solid var(--dayAccent,#63bee9)}
-.sagaDivider--finish{margin:18px 0 12px;border-bottom:3px solid #e5b65f}
-.sagaDivider img{
-  display:block;width:100%;max-width:100%;height:auto;
-  object-fit:contain;object-position:center;
-  border:0;user-select:none;
+.sceneBand{
+ display:block;
+ width:100%;
+ margin:0 0 14px;
+ padding:0;
+ overflow:hidden;
+ border-radius:0 0 15px 15px;
+ background:#12253d;
+ border-bottom:3px solid var(--dayAccent,#63bee9);
+ box-shadow:0 6px 16px #0c234220;
 }
-.sagaDivider.isPortrait{padding:12px 0}
-.sagaDivider.isPortrait img{width:auto;max-width:100%;max-height:min(420px,62vh);height:auto}
-.sagaDivider.isLoading{min-height:130px}
-.sagaDivider.isLoading img{visibility:hidden}
-.artControls{display:flex;justify-content:flex-end;margin:-4px 2px 12px}
-.artCycle{
-  background:transparent;border:0;color:#53718f;font-size:12px;font-weight:750;
-  min-height:44px;padding:8px 10px;box-shadow:none;
+.sceneBand img{
+ display:block;
+ width:100%;
+ max-width:100%;
+ height:auto;
+ object-fit:contain;
+ object-position:center;
+ user-select:none;
 }
-.artCycle:focus-visible{outline:3px solid #53c7ed}
+.sceneBand--finish{
+ margin:14px 0 0;
+ border-radius:15px 15px 0 0;
+ border-top:3px solid #dfb65a;
+ border-bottom:0;
+ box-shadow:none;
+}
+.finishCard{
+ margin-top:0;
+ border-top:0;
+ border-radius:0 0 15px 15px;
+}
 @media(max-width:420px){
-  .sagaDivider{margin:12px 0;border-radius:12px}
-  .sagaDivider--finish{margin:15px 0 10px}
-  .sagaDivider.isPortrait{padding:10px 0}
+ .sceneBand{margin-bottom:12px;border-radius:0 0 12px 12px}
+ .sceneBand--finish{margin:12px 0 0;border-radius:12px 12px 0 0}
+ #mainTimerCard{border-radius:12px 12px 0 0}
+ .finishCard{border-radius:0 0 12px 12px}
 }
 </style></head><body>
 <header><div><b>Cut Phase</b><div class="muted">“Fall in love with the grind.”</div></div><div class="tabs" id="tabs"></div></header>
@@ -300,8 +313,8 @@ body.victoryOpen{overflow:hidden}
 
 <div class="card instructionsCard"><div class="row"><h3>Workout plan</h3><span class="muted" id="planProgress" hidden></span></div><div id="plan"></div></div>
 <div class="card" id="mainTimerCard"><div class="row"><b>60-minute workout clock</b><span class="muted" id="clockState">Ready · 60-minute countdown</span></div><div class="clock" id="clock" aria-live="off">60:00</div><div class="clockButtons"><button class="primary" onclick="start()">Start</button><button onclick="stop()">Pause</button><button onclick="reset()">Reset</button></div><details class="timerHelp"><summary>About the countdown</summary><p class="muted">Elapsed time stays accurate across screen locks when reopened. iPhone web apps cannot reliably sound a background alarm.</p></details></div>
-<figure class="sagaDivider sagaDivider--clock isLoading" id="clockSceneFrame"><img id="clockScene" alt="Workout artwork" decoding="async" loading="eager"></figure>
-<div class="artControls"><button type="button" class="artCycle" id="artThemeBtn" onclick="cycleSagaArt()" aria-label="Change workout artwork collection">Artwork · <span id="artThemeName">Loading</span> <span id="artThemeNumber">1/3</span> <span aria-hidden="true">↻</span></button></div>
+<figure class="sceneBand sceneBand--clock" id="clockSceneFrame"><img id="clockScene" alt="Training artwork" decoding="async" loading="eager" width="1050" height="349"></figure>
+
 <div class="card" id="intervalCard"></div>
 <div class="card runCard" id="runCard" style="display:none"><div class="row"><h3 id="runCardTitle">🏃 Run tracker</h3><span class="muted" id="runCardSubtitle">Distance · time · pace</span></div>
 <p class="muted">Record running and walking separately. Tap “Use elapsed time” after your run.</p><div class="runStopwatch"><div id="runElapsed" class="runTime">00:00</div><div class="clockButtons"><button onclick="startRunTimer()" class="primary">Start</button><button onclick="pauseRunTimer()">Pause</button><button onclick="resetRunTimer()">Reset</button></div><button class="useTimeBtn" onclick="useRunTime()">Use elapsed time as running duration</button></div>
@@ -318,7 +331,7 @@ body.victoryOpen{overflow:hidden}
 <div class="card logCard" id="gymLogCard"><div class="row"><h3>💪 Workout log</h3><span class="muted">Weight · reps · notes</span></div><p class="muted"></p><div id="sets"></div><button onclick="add()" id="addExerciseBtn">+ Add exercise</button><div id="addExercisePicker" class="addPicker" hidden><h3>Supplementary exercise</h3><p class="muted">Choose a suggested option for this day or add your own. Sets, reps and starting-load guidance will fill in automatically.</p><select id="addChoice" onchange="changeAddChoice()"></select><div id="addPreview" class="muted"></div><div id="customAdd" hidden><label>Exercise name<input id="customName" type="text" placeholder="Exercise name"></label><div class="runGrid"><label>Sets<input id="customSets" type="number" inputmode="numeric" min="1" max="20" value="3"></label><label>Minimum reps / time<input id="customMin" type="number" inputmode="numeric" min="1" value="8"></label><label>Maximum reps / time<input id="customMax" type="number" inputmode="numeric" min="1" value="12"></label><label>Starting-load note<input id="customLoad" type="text" placeholder="e.g. light / 12–18 kg"></label></div></div><div class="actionrow"><button class="primary" onclick="confirmAddExercise()">Add to workout</button><button onclick="closeAddExercise()">Cancel</button></div></div></div>
 
 
-<figure class="sagaDivider sagaDivider--finish isLoading" id="finishSceneFrame"><img id="finishScene" alt="Workout achievement artwork" decoding="async" loading="lazy"></figure>
+<figure class="sceneBand sceneBand--finish" id="finishSceneFrame"><img id="finishScene" alt="Workout achievement artwork" decoding="async" loading="lazy" width="1050" height="315"></figure>
 <div class="card finishCard" id="finishWorkout"><div class="row"><h3>✓ Finish workout</h3><span class="muted">Feedback · save · share</span></div><h3>How hard was the workout?</h3><div class="runGrid"><label>Overall difficulty (1–10)<select id="sessionEffort" onchange="saveFeedback()"><option value="">Select difficulty</option><option value="1">1 — Very easy</option><option value="2">2 — Easy</option><option value="3">3 — Light</option><option value="4">4 — Some effort</option><option value="5">5 — Moderate</option><option value="6">6 — Challenging</option><option value="7">7 — Hard</option><option value="8">8 — Very hard</option><option value="9">9 — Extremely hard</option><option value="10">10 — Maximum effort</option></select></label></div><label class="runLabel"><b>Workout feedback / what should change next week?</b><textarea id="notes" rows="4" oninput="saveFeedback()" placeholder="e.g. Not hard enough; heart rate too low. Run interrupted by work. Increase circuit pace or add 10 minutes conditioning."></textarea></label><div class="actionrow"><button class="primary" onclick="saveSession()">Save workout</button><button onclick="copyReport()">Copy report</button></div><button class="newWorkoutBtn" onclick="newWorkout()">+ Start New Workout</button><p class="muted">New workout clears this day’s active entries, not saved History.</p><textarea id="reportFallback" rows="7" style="display:none;margin-top:8px" readonly aria-label="Workout report to copy"></textarea></div>
 
 
@@ -455,81 +468,23 @@ function newWorkout(){
 function saveDayNotes(){if($("notes")&&S.work[D[S.day][0]])saveFeedback()}
 /* Complete, uncropped day artwork. Atlases are only the download format;
    a small canvas extracts one complete panel into an actual <img>. */
-const SAGA_COLLECTIONS=[
- {id:"comic",label:"Comic",src:"./assets/cutphase-comic-v18.webp",cols:2,rows:6},
- {id:"portrait",label:"Legend",src:"./assets/cutphase-portrait-v18.webp",cols:6,rows:2},
- {id:"cinematic",label:"Cinematic",src:"./assets/cutphase-cinematic-v18.webp",cols:2,rows:6}
-];
-const SAGA_PREF_KEY="cutphase-art-theme-v18";
-const sagaAtlasCache=new Map(),sagaPanelCache=new Map();
-let sagaPreference=null;
-try{const v=localStorage.getItem(SAGA_PREF_KEY);if(v!==null&&/^[012]$/.test(v))sagaPreference=Number(v)}catch{}
-function currentSagaTheme(){
- // Rotate the available collections weekly unless the user has chosen one.
- return sagaPreference===null?(Math.floor(Date.now()/604800000)%SAGA_COLLECTIONS.length):sagaPreference;
-}
-function sagaAtlas(cfg){
- if(!sagaAtlasCache.has(cfg.id)){
-  const request=new Promise((resolve,reject)=>{
-   const im=new Image();
-   im.onload=()=>resolve(im);
-   im.onerror=()=>reject(new Error("Could not load artwork collection "+cfg.id));
-   im.src=cfg.src;
-  });
-  sagaAtlasCache.set(cfg.id,request);
- }
- return sagaAtlasCache.get(cfg.id);
-}
-function sagaPanel(atlas,cfg,dayIndex,slot){
- const key=cfg.id+"-"+dayIndex+"-"+slot;
- if(sagaPanelCache.has(key))return sagaPanelCache.get(key);
- const col=cfg.cols===2?(slot==="clock"?0:1):dayIndex;
- const row=cfg.rows===6?dayIndex:(slot==="clock"?0:1);
- const sx=Math.round(col*atlas.naturalWidth/cfg.cols);
- const sy=Math.round(row*atlas.naturalHeight/cfg.rows);
- const ex=Math.round((col+1)*atlas.naturalWidth/cfg.cols);
- const ey=Math.round((row+1)*atlas.naturalHeight/cfg.rows);
- const canvas=document.createElement("canvas");
- canvas.width=ex-sx;canvas.height=ey-sy;
- const ctx=canvas.getContext("2d");
- if(!ctx)throw new Error("Image canvas unavailable");
- // This is the precise panel boundary, NOT a crop of the illustration itself.
- ctx.drawImage(atlas,sx,sy,canvas.width,canvas.height,0,0,canvas.width,canvas.height);
- const src=canvas.toDataURL("image/webp",0.93);
- sagaPanelCache.set(key,{src,width:canvas.width,height:canvas.height});
- return sagaPanelCache.get(key);
-}
-function cycleSagaArt(){
- sagaPreference=(currentSagaTheme()+1)%SAGA_COLLECTIONS.length;
- try{localStorage.setItem(SAGA_PREF_KEY,String(sagaPreference))}catch{}
- updateSagaArt();
-}
-async function updateSagaArt(){
- const requestedDay=S.day,themeIndex=currentSagaTheme(),cfg=SAGA_COLLECTIONS[themeIndex];
- const label=$("artThemeName"),counter=$("artThemeNumber");
- if(label)label.textContent=cfg.label;
- if(counter)counter.textContent=(themeIndex+1)+"/3";
- const ids=[["clockScene","clockSceneFrame","clock"],["finishScene","finishSceneFrame","finish"]];
- for(const [imgId,frameId] of ids){
-  const frame=$(frameId);if(frame){frame.classList.toggle("isPortrait",cfg.cols===6);frame.classList.add("isLoading")}
-  const im=$(imgId);if(im)im.removeAttribute("src");
- }
- try{
-  const atlas=await sagaAtlas(cfg);
-  // Tab changes or another theme selection may have occurred during loading.
-  if(S.day!==requestedDay||currentSagaTheme()!==themeIndex)return;
-  for(const [imgId,frameId,slot] of ids){
-   const panel=sagaPanel(atlas,cfg,requestedDay,slot);
-   const im=$(imgId),frame=$(frameId);
-   if(!im||!frame)continue;
-   im.width=panel.width;im.height=panel.height;
-   im.src=panel.src;
-   im.alt=(D[requestedDay]?.[0]||"Workout")+" "+(slot==="clock"?"training":"achievement")+" illustration, "+cfg.label+" collection";
-   frame.classList.remove("isLoading");
-  }
- }catch(error){
-  for(const [imgId,frameId] of ids){const f=$(frameId),im=$(imgId);if(f)f.classList.remove("isLoading");if(im)im.alt="Artwork temporarily unavailable"}
-  console.warn("Cut Phase artwork:",error);
+// Each day has two dedicated original wide images. No runtime canvas or alternate themes.
+const SCENE_DAYS=["monday","tuesday","wednesday","thursday","friday","weekend"];
+function updateSagaArt(){
+ const day=SCENE_DAYS[S.day]||SCENE_DAYS[0];
+ const dayName=D[S.day]?.[0]||"Workout";
+ const files=[
+  ["clockScene","clock","training",349],
+  ["finishScene","finish","completion",315]
+ ];
+ for(const [id,slot,description,height] of files){
+  const im=$(id);
+  if(!im)continue;
+  const path="./assets/cutphase-v19/"+day+"-"+slot+".webp";
+  if(im.getAttribute("src")!==path)im.setAttribute("src",path);
+  im.setAttribute("alt",dayName+" "+description+" artwork");
+  im.width=1050;
+  im.height=height;
  }
 }
 

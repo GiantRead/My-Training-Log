@@ -1,5 +1,5 @@
-const CACHE="mtl-v18-complete-art-themes";
-const ASSETS=["./","./index.html","./manifest.webmanifest","./assets/cutphase-comic-v18.webp","./assets/cutphase-portrait-v18.webp","./assets/cutphase-cinematic-v18.webp"];
+const CACHE="mtl-v19-cinematic-wides";
+const ASSETS=["./","./index.html","./manifest.webmanifest","./assets/cutphase-v19/monday-clock.webp","./assets/cutphase-v19/monday-finish.webp","./assets/cutphase-v19/tuesday-clock.webp","./assets/cutphase-v19/tuesday-finish.webp","./assets/cutphase-v19/wednesday-clock.webp","./assets/cutphase-v19/wednesday-finish.webp","./assets/cutphase-v19/thursday-clock.webp","./assets/cutphase-v19/thursday-finish.webp","./assets/cutphase-v19/friday-clock.webp","./assets/cutphase-v19/friday-finish.webp","./assets/cutphase-v19/weekend-clock.webp","./assets/cutphase-v19/weekend-finish.webp"];
 
 self.addEventListener("install",event=>{
   self.skipWaiting();
