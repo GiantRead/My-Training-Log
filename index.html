@@ -275,7 +275,7 @@ body.victoryOpen{overflow:hidden}
  border-bottom:3px solid var(--dayAccent,#63bee9);
  box-shadow:0 6px 16px #0c234220;
 }
-.sceneBand img{
+.sceneBand img,.sceneBand svg{
  display:block;
  width:100%;
  max-width:100%;
@@ -284,6 +284,9 @@ body.victoryOpen{overflow:hidden}
  object-position:center;
  user-select:none;
 }
+/* Finish art: preserve the ORIGINAL complete scene at its native aspect ratio.
+   The SVG viewBox selects a whole illustrated frame (including heads). */
+.sceneBand--finish svg{aspect-ratio:599 / 219;overflow:hidden;}
 .sceneBand--finish{
  margin:14px 0 0;
  border-radius:15px 15px 0 0;
@@ -331,7 +334,7 @@ body.victoryOpen{overflow:hidden}
 <div class="card logCard" id="gymLogCard"><div class="row"><h3>💪 Workout log</h3><span class="muted">Weight · reps · notes</span></div><p class="muted"></p><div id="sets"></div><button onclick="add()" id="addExerciseBtn">+ Add exercise</button><div id="addExercisePicker" class="addPicker" hidden><h3>Supplementary exercise</h3><p class="muted">Choose a suggested option for this day or add your own. Sets, reps and starting-load guidance will fill in automatically.</p><select id="addChoice" onchange="changeAddChoice()"></select><div id="addPreview" class="muted"></div><div id="customAdd" hidden><label>Exercise name<input id="customName" type="text" placeholder="Exercise name"></label><div class="runGrid"><label>Sets<input id="customSets" type="number" inputmode="numeric" min="1" max="20" value="3"></label><label>Minimum reps / time<input id="customMin" type="number" inputmode="numeric" min="1" value="8"></label><label>Maximum reps / time<input id="customMax" type="number" inputmode="numeric" min="1" value="12"></label><label>Starting-load note<input id="customLoad" type="text" placeholder="e.g. light / 12–18 kg"></label></div></div><div class="actionrow"><button class="primary" onclick="confirmAddExercise()">Add to workout</button><button onclick="closeAddExercise()">Cancel</button></div></div></div>
 
 
-<figure class="sceneBand sceneBand--finish" id="finishSceneFrame"><img id="finishScene" alt="Workout achievement artwork" decoding="async" loading="lazy" width="1050" height="315"></figure>
+<figure class="sceneBand sceneBand--finish" id="finishSceneFrame"><svg id="finishScene" role="img" aria-label="Monday complete workout achievement artwork" xmlns="http://www.w3.org/2000/svg" viewBox="600 0 599 219" width="599" height="219" preserveAspectRatio="xMidYMid meet"><image href="./assets/cutphase-comic-v18.webp" x="0" y="0" width="1199" height="1312" preserveAspectRatio="none"/></svg></figure>
 <div class="card finishCard" id="finishWorkout"><div class="row"><h3>✓ Finish workout</h3><span class="muted">Feedback · save · share</span></div><h3>How hard was the workout?</h3><div class="runGrid"><label>Overall difficulty (1–10)<select id="sessionEffort" onchange="saveFeedback()"><option value="">Select difficulty</option><option value="1">1 — Very easy</option><option value="2">2 — Easy</option><option value="3">3 — Light</option><option value="4">4 — Some effort</option><option value="5">5 — Moderate</option><option value="6">6 — Challenging</option><option value="7">7 — Hard</option><option value="8">8 — Very hard</option><option value="9">9 — Extremely hard</option><option value="10">10 — Maximum effort</option></select></label></div><label class="runLabel"><b>Workout feedback / what should change next week?</b><textarea id="notes" rows="4" oninput="saveFeedback()" placeholder="e.g. Not hard enough; heart rate too low. Run interrupted by work. Increase circuit pace or add 10 minutes conditioning."></textarea></label><div class="actionrow"><button class="primary" onclick="saveSession()">Save workout</button><button onclick="copyReport()">Copy report</button></div><button class="newWorkoutBtn" onclick="newWorkout()">+ Start New Workout</button><p class="muted">New workout clears this day’s active entries, not saved History.</p><textarea id="reportFallback" rows="7" style="display:none;margin-top:8px" readonly aria-label="Workout report to copy"></textarea></div>
 
 
@@ -471,20 +474,29 @@ function saveDayNotes(){if($("notes")&&S.work[D[S.day][0]])saveFeedback()}
 // Each day has two dedicated original wide images. No runtime canvas or alternate themes.
 const SCENE_DAYS=["monday","tuesday","wednesday","thursday","friday","weekend"];
 function updateSagaArt(){
- const day=SCENE_DAYS[S.day]||SCENE_DAYS[0];
- const dayName=D[S.day]?.[0]||"Workout";
- const files=[
-  ["clockScene","clock","training",349],
-  ["finishScene","finish","completion",315]
- ];
- for(const [id,slot,description,height] of files){
-  const im=$(id);
-  if(!im)continue;
-  const path="./assets/cutphase-v19/"+day+"-"+slot+".webp";
-  if(im.getAttribute("src")!==path)im.setAttribute("src",path);
-  im.setAttribute("alt",dayName+" "+description+" artwork");
-  im.width=1050;
-  im.height=height;
+ const dayIndex=Math.max(0,Math.min(SCENE_DAYS.length-1,S.day));
+ const day=SCENE_DAYS[dayIndex],dayName=D[dayIndex]?.[0]||"Workout";
+ // Preserve the approved wide training artwork below the main clock.
+ const clock=$("clockScene");
+ if(clock){
+  const path="./assets/cutphase-v19/"+day+"-clock.webp";
+  if(clock.getAttribute("src")!==path)clock.setAttribute("src",path);
+  clock.setAttribute("alt",dayName+" training artwork");
+  clock.width=1050;clock.height=349;
+ }
+ // IMPORTANT: the old v19 finish files were cropped before publication.
+ // Show the original, COMPLETE right-hand cell from the high-quality artwork
+ // source. SVG viewBox clips only to each full original frame, not the head.
+ // One source image is cached offline; no zoom, stretched art, or blank padding.
+ const finish=$("finishScene");
+ if(finish){
+  const sourceHeight=1312,cellStart=Math.round(dayIndex*sourceHeight/6);
+  const cellEnd=Math.round((dayIndex+1)*sourceHeight/6);
+  const cellHeight=cellEnd-cellStart;
+  finish.setAttribute("viewBox","600 "+cellStart+" 599 "+cellHeight);
+  finish.setAttribute("height",String(cellHeight));
+  finish.style.aspectRatio="599 / "+cellHeight;
+  finish.setAttribute("aria-label",dayName+" finish artwork, full character and composition");
  }
 }
 
