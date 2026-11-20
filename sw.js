@@ -1,5 +1,5 @@
-const CACHE="mtl-v14-cutphase-eight-week-rebuild";
-const ASSETS=["./","./index.html","./manifest.webmanifest"];
+const CACHE="mtl-v15-twelve-anime-scenes";
+const ASSETS=["./","./index.html","./manifest.webmanifest","./assets/cutphase-saga-12-v15.webp"];
 
 self.addEventListener("install",event=>{
   self.skipWaiting();
