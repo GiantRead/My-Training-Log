@@ -304,53 +304,94 @@ body.victoryOpen{overflow:hidden}
  </div>
 </div>
 <script>
+// CUT PHASE 2.0 · eight-week physique / half-marathon block.
+// No automatic load or distance increases: review actual performance each week.
+// Daily prescriptions are designed for approximately 60 minutes in a busy gym.
+// Exercise spec = [name, sets, min reps, max reps, starter guidance, optional unit].
 const D=[
-["Monday","Heavy Bench + High-Output Upper Body",[
-["Warm-up & bench ramp-up · 12 minutes","3–4 minutes of shoulder/scapular mobility, then a gradual bench ramp-up: bar × 15, 60 kg × 8, 90 kg × 5, 110 kg × 3, 125 kg × 1 as appropriate.","Ramp-up loads are examples only, not targets. Keep them easy enough to prepare for working sets, and use safeties or a spotter for heavy bench."],
-["Heavy bench · 11 minutes","Bench press — 3 working sets × 4–6 reps, 2–3 minutes rest.","Prioritise strength and good reps. Stop with 1–2 reps in reserve; no failed reps without a spotter."],
-["Vertical pull · 7 minutes","Weighted pull-ups or controlled bodyweight pull-ups — 3 × 6–10, rest approximately 90 seconds.","At your bodyweight, unweighted pull-ups already provide serious resistance. Focus on full, controlled reps."],
-["Circuit A · Power & back · 12 minutes","4 rounds in ONE dumbbell/floor area: explosive push-ups × 8–10 → DB push press × 8–10 → single-arm DB row × 10/side → rest 60–75 seconds.","Use one pair of dumbbells and floor space; no reserving multiple machines. Move briskly, but never trade form for speed. Explosive push-ups: press fast, with hands staying down if needed."],
-["Shoulder width · 5 minutes","DB lateral raises — 3 × 12–20, 45–60 seconds rest.","Strict lateral raises to build side delts; reduce swinging."],
-["Conditioning finisher · 8 minutes","Battle ropes: 8 rounds of 40 seconds HARD / 20 seconds rest at ONE station.","Aim for sustained vigorous effort, not uncontrolled all-out sprints. If ropes are occupied, use mountain climbers or fast shadow boxing at the same 40/20 intervals. Use the interval timer below."],
-["Mobility · 5 minutes","Doorway pec stretch, lats and thoracic rotations.","Keep moving gently until breathing settles. Thoracic rotations: on hands/knees, place one hand behind head and rotate the elbow upward 5 times each side."]
+["Monday","Chest + V-taper · Heavy strength & ropes",[
+["Prepare + explosive push-ups · 10 min","Warm shoulders/scapulae, then 2 × 4–5 FAST explosive push-ups. Ramp bench progressively with easy sets before working at 130–140 kg.","Power first, while fresh. Reset between reps and stop when speed drops. Bench ramp examples: bar, 60 kg, 90 kg, 110 kg, then a light single as appropriate."],
+["Heavy bench · 11 min","Bench press: 3 × 4–6 at approximately 130–140 kg, leaving 1–2 reps in reserve. Rest 2–3 min.","Use safety arms or a spotter. Your recorded sets included 130 × 4, 130 × 5 and 140 × 4; increase reps before load."],
+["Pull-up strength · 7 min","Bodyweight pull-up: 3 × 5–8 controlled. Add weight only when all sets are clean.","At roughly 120 kg bodyweight, unweighted pull-ups are already demanding. Use 1–2 reps in reserve."],
+["Circuit A · upper chest / back / delts · 18 min","3 rounds, in ONE dumbbell/bench area: incline DB press 8–10 at ~36–42 kg/hand → DB row 10/side at ~38 kg/hand → lateral raises 15–20 at ~12 kg/hand. Rest 60–75 sec between rounds.","One adjustable bench and a nearby dumbbell rack. Superset efficiently, without sacrificing controlled reps. Don't increase every lift at once."],
+["Battle-rope finisher · 8 min","At one station: 8 rounds of 40 seconds hard / 20 seconds rest. Use the timer below.","Aim around 8/10 effort during work. If ropes are occupied, use mountain climbers at the same intervals. The clock marks ropes complete on finishing."],
+["Mobility · 4 min","Relax chest and lats; add thoracic rotations and gentle shoulder mobility.","Keep it comfortable. Allow roughly two minutes of transition time within the 60-minute session."]
 ],[
-["Bench press",3,4,6],["Weighted pull-up",3,6,10],["Explosive push-up",4,8,10],["DB push press",4,8,10],["DB row (per side)",4,10,10],["DB lateral raise",3,12,20],["Battle ropes (40s work intervals)",8,1,1]],["rope",8]],
-["Tuesday","Functional Conditioning + Core + Half-Marathon Running",[
-["Functional Five","5 rounds: battle ropes 40 sec → push-ups 20–25 → farmer's carry 20 m → pull-ups 5–8 → farmer's carry 20 m back.","Aim for a challenging, repeatable 7–8/10 effort, resting about 60–75 seconds between rounds. Keep technique solid. Stay in one functional area; do not reserve half the gym."],
-["Run / walk","15–25 minutes of easy running, or run/walk intervals when needed.","Keep it genuinely aerobic: you should be able to speak in sentences. Track running and walking separately in the tracker below. If interrupted, record what you actually completed."],
-["Core","3 rounds: hanging knee raises 10–15 → dead bugs 8–10/side → plank 45–60 sec.","Dead bug: lie on your back with hips/knees at 90°, slowly lower opposite arm and leg while keeping your lower back controlled."],
-["Mobility","5 minutes: hip flexors, hamstrings and thoracic rotations.","Mobility is part of the workout, not optional."]],[
-["Hanging knee raise",3,10,15],["Dead bug (per side)",3,8,10],["Plank (seconds)",3,45,60]],null],
+["Explosive push-up",2,4,5,"Bodyweight · fast, fresh reps; stop before speed drops"],
+["Bench press",3,4,6,"130–140 kg · 1–2 RIR; spotter or safety arms"],
+["Weighted pull-up",3,5,8,"Bodyweight initially (~120 kg); add load only after clean reps"],
+["Incline DB press",3,8,10,"36–42 kg PER HAND to trial; 1–2 RIR"],
+["DB row (per side)",3,10,10,"About 38 kg PER HAND"],
+["DB lateral raise",3,15,20,"About 12 kg PER HAND; strict control"],
+["Battle ropes (40s work intervals)",8,1,1,"40 sec on / 20 sec off × 8, use timer"]
+],["rope",8]],
 
-["Wednesday","Heavy Deadlift + Back + Power",[
-["Warm-up & ramp-up","Cat-cow, unloaded hip hinges, thoracic rotations and gentle hamstring mobility, then progressive deadlift warm-up sets.","Hip hinge: push hips backwards while keeping your spine controlled; this rehearses the deadlift pattern."],
-["Main lift","Straight-bar deadlift — 3 × 3–5 working sets.","Rest 2–4 minutes. Heavy enough to preserve strength; avoid unnecessary junk volume."],
-["Power circuit","3 rounds: burpees 8–10 → broad jumps 5.","Rest about 90 seconds. Broad jump = jump forward explosively and land softly under control. Use the space you can safely find."],
-["Back hypertrophy","Chest-supported dumbbell row or dumbbell row — 3 × 8–12.","This adds horizontal pulling for back thickness."],
-["Rear delts","Rear delt fly — 2–3 × 12–20.","Hinge forward lightly or use a bench; sweep arms out under control to target the rear shoulders."],
-["Stretch","5 minutes: hamstrings, hip flexors, lats and thoracic rotations.","Comfortable stretching, not aggressive."]],[
-["Straight-bar deadlift",3,3,5],["Burpee",3,8,10],["Broad jump",3,5,5],["DB row",3,8,12],["Rear delt fly",3,12,20]],null],
+["Tuesday","Easy run + conditioning + abs",[
+["Run / walk · 30–35 min","5 min easy start, then 25–30 min of conversational running (or run/walk); build toward 35 min as tolerated. Record running and walking separately.","Make this the FIRST priority. In weeks 1–2 keep it easy. Later, if weekly mileage/recovery are stable, substitute controlled tempo intervals in this time slot."],
+["Functional circuit · 12–15 min","3 complete rounds: battle ropes 40 sec → push-ups 15–20 → farmer carry 20 m out + 20 m back with ~30–36 kg/hand. Optional: 4–6 controlled pull-ups if the bar is immediately nearby. Rest 60–75 sec.","Stay in ONE functional area; don't reserve multiple stations. Mark the circuit once after finishing three rounds. If pull-ups require a trip across the gym, skip them here."],
+["Ab development · 9–10 min","Cable crunch 3 × 10–15 at a controlled ~40–50 kg → hanging knee raise 2 × 10–15. Use short rests.","Train abdominal flexion directly and progressively; ab work develops muscle, but visible abs require overall fat loss. No need for five extra crunch circuits."],
+["Mobility · 4–5 min","Hip flexor mobility, gentle hamstring work, thoracic rotations.","Keep transitions short. Do not turn the run into an all-out test."]
+],[
+["Functional circuit",1,3,3,"1 entry = 3 COMPLETE rounds. Ropes 40s, push-ups 15–20, farmer carries ~30–36 kg/hand; nearby pull-ups optional","rounds"],
+["Cable crunch",3,10,15,"Trial 40–50 kg on your cable stack; control the return"],
+["Hanging knee raise",2,10,15,"Bodyweight; avoid swinging"]
+],null],
 
-["Thursday","Shoulders + Back + Functional Strength",[
-["Shoulder strength","Standing dumbbell overhead press — 4 × 6–10.","Stand tall and press the dumbbells overhead under control. This is your main shoulder strength movement."],
-["Back strength","Pull-ups or weighted pull-ups — 4 × 6–10.","At your bodyweight, unweighted pull-ups are demanding. Use a controlled full range."],
-["Shoulder/back circuit","3 rounds: dumbbell lateral raises 12–20 → dumbbell rows 10–12/side.","Stay in one dumbbell area and rest 60–90 seconds after each round. Both exercises are 3 sets in the log."],
-["Functional finisher","5 rounds: DB Romanian deadlift × 6–10 (test 40 kg per hand) → DB hang clean × 6 (26 kg per hand) → DB push press × 6 (26 kg per hand) → bodyweight squat × 10.","All four exercises have 5 sets in the log. Use two pairs of dumbbells if available. Rest 60–75 sec between rounds. Warm up for 40 kg RDL and prioritise controlled technique."],
-["Rear delts (separate from circuit)","Reverse pec-deck / machine rear-delt fly — 3 × 12–20.","Do this as a standalone exercise, away from the dumbbell circuit. Machine stability makes it easier to focus on rear delts; dumbbells are also effective, so use whichever you can progress comfortably."] ,["Stretch","5 minutes: shoulders, chest, lats and thoracic rotations.","Finish with mobility rather than skipping it."]],[
-["DB overhead press",4,6,10],["Pull-up / weighted pull-up",4,6,10],["DB lateral raise",3,12,20],["DB row (per side)",3,10,12],["DB RDL (kg per hand)",5,6,10],["DB hang clean (kg per hand)",5,6,6],["DB push press (kg per hand)",5,6,6],["Bodyweight squat",5,10,15],["Rear delt fly",3,12,20]],null],
+["Wednesday","Deadlift + back thickness + lower-body power",[
+["Hip preparation + jumps · 10 min","5–6 min: 90/90 transitions, adductor rock-backs, unloaded hip hinges. Then vertical jumps: 3 × 3 with controlled landings and full reset between attempts.","Jumps are POWER practice, not a breathless circuit. Stop when jump quality declines. You reported deadlift setup stiffness, not pain."],
+["Deadlift · 15 min","Progressively warm the straight-bar deadlift; then 3 × 3–5 at approximately 120–140 kg initially, maintaining 2–3 RIR.","Your 160 × 3 demonstrates capacity, but rebuild a consistent starting position first. Don't force a heavy pull if the setup is poor."],
+["Back thickness · 10 min","Nautilus chest-supported row 3 × 8–12, trial 75–85 kg on YOUR machine; alternatively DB row if busy.","Chest support removes some lower-back fatigue. Machine weights are not interchangeable with dumbbell weights."],
+["Rear delts + arms · 13 min","Rear-delt machine fly 3 × 15–20 (~73 kg on your machine), then cable rope bicep curls 3 × 12–15 (~15–20 kg).","Use 1–2 RIR. Keep form strict; repeated 0-RIR sets aren't needed to grow."],
+["Hamstrings + mobility · 10 min","Leg-curl machine 2 × 10–12 at a moderate load; finish hip flexors, lats and thoracic mobility.","Keep leg curls controlled and avoid leaving your hamstrings severely sore for running. Allow 2 min transitions."]
+],[
+["Vertical jump",3,3,3,"Bodyweight only · jump high, land softly, full reset"],
+["Straight-bar deadlift",3,3,5,"120–140 kg initially · 2–3 RIR; good setup first"],
+["DB row",3,8,12,"Nautilus chest-supported row ~75–85 kg; if unavailable DB row ~38 kg/hand"],
+["Rear delt fly",3,15,20,"Nautilus / rear-delt machine ~73 kg; 1–2 RIR"],
+["Cable rope bicep curls",3,12,15,"Trial ~15–20 kg on cable stack; strict"],
+["Leg curl (machine)",2,10,12,"Choose a moderate load with 2–3 RIR"]
+],null],
 
-["Friday","Heavy Squat + Athletic Conditioning",[
-["Warm-up & ramp-up","General mobility followed by progressive squat warm-up sets.","Your ramp-up should prepare you without exhausting you before working sets."],
-["Main lift","Squat — 3 × 4–6 working sets.","Rest 2–4 minutes. This is your main lower-body strength work."],
-["10-minute AMRAP","Push press × 6 → barbell row × 8 → burpees × 6. Repeat as many QUALITY rounds as possible in 10 minutes.","AMRAP = As Many Rounds As Possible. You have already squatted heavily, so there is no second squat variation here."],
-["Stretch","5 minutes: quads, hip flexors, hamstrings and pecs.","Finish the week moving better than you started."]],[
-["Squat",3,4,6],["Barbell push press",1,6,6],["Barbell row",1,8,8],["Burpee",1,6,6]],["amrap",10]],
-["Weekend","Half-Marathon Long Run",[
-["Before you run","5–10 minutes brisk walking, easy jogging and leg swings.","Start gently. Avoid aggressive static stretching before running."],
-["Long run","Run at a comfortable conversational pace. Start around 10–12 km ONLY if your recent running volume supports it; otherwise start shorter. Build gradually according to weekly mileage, recovery and how the run feels.","This is a provisional starting range, not a locked weekly progression. Do not force race pace. Your sub-2-hour goal requires about 5:41/km on race day, but most long runs should be slower."],
-["Post-run recovery","Walk 5 minutes, rehydrate, eat and note any calf, Achilles or knee symptoms.","Reduce the next long run if soreness or fatigue persists. Avoid adding distance rapidly after a low-mileage week."],
-["Training notes","Log distance, duration, average pace, effort and any soreness in the run entry below.","Use the comment field for terrain, recovery, and how the final kilometres felt."]],[
-["Long run distance (km)",1,1,30],["Long run time (minutes)",1,1,180]],null]
+["Thursday","Shoulder width + pull-ups + easy aerobic run",[
+["Warm-up · 5 min","Shoulder/scapular preparation and a few progressively heavier dumbbell presses.","Stay in one area where practical; don't expend energy doing more warm-up sets than necessary."],
+["Shoulder strength · 10 min","Standing DB overhead press 4 × 6–10, trial 32–36 kg PER HAND.","Your 36 kg × 8 was at 1 RIR. Try 34 kg for consistent sets before increasing."],
+["Pull-up strength · 8 min","Weighted pull-ups +12–16 kg for 3 × 6 IF convenient and recovered. Otherwise 3 × 7–9 at bodyweight.","You love pull-ups: keep them. Choose either weighted or bodyweight today, not both as separate compulsory blocks."],
+["Circuit A · shoulders & back · 12 min","3 rounds, same dumbbell area: lateral raise 12–20 (~12–14 kg/hand) → DB row 10–12/side (~38 kg/hand). Rest 60–75 sec between rounds.","This replaces the old five-round RDL/hang-clean/push-press complex. Don't add heavy hinging the day after deadlifts."],
+["Run / walk · 20 min","Easy 20-minute run or run/walk at conversational effort. Enter distance and time in the run tracker.","This is your SECOND midweek run. If 60 minutes is tight, reduce a circuit round before sacrificing the entire run."],
+["Mobility · 4 min","Gentle chest, shoulder, hip and thoracic mobility.","Allow roughly one minute for equipment transitions."]
+],[
+["DB overhead press",4,6,10,"32–36 kg PER HAND; trial 34 kg for consistent sets"],
+["Pull-up / weighted pull-up",3,6,10,"Bodyweight 7–9 reps OR +12–16 kg for 6 reps; 1–2 RIR"],
+["DB lateral raise",3,12,20,"12–14 kg PER HAND, controlled"],
+["DB row (per side)",3,10,12,"38 kg PER HAND; controlled 10–12 per side"]
+],null],
+
+["Friday","Heavy leg press + 10-minute athletic AMRAP",[
+["Warm-up + hip mobility · 8 min","5 min gradually brisk walking/cycling, then 90/90 transitions and squat-pattern preparation.","Don't spend four hard sets on a hip-abductor machine just to warm up. Use 1–2 light sets only if helpful."],
+["Heavy angled leg press · 22 min","Ramp gradually to three working sets of 6–10, initially around 300–360 kg, 1–2 RIR, using a consistent comfortable depth.","Your 360 × 6 wasn't a maximum, and you've reported >420 kg × 3. Keep the heavy ramp-up without treating all five warm-up sets as hard work. Machine loads are machine-specific."],
+["10-minute AMRAP","ONE round = barbell push press × 6 → barbell row × 8 → burpees × 6. Repeat for 10 minutes. The large +1 button counts only fully completed three-movement rounds.","Trial ~50–60 kg for both barbell movements if form remains sharp. Your previous 12 rounds were push press + row only, so DON'T compare them to full three-movement rounds."],
+["Single-leg work · 8 min","Bulgarian split squat 2 × 8 PER LEG, bodyweight initially.","Use a bench in one spot. Reduce or skip the second set if legs are unusually heavy before your weekend long run."],
+["Calves + abs · 8 min","Standing calf raise 2 × 12–15, then reverse crunch 2 × 12–15.","Moderate effort and controlled range, not failure; no need to exhaust calves the day before running."],
+["Mobility · 4 min","Light quads, hip flexors and calves. Check how your legs feel before the weekend.","Saturday is rest/easy walking; don't force the weekend long run if you remain unusually sore."]
+],[
+["Angled leg press",3,6,10,"300–360 kg initially after progressive ramp; 1–2 RIR, consistent depth"],
+["Barbell push press",1,6,6,"AMRAP component · trial 50–60 kg; round tally above"],
+["Barbell row",1,8,8,"AMRAP component · trial 50–60 kg; round tally above"],
+["Burpee",1,6,6,"AMRAP component · bodyweight; round tally above"],
+["Bulgarian split squat",2,8,8,"Bodyweight initially · 8 reps PER LEG"],
+["Standing calf raise",2,12,15,"Moderate load; avoid soreness before long run"],
+["Reverse crunch",2,12,15,"Bodyweight; controlled posterior pelvic tilt"]
+],["amrap",10]],
+
+["Weekend","Saturday recovery · Sunday long aerobic run",[
+["Saturday · recover","Rest, easy walk or gentle mobility. No compulsory gym circuit.","Keep one proper recovery day so the running programme stays sustainable."],
+["Before the long run","5–10 minutes easy walking/jogging, leg swings and gradual pace build.","Start gently; avoid forcing hard static stretches before running."],
+["Long run","Comfortable, conversational pace. Provisional long-run options over eight weeks: 9, 10, 11, 9 (lighter), 12, 14, 15 and 13 km. These are GUIDES, not automatic targets: start shorter if current weekly mileage doesn't support 9 km.","Race pace for sub-2h is ~5:41/km; most long runs should be slower. Build only if soreness and recovery allow. Practise fuelling as duration increases."],
+["Post-run recovery","Walk 5 minutes, rehydrate, eat and record calves/Achilles/knees, energy, terrain and pace.","Reduce volume if soreness persists. Use the run tracker below; you don't need another exercise log."]
+],[
+["Long run distance (km)",1,1,30],
+["Long run time (minutes)",1,1,180]
+],null]
 ];
 
 let S=JSON.parse(localStorage.cutphase||"null")||{day:0,work:{},history:[],body:[]};S.work ||= {};S.history ||= [];S.body ||= [];
