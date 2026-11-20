@@ -447,6 +447,7 @@ function init(){
  document.documentElement.style.setProperty("--dayAccent",["#4cbcf2","#ef8c4a","#65cfc6","#24b987","#f3b064","#68d5b4"][S.day]);
  document.querySelectorAll(".dayArt").forEach((img)=>{if(img.src!==DAILY_ART)img.src=DAILY_ART;img.style.transform="translateY(calc("+(-S.day*100/6)+"% + "+(img.closest(".artRibbon")?"-34px":"0px")+"))"});
  renderOverview();if(d[0]!=="Weekend")renderSets();else $("sets").innerHTML="";
+ if(!RUN_DAYS.includes(d[0])&&runTicker){clearInterval(runTicker);runTicker=null;}
  $("gymLogCard").style.display=d[0]==="Weekend"?"none":"block";
  $("runCard").style.display=RUN_DAYS.includes(d[0])?"block":"none";
  if(RUN_DAYS.includes(d[0]))renderRun();
@@ -689,7 +690,7 @@ function confirmAddExercise(){
 function sessionHasData(record){
  if(String(record?.notes||"").trim()||String(record?.effort||"").trim()||Number(record?.amrapRounds)>0||String(record?.amrapNotes||"").trim()||Object.values(record?.planDone||{}).some(Boolean))return true;
  const r=record?.run||{};
- if(["distance","duration","target","effort","terrain","recovery"].some(k=>String(r[k]??"").trim()))return true;
+ if(["distance","duration","walkDistance","walkDuration","target","effort","terrain","recovery"].some(k=>String(r[k]??"").trim()))return true;
  return (record?.ex||[]).some(e=>{
   const q=e.quick||{};
   if(q.done||["weight","reps","rir","comment"].some(k=>String(q[k]??"").trim()))return true;
