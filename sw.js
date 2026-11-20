@@ -1,4 +1,4 @@
-const CACHE="mtl-v13-extra-set-rows";
+const CACHE="mtl-v14-cutphase-eight-week-rebuild";
 const ASSETS=["./","./index.html","./manifest.webmanifest"];
 
 self.addEventListener("install",event=>{
