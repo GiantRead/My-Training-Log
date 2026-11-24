@@ -305,6 +305,41 @@ body.victoryOpen{overflow:hidden}
  #mainTimerCard{border-radius:12px 12px 0 0}
  .finishCard{border-radius:0 0 12px 12px}
 }
+
+/* Cut Phase v22: gym-first logging, fixed completion action, one actual-set workflow. */
+.exerciseCard{scroll-margin-top:135px}
+.exerciseCard .exerciseHeader{display:grid;grid-template-columns:minmax(0,1fr) 98px;gap:10px;align-items:start}
+.exerciseCard .exHeading{min-width:0;overflow-wrap:anywhere}
+.exerciseCard .exTitle{font-size:16px;line-height:1.28;margin-bottom:3px}
+.exerciseCard .markDone{width:98px;min-width:98px;min-height:48px;margin:0;padding:8px 5px;white-space:nowrap;justify-self:end;font-size:13px}
+.exerciseCard .exercisePrescription{font-size:12px;color:#5a7395;font-weight:700}
+.exerciseCard .prescribedNote{font-size:11px;color:#88621c;font-weight:800;line-height:1.35}
+.exerciseCard .prescribedNote:empty{display:none}
+.exerciseCard .exercisePrevious{margin:7px 0 0;color:#42617e;font-size:12px;line-height:1.3}
+.exerciseCard .exerciseProgress{margin:8px 0 4px;font-size:12px;color:#285b87;font-weight:800}
+.exerciseCard.isDone .exerciseProgress{color:#087e65}
+.exerciseCard .setEntryDetails{border-top:1px solid #dbe6f2;padding-top:5px;margin-top:9px}
+.exerciseCard .setEntryDetails>summary{padding:7px 0;min-height:40px;color:#245c91;font-size:13px;font-weight:900}
+.exerciseCard .sets{margin:8px 0 5px;display:grid;grid-template-columns:26px minmax(0,1fr) minmax(0,1fr) 52px;gap:6px;align-items:center}
+.exerciseCard .sets small{color:#597594;font-size:11px;font-weight:800}
+.exerciseCard .sets input{width:100%;min-width:0;min-height:44px;padding:8px 3px;text-align:center;background:#fff}
+.exerciseCard .setEntryActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.exerciseCard .setEntryActions button{min-width:0;font-size:12px;padding:8px 5px;min-height:46px}
+.exerciseCard .setEntryActions .addSetButton{margin:0}
+.exerciseCard .legacyQuick{background:#fff7e6;padding:7px;border-radius:7px;font-size:11px;color:#755023}
+.exerciseCard .exerciseSwap,.exerciseCard .exerciseMore{border-top:0;margin:5px 0 0;padding-top:0}
+.exerciseCard .exerciseSwap>summary,.exerciseCard .exerciseMore>summary{min-height:40px;font-size:12px;color:#4a7097}
+.exerciseCard .exerciseSwap input{display:block;width:100%;min-height:45px;margin:6px 0;font-size:16px}
+.exerciseCard .exerciseSwap label{font-size:12px;font-weight:800}
+.exerciseCard .swapActions{display:flex;flex-wrap:wrap;gap:7px}
+.exerciseCard .swapActions button{flex:1;min-width:110px;font-size:12px;padding:8px}
+.exerciseCard .amrapAutoLabel{justify-self:end;font-size:11px;color:#497297;padding:10px 2px}
+.planFold>summary{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:15px;cursor:pointer;min-height:44px}
+.planFold>summary .muted{font-size:11px;text-align:right}
+.planFold[open]>summary{margin-bottom:8px;border-bottom:1px solid #dce6ef;padding-bottom:9px}
+.jumpLabel{display:block;margin:8px 0 14px;color:#53718f;font-size:12px;font-weight:800}
+.jumpLabel select{width:100%;margin-top:5px;min-height:46px;font-size:15px;border-radius:9px;background:#fff;padding:8px;border:1px solid #a9c4db}
+@media(max-width:380px){.exerciseCard .exerciseHeader{grid-template-columns:minmax(0,1fr) 91px;gap:6px}.exerciseCard .markDone{width:91px;min-width:91px;font-size:12px}}
 </style></head><body>
 <header><div><b>Cut Phase</b><div class="muted">“Fall in love with the grind.”</div></div><div class="tabs" id="tabs"></div></header>
 <main>
@@ -314,7 +349,7 @@ body.victoryOpen{overflow:hidden}
 
 
 
-<div class="card instructionsCard"><div class="row"><h3>Workout plan</h3><span class="muted" id="planProgress" hidden></span></div><div id="plan"></div></div>
+<div class="card instructionsCard"><details class="planFold" id="planDetails"><summary><strong>Workout plan &amp; instructions</strong><span class="muted">Tap to expand · workout log below</span></summary><div id="plan"></div></details></div>
 <div class="card" id="mainTimerCard"><div class="row"><b>60-minute workout clock</b><span class="muted" id="clockState">Ready · 60-minute countdown</span></div><div class="clock" id="clock" aria-live="off">60:00</div><div class="clockButtons"><button class="primary" onclick="start()">Start</button><button onclick="stop()">Pause</button><button onclick="reset()">Reset</button></div><details class="timerHelp"><summary>About the countdown</summary><p class="muted">Elapsed time stays accurate across screen locks when reopened. iPhone web apps cannot reliably sound a background alarm.</p></details></div>
 <figure class="sceneBand sceneBand--clock" id="clockSceneFrame"><img id="clockScene" alt="Training artwork" decoding="async" loading="eager" width="1050" height="349"></figure>
 
@@ -331,7 +366,7 @@ body.victoryOpen{overflow:hidden}
 <label class="runLabel">Route / terrain<input id="runTerrain" type="text" placeholder="Road, treadmill, hills, weather…" oninput="runMetric('terrain',this.value)"></label>
 <label class="runLabel">Recovery & soreness<textarea id="runRecovery" rows="3" placeholder="Calves, Achilles, knees, energy, how the final kilometres felt…" oninput="runMetric('recovery',this.value)"></textarea></label>
 <div id="runProgress"></div><button id="runDoneBtn" onclick="toggleRunDone()">✓ Mark run / walk complete</button></div>
-<div class="card logCard" id="gymLogCard"><div class="row"><h3>💪 Workout log</h3><span class="muted">Weight · reps · notes</span></div><p class="muted"></p><div id="sets"></div><button onclick="add()" id="addExerciseBtn">+ Add exercise</button><div id="addExercisePicker" class="addPicker" hidden><h3>Supplementary exercise</h3><p class="muted">Choose a suggested option for this day or add your own. Sets, reps and starting-load guidance will fill in automatically.</p><select id="addChoice" onchange="changeAddChoice()"></select><div id="addPreview" class="muted"></div><div id="customAdd" hidden><label>Exercise name<input id="customName" type="text" placeholder="Exercise name"></label><div class="runGrid"><label>Sets<input id="customSets" type="number" inputmode="numeric" min="1" max="20" value="3"></label><label>Minimum reps / time<input id="customMin" type="number" inputmode="numeric" min="1" value="8"></label><label>Maximum reps / time<input id="customMax" type="number" inputmode="numeric" min="1" value="12"></label><label>Starting-load note<input id="customLoad" type="text" placeholder="e.g. light / 12–18 kg"></label></div></div><div class="actionrow"><button class="primary" onclick="confirmAddExercise()">Add to workout</button><button onclick="closeAddExercise()">Cancel</button></div></div></div>
+<div class="card logCard" id="gymLogCard"><div class="row"><h3>💪 Workout log</h3><span class="muted">Actual sets · load · reps · RIR</span></div><label class="jumpLabel" for="exerciseJump">Jump to exercise <select id="exerciseJump" onchange="jumpToExercise(this.value)"><option value="">Choose an exercise</option></select></label><div id="sets"></div><button onclick="add()" id="addExerciseBtn">+ Add exercise</button><div id="addExercisePicker" class="addPicker" hidden><h3>Supplementary exercise</h3><p class="muted">Choose a suggested option for this day or add your own. Sets, reps and starting-load guidance will fill in automatically.</p><select id="addChoice" onchange="changeAddChoice()"></select><div id="addPreview" class="muted"></div><div id="customAdd" hidden><label>Exercise name<input id="customName" type="text" placeholder="Exercise name"></label><div class="runGrid"><label>Sets<input id="customSets" type="number" inputmode="numeric" min="1" max="20" value="3"></label><label>Minimum reps / time<input id="customMin" type="number" inputmode="numeric" min="1" value="8"></label><label>Maximum reps / time<input id="customMax" type="number" inputmode="numeric" min="1" value="12"></label><label>Starting-load note<input id="customLoad" type="text" placeholder="e.g. light / 12–18 kg"></label></div></div><div class="actionrow"><button class="primary" onclick="confirmAddExercise()">Add to workout</button><button onclick="closeAddExercise()">Cancel</button></div></div></div>
 
 
 <figure class="sceneBand sceneBand--finish" id="finishSceneFrame"><svg id="finishScene" role="img" aria-label="Monday complete workout achievement artwork" xmlns="http://www.w3.org/2000/svg" viewBox="600 0 599 219" width="599" height="219" preserveAspectRatio="xMidYMid meet"><image href="./assets/cutphase-comic-v18.webp" x="0" y="0" width="1199" height="1312" preserveAspectRatio="none"/></svg></figure>
@@ -396,7 +431,7 @@ const D=[
 ],[
 ["Vertical jump",3,3,3,"Bodyweight only · jump high, land softly, full reset"],
 ["Straight-bar deadlift",3,3,5,"120–140 kg initially · 2–3 RIR; good setup first"],
-["DB row",3,8,12,"Nautilus chest-supported row ~75–85 kg; if unavailable DB row ~38 kg/hand"],
+["Chest-supported row (machine)",3,8,12,"Nautilus chest-supported row ~75–85 kg; if unavailable DB row ~38 kg/hand"],
 ["Rear delt fly",3,15,20,"Nautilus / rear-delt machine ~73 kg; 1–2 RIR"],
 ["Cable rope bicep curls",3,12,15,"Trial ~15–20 kg on cable stack; strict"],
 ["Leg curl (machine)",2,10,12,"Choose a moderate load with 2–3 RIR"]
@@ -504,6 +539,12 @@ function init(){
  $("tabs").innerHTML=D.map((x,i)=>'<button class="'+(i===S.day?"active":"")+'" onclick="saveDayNotes();S.day='+i+';save();init();showScreen(&quot;workout&quot;)">'+(x[0]==="Weekend"?"Weekend":x[0].slice(0,3))+'</button>').join("");
  const d=D[S.day],w=S.work[d[0]]||(S.work[d[0]]={ex:[],notes:""});
  w.ex ||= [];w.planDone ||= {};w.effort ||= "";w.amrapRounds ||= 0;
+ // One-time, non-destructive active-draft correction of the incorrectly named Wednesday machine row.
+ // Saved history is immutable: old "DB row" records are not relabelled without proof of equipment.
+ if(d[0]==="Wednesday"&&!w.ex.some(e=>e.name==="Chest-supported row (machine)")){
+  const oldRow=w.ex.find(e=>e.name==="DB row"&&!e.optional);
+  if(oldRow){oldRow.name="Chest-supported row (machine)";oldRow.priorLabel="DB row";}
+ }
  for(const spec of d[3]){
   let existing=w.ex.find(x=>x.name===spec[0]);
   if(!existing){w.ex.push(freshExercise(spec));continue}
@@ -543,7 +584,7 @@ function stepSource(day,index){
  const maps={
  Monday:[["Explosive push-up"],["Bench press"],["Weighted pull-up"],["Incline DB press","DB row (per side)","DB lateral raise"],["Battle ropes (40s work intervals)"],null],
  Tuesday:["run",["Functional circuit"],["Cable crunch","Hanging knee raise"],null],
- Wednesday:[["Vertical jump"],["Straight-bar deadlift"],["DB row"],["Rear delt fly","Cable rope bicep curls"],["Leg curl (machine)"]],
+ Wednesday:[["Vertical jump"],["Straight-bar deadlift"],["Chest-supported row (machine)"],["Rear delt fly","Cable rope bicep curls"],["Leg curl (machine)"]],
  Thursday:[null,["DB overhead press"],["Pull-up / weighted pull-up"],["DB lateral raise","DB row (per side)"],"run",null],
  Friday:[null,["Angled leg press"],"amrap",["Bulgarian split squat"],["Standing calf raise","Reverse crunch"],null],
  Weekend:[null,null,"run",null]
@@ -635,16 +676,68 @@ function exerciseComment(i,v){let e=S.work[D[S.day][0]].ex[i];quick(e).comment=v
 function quickVal(i,k,v){let e=S.work[D[S.day][0]].ex[i];quick(e)[k]=v;save()}
 function markExercise(i,button){
  const e=S.work[D[S.day][0]].ex[i],q=quick(e);q.done=!q.done;save();
- if(button){button.classList.toggle("primary",q.done);button.textContent=q.done?"✓ Done":"Mark done";button.setAttribute("aria-pressed",String(q.done))}
+ if(button){button.classList.toggle("primary",q.done);button.textContent=q.done?"✓ Done":"Mark done";button.setAttribute("aria-pressed",String(q.done));const card=button.closest(".exerciseCard");card?.classList.toggle("isDone",q.done);const details=card?.querySelector(".setEntryDetails");if(details)details.open=!q.done;}
  renderCompletion();
 }
 
 function last(name){
- for(let h of S.history){let e=(h.ex||[]).find(x=>x.name===name);if(e){let q=e.quick;
- if(q&&(q.weight!==""||q.reps!==""))return [q.weight?q.weight+"kg":"BW",q.reps?q.reps+" reps":"",q.rir!==""?q.rir+" RIR":""].filter(Boolean).join(" · ");
- let sets=(e.data||[]).filter(x=>x.done);
- if(sets.length)return sets.map(x=>(x.w||"BW")+"kg × "+x.r).join(" | ");
- }}return "";
+ for(const history of S.history){
+  const e=(history.ex||[]).find(x=>actualExerciseName(x)===name);
+  if(e){const rows=loggedSetRows(e);
+   if(rows.length)return rows.slice(-2).map(x=>(String(x.w??"").trim()?x.w+" kg":"BW")+" × "+(x.r||"?")+(String(x.rir??"").trim()!==""?" · "+x.rir+" RIR":"")).join(" | ");
+   const q=e.quick||{};
+   if(q.weight||q.reps)return [q.weight?q.weight+" kg":"BW",q.reps?q.reps+" reps":"",String(q.rir??"").trim()?q.rir+" RIR":""].filter(Boolean).join(" · ");
+  }
+ }
+ return "";
+}
+function actualExerciseName(e){return String(e?.performedName||e?.name||"").trim()}
+function loggedSetRows(e){return (e?.data||[]).map((s,i)=>({...s,originalIndex:i})).filter(s=>["w","r","rir"].some(k=>String(s[k]??"").trim())||s.done)}
+function shortSetSummary(e){
+ const rows=loggedSetRows(e);
+ if(rows.length){const s=rows.at(-1);return rows.length+" set"+(rows.length===1?"":"s")+" logged · last "+(String(s.w??"").trim()?s.w+" kg":"BW")+" × "+(String(s.r??"").trim()||"—")+(String(s.rir??"").trim()!==""?" · "+s.rir+" RIR":"")}
+ const q=e?.quick||{};
+ return [q.weight?String(q.weight)+" kg":"",q.reps?String(q.reps)+" reps":"",q.rir!==""&&q.rir!=null?String(q.rir)+" RIR":""].filter(Boolean).join(" · ")||(q.done?"Completed":"No sets recorded");
+}
+function jumpToExercise(value){
+ if(value==="")return;
+ const el=document.getElementById("exercise-"+value);
+ if(el){el.scrollIntoView({behavior:"smooth",block:"start"});const details=el.querySelector(".setEntryDetails");if(details)details.open=true}
+ const sel=$("exerciseJump");if(sel)sel.value="";
+}
+function applyPerformedName(i,reset=false){
+ const e=S.work[D[S.day][0]]?.ex[i],card=document.getElementById("exercise-"+i);if(!e)return;
+ const input=card?.querySelector(".performedNameInput");
+ const typed=reset?"":String(input?.value||"").trim().slice(0,90);
+ if(!reset&&!typed){toast("Enter the actual exercise or choose Use planned");return}
+ if(typed&&typed.toLowerCase()!==e.name.toLowerCase())e.performedName=typed;
+ else delete e.performedName;
+ save();
+ if(card){const title=card.querySelector(".exTitle"),status=card.querySelector(".prescribedNote");if(title)title.textContent=actualExerciseName(e);if(status)status.textContent=e.performedName?"Planned: "+e.name:"";if(input)input.value=e.performedName||"";}
+ toast(e.performedName?"Actual exercise recorded":"Using prescribed exercise");
+}
+function repeatExerciseLoad(i,button){
+ const e=S.work[D[S.day][0]]?.ex[i];if(!e)return;
+ const rows=e.data||[];
+ let source=null;
+ for(let j=rows.length-1;j>=0;j--)if(String(rows[j].w??"").trim()){source=rows[j];break}
+ if(!source){toast("Enter a weight first, then use Repeat load");return}
+ let next=rows.findIndex(s=>!String(s.w??"").trim()&&!String(s.r??"").trim()&&!String(s.rir??"").trim());
+ if(next<0){
+  if(rows.length>=40){toast("40 sets is the maximum");return}
+  next=rows.length;rows.push({w:"",r:"",rir:"",done:false});
+  const grid=button.closest(".exerciseCard")?.querySelector(".sets");
+  if(grid)grid.insertAdjacentHTML("beforeend",setRowHtml(i,next,rows[next],e.unit==="minutes",next>=e.n));
+ }
+ rows[next].w=source.w;save();
+ const grid=button.closest(".exerciseCard")?.querySelector(".sets");
+ if(grid){
+  const weight=grid.querySelector('[data-set="'+next+'"][data-field="w"]');
+  const reps=grid.querySelector('[data-set="'+next+'"][data-field="r"]');
+  if(weight)weight.value=source.w;
+  if(reps)reps.focus();
+ }
+ toast("Load repeated — enter the reps and RIR you actually achieved");
 }
 function renderSets(){
  const day=D[S.day][0],d=D[S.day],w=S.work[day];
@@ -654,63 +747,66 @@ function renderSets(){
  const items=[...planned.map((i,pos)=>({i,kind:"planned",position:pos})),...extras.map(i=>({i,kind:"optional",position:-1})),...legacy.map(i=>({i,kind:"legacy",position:-1}))];
  let previousGroup="",previousKind="";
  $("sets").innerHTML=items.map((item,itemIndex)=>{
-  const ei=item.i,e=w.ex[ei],q=quick(e),logged=(e.data||[]).filter(x=>x.done).length;
+  const ei=item.i,e=w.ex[ei],q=quick(e);
   const g=item.kind==="planned"&&!(day==="Friday"&&[1,2,3].includes(item.position))?exerciseGroup(day,item.position):null;
   const next=items[itemIndex+1];
   const nextGroup=next?.kind==="planned"&&!(day==="Friday"&&[1,2,3].includes(next.position))?exerciseGroup(day,next.position):null;
   let prefix="",suffix="";
   if(item.kind==="optional"&&previousKind!=="optional")prefix+='<div class="optionalHeader">➕ Optional extra exercises</div>';
-  if(item.kind==="legacy"&&previousKind!=="legacy")prefix+='<details class="legacyGroup"><summary>Older / previous-plan exercises ('+legacy.length+') — tap to view</summary><p class="muted">These entries are not in the current plan. Previous records remain available; nothing has been deleted.</p>';
+  if(item.kind==="legacy"&&previousKind!=="legacy")prefix+='<details class="legacyGroup"><summary>Older / previous-plan exercises ('+legacy.length+') — tap to view</summary><p class="muted">Previous records remain available; nothing has been deleted.</p>';
   if(g&&g[0]!==previousGroup)prefix+='<div class="exerciseGroup '+g[1]+'"><div class="groupHeader">↪ '+escapeHtml(g[0])+'</div>';
   if(g&&(!nextGroup||nextGroup[0]!==g[0]))suffix+='</div>';
   if(item.kind==="legacy"&&(!next||next.kind!=="legacy"))suffix+='</details>';
   previousGroup=g?g[0]:"";previousKind=item.kind;
-  const previous=last(e.name),isRun=e.unit==="minutes",isRounds=e.unit==="rounds",targetUnit=isRun?"minutes":isRounds?"rounds":"reps";
-  const loadHint=e.loadHint?'<p class="plannedLoad">Suggested starting load: '+escapeHtml(e.loadHint)+'</p>':"";
-  const detailedPrevious=(e.previousSets||[]).length?'<p class="muted">'+e.previousSets.length+' additional logged set(s) from an earlier programme are preserved in the session record.</p>':"";
+  const previous=last(actualExerciseName(e)),isRun=e.unit==="minutes",isRounds=e.unit==="rounds",targetUnit=isRun?"minutes":isRounds?"rounds":"reps";
+  const loadHint=e.loadHint?'<p class="plannedLoad">Target guidance: '+escapeHtml(e.loadHint)+'</p>':"";
   const isAmrapComponent=day==="Friday"&&item.kind==="planned"&&["Barbell push press","Barbell row","Burpee"].includes(e.name);
   if(isAmrapComponent&&e.name==="Barbell push press")prefix+='<details class="amrapLogDetails"><summary>Optional: AMRAP exercise details</summary><p class="muted">Your rounds are counted above. Individual entries are optional.</p>';
   if(isAmrapComponent&&e.name==="Burpee")suffix+='</details>';
-  // ONE completion button per exercise. Detailed sets are just data fields, not extra ticks.
-  const action=isAmrapComponent?'':'<button type="button" class="markDone '+(q.done?"primary":"")+'" onclick="markExercise('+ei+',this)" aria-pressed="'+(q.done?"true":"false")+'">'+(q.done?"✓ Done":"Mark done")+'</button>';
-  const detailsSaved=!!(q.comment||e.comment||(e.data||[]).some(x=>["w","r","rir"].some(k=>String(x[k]??"").trim())));
-  return prefix+'<div class="exerciseCard"><div class="row"><div><div class="exTitle">'+escapeHtml(e.name)+'</div><div class="muted">'+e.n+' sets · '+e.min+'–'+e.max+' '+targetUnit+(previous?' · Last: '+escapeHtml(previous):'')+'</div></div>'+action+'</div>'+loadHint+
-  '<div class="quickGrid"><label>'+(isRun?'Distance (km)':'Weight (kg)')+'<input type="number" inputmode="decimal" step="'+(isRun?'.1':'.5')+'" placeholder="'+(isRun?'km':'BW / kg')+'" value="'+escapeHtml(q.weight)+'" oninput="quickVal('+ei+',\'weight\',this.value)"></label>'+
-  '<label>'+(isRun?'Minutes / set':isRounds?'Rounds':'Reps / set')+'<input type="text" inputmode="numeric" pattern="[0-9]*" placeholder="'+(isRun?'15':isRounds?'3':'e.g. 8')+'" value="'+escapeHtml(q.reps)+'" oninput="quickVal('+ei+',\'reps\',this.value)"></label>'+
-  '<label>RIR <span class="muted">(opt.)</span><input type="number" inputmode="numeric" min="0" max="10" placeholder="2" value="'+escapeHtml(q.rir)+'" oninput="quickVal('+ei+',\'rir\',this.value)"></label></div>'+
-  '<details class="exerciseMore"><summary>Details &amp; notes'+(detailsSaved?' · saved':'')+'</summary>'+
-  '<label class="small"><b>Exercise notes</b></label><textarea rows="2" placeholder="Load changes, technique, interruptions…" oninput="exerciseComment('+ei+',this.value)">'+escapeHtml(q.comment||e.comment||"")+'</textarea>'+
-  '<p class="setHeading">Individual sets (optional)</p>'+detailedPrevious+
-  '<div class="sets"><small>#</small><small>'+(isRun?'km':'kg')+'</small><small>'+(isRun?'min':isRounds?'rounds':'reps')+'</small><small>RIR</small>'+
-  (e.data||[]).map((x,si)=>setRowHtml(ei,si,x,isRun,si>=e.n)).join("")+
-  '</div><button type="button" class="addSetButton" onclick="addSet('+ei+',this)">＋ Add set</button></details></div>'+suffix;
+  const action=isAmrapComponent?'<span class="amrapAutoLabel">AMRAP tally</span>':'<button type="button" class="markDone '+(q.done?"primary":"")+'" onclick="markExercise('+ei+',this)" aria-pressed="'+(q.done?"true":"false")+'">'+(q.done?"✓ Done":"Mark done")+'</button>';
+  const hasLegacyQuick=[q.weight,q.reps,q.rir].some(v=>String(v??"").trim());
+  const quickLegacy=hasLegacyQuick?'<p class="legacyQuick">Earlier quick-entry values retained: '+escapeHtml([q.weight?String(q.weight)+" kg":"",q.reps?String(q.reps)+" reps":"",q.rir!==""&&q.rir!=null?String(q.rir)+" RIR":""].filter(Boolean).join(" · "))+'</p>':"";
+  const notesSaved=Boolean(q.comment||e.comment);
+  const setCount=e.data?.length||0;
+  const setsHtml=(e.data||[]).map((x,si)=>setRowHtml(ei,si,x,isRun,si>=e.n)).join("");
+  const title=escapeHtml(actualExerciseName(e));
+  return prefix+'<div class="exerciseCard'+(q.done?" isDone":"")+'" id="exercise-'+ei+'">'+
+   '<div class="exerciseHeader"><div class="exHeading"><div class="exTitle">'+title+'</div><div class="prescribedNote">'+(e.performedName?"Planned: "+escapeHtml(e.name):"")+'</div><div class="exercisePrescription">'+e.n+' sets · '+e.min+'–'+e.max+' '+targetUnit+'</div></div>'+action+'</div>'+
+   (previous?'<p class="exercisePrevious">Previous: '+escapeHtml(previous)+'</p>':"")+
+   '<p class="exerciseProgress" id="progress-'+ei+'">'+escapeHtml(shortSetSummary(e))+'</p>'+
+   '<details class="setEntryDetails" '+(q.done?"":"open")+'><summary>Record actual sets · '+setCount+' rows</summary><div class="sets"><small>#</small><small>'+(isRun?"km":"kg")+'</small><small>'+(isRun?"min":isRounds?"rounds":"reps")+'</small><small>RIR</small>'+setsHtml+'</div>'+
+   '<div class="setEntryActions"><button type="button" onclick="repeatExerciseLoad('+ei+',this)">↻ Repeat load</button><button type="button" class="addSetButton" onclick="addSet('+ei+',this)">＋ Add set</button></div>'+quickLegacy+'</details>'+
+   '<details class="exerciseSwap"><summary>↔ Swap exercise / equipment</summary><label>Actual movement (if different from plan)<input class="performedNameInput" type="text" maxlength="90" value="'+escapeHtml(e.performedName||"")+'" placeholder="e.g. DB biceps curl"></label><div class="swapActions"><button type="button" onclick="applyPerformedName('+ei+')">Use actual exercise</button><button type="button" onclick="applyPerformedName('+ei+',true)">Use planned</button></div><p class="muted">Original prescription and existing history stay intact.</p></details>'+
+   '<details class="exerciseMore"><summary>Notes'+(notesSaved?" · saved":"")+'</summary><textarea rows="2" placeholder="Load changes, technique, interruptions…" oninput="exerciseComment('+ei+',this.value)">'+escapeHtml(q.comment||e.comment||"")+'</textarea>'+loadHint+'</details></div>'+suffix;
  }).join("");
+ const jump=$("exerciseJump");
+ if(jump)jump.innerHTML='<option value="">Jump to any exercise…</option>'+items.filter(x=>!((day==="Friday")&&["Barbell push press","Barbell row","Burpee"].includes(w.ex[x.i].name))).map(x=>'<option value="'+x.i+'">'+escapeHtml(actualExerciseName(w.ex[x.i]))+'</option>').join("");
  renderCompletion();
 }
 function renderCompletion(){renderPlanCount()}
 
 function setRowHtml(ei,si,x,isRun,isExtra){
- // One numbered, editable row. Only the main exercise card can be marked complete.
+ const meta=(field)=>' data-set="'+si+'" data-field="'+field+'" ';
  return '<span class="'+(isExtra?'extraSetIndex':'')+'" title="'+(isExtra?'Additional set':'Planned set')+'">'+(si+1)+'</span>'+
- '<input aria-label="Set '+(si+1)+' '+(isRun?'distance':'weight')+'" type="number" inputmode="decimal" step=".5" value="'+escapeHtml(x.w)+'" onchange="val('+ei+','+si+',\'w\',this.value)">'+
- '<input aria-label="Set '+(si+1)+' '+(isRun?'minutes':'reps')+'" type="number" inputmode="numeric" value="'+escapeHtml(x.r)+'" onchange="val('+ei+','+si+',\'r\',this.value)">'+
- '<input aria-label="Set '+(si+1)+' RIR" type="number" inputmode="numeric" value="'+escapeHtml(x.rir)+'" onchange="val('+ei+','+si+',\'rir\',this.value)">';
+ '<input '+meta("w")+'aria-label="Set '+(si+1)+' '+(isRun?'distance':'weight')+'" type="number" inputmode="decimal" step=".5" value="'+escapeHtml(x.w??"")+'" oninput="val('+ei+','+si+',\'w\',this.value)">'+
+ '<input '+meta("r")+'aria-label="Set '+(si+1)+' '+(isRun?'minutes':'reps')+'" type="number" inputmode="numeric" value="'+escapeHtml(x.r??"")+'" oninput="val('+ei+','+si+',\'r\',this.value)">'+
+ '<input '+meta("rir")+'aria-label="Set '+(si+1)+' RIR" type="number" inputmode="numeric" min="0" max="10" value="'+escapeHtml(x.rir??"")+'" oninput="val('+ei+','+si+',\'rir\',this.value)">';
 }
-function val(e,s,k,v){S.work[D[S.day][0]].ex[e].data[s][k]=v;save()}
+function val(e,s,k,v){
+ const ex=S.work[D[S.day][0]].ex[e];if(!ex?.data?.[s])return;
+ ex.data[s][k]=v;save();
+ const counter=$("progress-"+e);if(counter)counter.textContent=shortSetSummary(ex);
+}
 function addSet(i,button){
  const exercise=S.work[D[S.day][0]]?.ex[i];if(!exercise)return;
  exercise.data ||= [];
  if(exercise.data.length>=40){toast("40 sets is the maximum");return}
- const si=exercise.data.length;
- const row={w:"",r:"",rir:"",done:false};
+ const si=exercise.data.length,row={w:"",r:"",rir:"",done:false};
  exercise.data.push(row);save();
- const grid=button?.previousElementSibling;
- if(grid?.classList?.contains("sets")){
-  grid.insertAdjacentHTML("beforeend",setRowHtml(i,si,row,exercise.unit==="minutes",si>=exercise.n));
- }else{
-  // Fallback without losing the new set if a nonstandard DOM is used.
-  renderSets();
- }
+ const grid=button?.closest(".exerciseCard")?.querySelector(".sets");
+ if(grid?.classList?.contains("sets"))grid.insertAdjacentHTML("beforeend",setRowHtml(i,si,row,exercise.unit==="minutes",si>=exercise.n));
+ else renderSets();
+ const detail=button?.closest(".setEntryDetails");if(detail)detail.querySelector("summary").textContent="Record actual sets · "+exercise.data.length+" rows";
 }
 const BONUS_OPTIONS={
  Monday:[
@@ -865,10 +961,10 @@ function renderRun(){
  }).join("")+'</div>';
 }
 function formatExercise(e){
- const q=e.quick||{},entries=(e.data||[]).filter(s=>s.done||s.w!==""||s.r!==""||s.rir!=="");
- const summary=[q.weight?String(q.weight)+" kg":"",q.reps?String(q.reps)+" reps":"",q.rir!==""&&q.rir!=null?String(q.rir)+" RIR":""].filter(Boolean).join(" · ");
- const details=entries.map((s,i)=>"set "+(i+1)+": "+(s.w||"BW")+" kg × "+(s.r||"?")+" reps").join("; ");
- return [summary,details].filter(Boolean).join(" | ")||"Not logged";
+ const rows=loggedSetRows(e),q=e.quick||{};
+ const details=rows.map(s=>"set "+(s.originalIndex+1)+": "+(String(s.w??"").trim()?s.w+" kg":"load —")+" × "+(String(s.r??"").trim()||"?")+" reps"+(String(s.rir??"").trim()!==""?" · "+s.rir+" RIR":"")).join("; ");
+ const legacy=[q.weight?String(q.weight)+" kg":"",q.reps?String(q.reps)+" reps":"",q.rir!==""&&q.rir!=null?String(q.rir)+" RIR":""].filter(Boolean).join(" · ");
+ return [details,legacy?(rows.length?"Older quick entry: ":"")+legacy:""].filter(Boolean).join(" | ")||(q.done?"Completed":"Not logged");
 }
 function renderHistory(){
  const filter=$("historyFilter").value;
@@ -882,9 +978,9 @@ function renderHistory(){
  compare.innerHTML='<b>Long-run comparison</b><table class="historyCompareTable"><tr><th>Metric</th><th>Latest</th><th>Previous</th></tr>'+
  [['Running distance',ra.distance,rb.distance,' km'],['Running duration',ra.duration,rb.duration,' min'],['Running pace',paceLabel(ra.distance,ra.duration),paceLabel(rb.distance,rb.duration),''],['Walking distance',ra.walkDistance,rb.walkDistance,' km'],['Effort',ra.effort,rb.effort,' /10']].map(x=>'<tr><td>'+escapeHtml(x[0])+'</td><td>'+escapeHtml(x[1]||"—")+x[3]+'</td><td>'+escapeHtml(x[2]||"—")+x[3]+'</td></tr>').join("")+'</table>';
  }else{
- const latest=sessions[0],previous=sessions[1],names=[...new Set([...(latest.ex||[]).map(x=>x.name),...(previous.ex||[]).map(x=>x.name)])];
+ const latest=sessions[0],previous=sessions[1],names=[...new Set([...(latest.ex||[]).map(actualExerciseName),...(previous.ex||[]).map(actualExerciseName)])];
  compare.innerHTML='<b>'+escapeHtml(filter)+' — last two sessions</b><table class="historyCompareTable"><tr><th>Exercise</th><th>Latest</th><th>Previous</th></tr>'+names.map(n=>{
- const a=latest.ex.find(x=>x.name===n),b=previous.ex.find(x=>x.name===n);
+ const a=latest.ex.find(x=>actualExerciseName(x)===n),b=previous.ex.find(x=>actualExerciseName(x)===n);
  return '<tr><td>'+escapeHtml(n)+'</td><td>'+escapeHtml(a?formatExercise(a):"—")+'</td><td>'+escapeHtml(b?formatExercise(b):"—")+'</td></tr>';
  }).join("")+'</table>';
  }
@@ -895,7 +991,7 @@ function renderHistory(){
  const summary=empty?"No workout data recorded":s.day==="Friday"&&Number(s.amrapRounds)>0?(s.amrapRounds+" counted AMRAP rounds"):RUN_DAYS.includes(s.day)&&s.run?.distance?("Run "+s.run.distance+" km · Walk "+(s.run.walkDistance||"0")+" km · "+paceLabel(s.run.distance,s.run.duration)):(s.ex||[]).filter(x=>x.quick?.done||(x.data||[]).some(y=>y.done)).length+" exercises completed";
  const detail=RUN_DAYS.includes(s.day)&&s.run?'<div class="historyExercise">Running: '+escapeHtml(s.run.distance||"—")+' km · '+escapeHtml(s.run.duration||"—")+' min · '+escapeHtml(paceLabel(s.run.distance,s.run.duration))+' · Walking: '+escapeHtml(s.run.walkDistance||"0")+' km · Effort: '+escapeHtml(s.run.effort||"—")+'/10</div><div class="muted">Terrain: '+escapeHtml(s.run.terrain||"—")+'<br>Recovery: '+escapeHtml(s.run.recovery||"—")+'</div>':"";
  return '<div class="card historyEntry '+(s.day==="Weekend"?"weekendEntry":"")+'"><details><summary>'+escapeHtml(s.day)+' · '+escapeHtml(date)+'</summary><div class="muted">'+escapeHtml(summary)+'</div><div class="historyDetail">'+detail+
- (s.ex||[]).filter(e=>e.quick?.done||e.quick?.comment||e.quick?.weight||e.quick?.reps||(e.data||[]).some(x=>x.done||x.w||x.r)).map(e=>'<div class="historyExercise"><b>'+escapeHtml(e.name)+'</b><div>'+escapeHtml(formatExercise(e))+'</div>'+(e.quick?.comment?'<div class="muted">Note: '+escapeHtml(e.quick.comment)+'</div>':"")+'</div>').join("")+
+ (s.ex||[]).filter(e=>e.quick?.done||e.quick?.comment||e.quick?.weight||e.quick?.reps||(e.data||[]).some(x=>x.done||x.w||x.r)).map(e=>'<div class="historyExercise"><b>'+escapeHtml(actualExerciseName(e))+'</b>'+(e.performedName?'<div class="muted">Planned: '+escapeHtml(e.name)+'</div>':'')+'<div>'+escapeHtml(formatExercise(e))+'</div>'+(e.quick?.comment?'<div class="muted">Note: '+escapeHtml(e.quick.comment)+'</div>':"")+'</div>').join("")+
  (s.amrapRounds?'<p class="muted">AMRAP: '+escapeHtml(s.amrapRounds)+' rounds · '+escapeHtml(s.amrapNotes||'standard sequence')+'</p>':"")+(s.effort?'<p class="muted">Overall difficulty: '+escapeHtml(s.effort)+'/10</p>':"")+(s.notes?'<p class="muted">Workout feedback: '+escapeHtml(s.notes)+'</p>':"")+(s.planDone?'<p class="muted">Completed sections: '+escapeHtml(Object.keys(s.planDone).filter(k=>s.planDone[k]).join(', ')||'none')+'</p>':"")+
  (empty?'<div class="emptyHistoryLabel">Empty saved workout</div>':"")+
  '<div class="historyActions"><button onclick="copyOldSession('+idx+')">Copy report</button><button class="deleteHistoryBtn" onclick="deleteOldSession('+idx+')">Delete workout</button></div></div></details></div>';
@@ -936,10 +1032,12 @@ function formatReport(record){
   const logged=e.quick?.done||["weight","reps","rir","comment"].some(k=>String(e.quick?.[k]??"").trim())||(e.data||[]).some(s=>s.done||["w","r","rir"].some(k=>String(s[k]??"").trim()));
   if(isCountedAmrap&&!logged)continue;
   const unit=e.unit==="minutes"?"minutes":e.unit==="rounds"?"rounds":"reps";
-  lines.push(e.name+" | target "+e.n+" sets × "+e.min+"–"+e.max+" "+unit+(e.optional?" [optional extra]":e.legacy?" [older programme]":""));
+  lines.push(actualExerciseName(e)+(e.performedName?" [substituted for: "+e.name+"]":"")+" | target "+e.n+" sets × "+e.min+"–"+e.max+" "+unit+(e.optional?" [optional extra]":e.legacy?" [older programme]":""));
   const q=e.quick||{};
-  if(q.done||["weight","reps","rir","comment"].some(k=>String(q[k]??"").trim())){
-   lines.push("  Summary: "+(q.weight!==""&&q.weight!==undefined?q.weight+(e.unit==="minutes"?" km":" kg"):"BW / not entered")+"; "+(q.reps||"reps/time not entered")+" "+unit+(q.rir!==""&&q.rir!==undefined?"; "+q.rir+" RIR":"")+(q.done?"; marked complete":""));
+  const hasActualSets=loggedSetRows(e).length>0;
+  if(q.done)lines.push("  Exercise complete");
+  if(["weight","reps","rir"].some(k=>String(q[k]??"").trim())){
+   lines.push("  "+(hasActualSets?"Earlier quick entry (preserved)":"Quick-entry summary")+": "+[String(q.weight??"").trim()?q.weight+(e.unit==="minutes"?" km":" kg"):"",String(q.reps??"").trim()?q.reps+" "+unit:"",String(q.rir??"").trim()?q.rir+" RIR":""].filter(Boolean).join(" · "));
   }
   if(q.comment)lines.push("  Comments: "+q.comment);
   let any=false;
