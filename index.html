@@ -340,6 +340,10 @@ body.victoryOpen{overflow:hidden}
 .jumpLabel{display:block;margin:8px 0 14px;color:#53718f;font-size:12px;font-weight:800}
 .jumpLabel select{width:100%;margin-top:5px;min-height:46px;font-size:15px;border-radius:9px;background:#fff;padding:8px;border:1px solid #a9c4db}
 @media(max-width:380px){.exerciseCard .exerciseHeader{grid-template-columns:minmax(0,1fr) 91px;gap:6px}.exerciseCard .markDone{width:91px;min-width:91px;font-size:12px}}
+
+.exerciseCard .legacyQuickEditor{margin:9px 0;border-top:1px dashed #d1deeb;padding-top:5px}
+.exerciseCard .legacyQuickEditor>summary{font-size:12px;min-height:38px;color:#8b691d}
+.exerciseCard .legacyQuickEditor .quickGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
 </style></head><body>
 <header><div><b>Cut Phase</b><div class="muted">“Fall in love with the grind.”</div></div><div class="tabs" id="tabs"></div></header>
 <main>
@@ -640,8 +644,6 @@ function saveFeedback(){
  const w=S.work[D[S.day][0]];w.notes=$("notes").value;w.effort=$("sessionEffort").value;save();
 }
 
-function last(name){for(let h of S.history){let e=h.ex.find(x=>x.name===name);if(e)return e.data.filter(x=>x.done).map(x=>x.w+"kg × "+x.r+" @ "+x.rir+" RIR").join(" | ")}return ""}
-
 function escapeHtml(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 
 function planType(name){return /circuit|finisher|AMRAP|power/i.test(name)?"circuit":/run/i.test(name)?"run":/warm-up|stretch|mobility|recovery/i.test(name)?"recovery":/lift|strength|bench|squat|deadlift|press|back|shoulder/i.test(name)?"strength":"other"}
@@ -673,7 +675,7 @@ function quick(e){
 }
 function quickHasData(e){let q=quick(e);return q.done||q.weight!==""||q.reps!==""||q.rir!==""||!!q.comment.trim()}
 function exerciseComment(i,v){let e=S.work[D[S.day][0]].ex[i];quick(e).comment=v;save()}
-function quickVal(i,k,v){let e=S.work[D[S.day][0]].ex[i];quick(e)[k]=v;save()}
+function quickVal(i,k,v){let e=S.work[D[S.day][0]].ex[i];quick(e)[k]=v;save();const label=$("progress-"+i);if(label)label.textContent=shortSetSummary(e)}
 function markExercise(i,button){
  const e=S.work[D[S.day][0]].ex[i],q=quick(e);q.done=!q.done;save();
  if(button){button.classList.toggle("primary",q.done);button.textContent=q.done?"✓ Done":"Mark done";button.setAttribute("aria-pressed",String(q.done));const card=button.closest(".exerciseCard");card?.classList.toggle("isDone",q.done);const details=card?.querySelector(".setEntryDetails");if(details)details.open=!q.done;}
@@ -765,7 +767,7 @@ function renderSets(){
   if(isAmrapComponent&&e.name==="Burpee")suffix+='</details>';
   const action=isAmrapComponent?'<span class="amrapAutoLabel">AMRAP tally</span>':'<button type="button" class="markDone '+(q.done?"primary":"")+'" onclick="markExercise('+ei+',this)" aria-pressed="'+(q.done?"true":"false")+'">'+(q.done?"✓ Done":"Mark done")+'</button>';
   const hasLegacyQuick=[q.weight,q.reps,q.rir].some(v=>String(v??"").trim());
-  const quickLegacy=hasLegacyQuick?'<p class="legacyQuick">Earlier quick-entry values retained: '+escapeHtml([q.weight?String(q.weight)+" kg":"",q.reps?String(q.reps)+" reps":"",q.rir!==""&&q.rir!=null?String(q.rir)+" RIR":""].filter(Boolean).join(" · "))+'</p>':"";
+  const quickLegacy=hasLegacyQuick?'<details class="legacyQuickEditor"><summary>Earlier quick entry (preserved · editable)</summary><p class="legacyQuick">Your original summary is retained; it is not an invented set.</p><div class="quickGrid"><label>Weight (kg)<input type="number" inputmode="decimal" value="'+escapeHtml(q.weight??"")+'" oninput="quickVal('+ei+',\'weight\',this.value)"></label><label>Reps<input type="number" inputmode="numeric" value="'+escapeHtml(q.reps??"")+'" oninput="quickVal('+ei+',\'reps\',this.value)"></label><label>RIR<input type="number" inputmode="numeric" value="'+escapeHtml(q.rir??"")+'" oninput="quickVal('+ei+',\'rir\',this.value)"></label></div></details>':"";
   const notesSaved=Boolean(q.comment||e.comment);
   const setCount=e.data?.length||0;
   const setsHtml=(e.data||[]).map((x,si)=>setRowHtml(ei,si,x,isRun,si>=e.n)).join("");
@@ -774,7 +776,7 @@ function renderSets(){
    '<div class="exerciseHeader"><div class="exHeading"><div class="exTitle">'+title+'</div><div class="prescribedNote">'+(e.performedName?"Planned: "+escapeHtml(e.name):"")+'</div><div class="exercisePrescription">'+e.n+' sets · '+e.min+'–'+e.max+' '+targetUnit+'</div></div>'+action+'</div>'+
    (previous?'<p class="exercisePrevious">Previous: '+escapeHtml(previous)+'</p>':"")+
    '<p class="exerciseProgress" id="progress-'+ei+'">'+escapeHtml(shortSetSummary(e))+'</p>'+
-   '<details class="setEntryDetails" '+(q.done?"":"open")+'><summary>Record actual sets · '+setCount+' rows</summary><div class="sets"><small>#</small><small>'+(isRun?"km":"kg")+'</small><small>'+(isRun?"min":isRounds?"rounds":"reps")+'</small><small>RIR</small>'+setsHtml+'</div>'+
+   '<details class="setEntryDetails" '+(q.done||e.name==="Battle ropes (40s work intervals)"?"":"open")+'><summary>Record actual sets · '+setCount+' rows</summary><div class="sets"><small>#</small><small>'+(isRun?"km":"kg")+'</small><small>'+(isRun?"min":isRounds?"rounds":"reps")+'</small><small>RIR</small>'+setsHtml+'</div>'+
    '<div class="setEntryActions"><button type="button" onclick="repeatExerciseLoad('+ei+',this)">↻ Repeat load</button><button type="button" class="addSetButton" onclick="addSet('+ei+',this)">＋ Add set</button></div>'+quickLegacy+'</details>'+
    '<details class="exerciseSwap"><summary>↔ Swap exercise / equipment</summary><label>Actual movement (if different from plan)<input class="performedNameInput" type="text" maxlength="90" value="'+escapeHtml(e.performedName||"")+'" placeholder="e.g. DB biceps curl"></label><div class="swapActions"><button type="button" onclick="applyPerformedName('+ei+')">Use actual exercise</button><button type="button" onclick="applyPerformedName('+ei+',true)">Use planned</button></div><p class="muted">Original prescription and existing history stay intact.</p></details>'+
    '<details class="exerciseMore"><summary>Notes'+(notesSaved?" · saved":"")+'</summary><textarea rows="2" placeholder="Load changes, technique, interruptions…" oninput="exerciseComment('+ei+',this.value)">'+escapeHtml(q.comment||e.comment||"")+'</textarea>'+loadHint+'</details></div>'+suffix;
