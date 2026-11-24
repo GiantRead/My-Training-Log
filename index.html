@@ -344,6 +344,21 @@ body.victoryOpen{overflow:hidden}
 .exerciseCard .legacyQuickEditor{margin:9px 0;border-top:1px dashed #d1deeb;padding-top:5px}
 .exerciseCard .legacyQuickEditor>summary{font-size:12px;min-height:38px;color:#8b691d}
 .exerciseCard .legacyQuickEditor .quickGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+
+/* Optional single-exercise focus; the full workout list remains the default. */
+.gymTools{display:flex;align-items:end;gap:9px;margin:8px 0 14px}
+.gymTools .jumpLabel{flex:1;min-width:0;margin:0}
+.gymTools .focusToggle{min-width:94px;min-height:46px;padding:8px 10px;font-size:12px;white-space:nowrap}
+.gymTools .focusToggle[aria-pressed="true"]{background:#e0f6ed;border-color:#56b59a;color:#156b50}
+.focusNav{display:grid;grid-template-columns:100px minmax(0,1fr) 100px;gap:6px;align-items:center;margin:8px 0 14px;background:#f3f8ff;border-radius:10px;padding:8px}
+.focusNav[hidden]{display:none!important}
+.focusNav button{min-width:0;min-height:44px;padding:6px;font-size:12px}
+.focusNav span{text-align:center;font-size:12px;font-weight:900;line-height:1.35;color:#275886}
+#gymLogCard.focusMode .exerciseCard:not(.focusActive){display:none}
+#gymLogCard.focusMode .exerciseGroup.focusHiddenGroup{display:none}
+#gymLogCard.focusMode .optionalHeader{display:none}
+#gymLogCard.focusMode .exerciseCard.focusActive{border:2px solid #65b9d9;background:#fff}
+@media(max-width:380px){.focusNav{grid-template-columns:82px minmax(0,1fr) 82px}.gymTools .focusToggle{min-width:86px;padding:6px}.focusNav button{font-size:11px}}
 </style></head><body>
 <header><div><b>Cut Phase</b><div class="muted">“Fall in love with the grind.”</div></div><div class="tabs" id="tabs"></div></header>
 <main>
@@ -370,7 +385,7 @@ body.victoryOpen{overflow:hidden}
 <label class="runLabel">Route / terrain<input id="runTerrain" type="text" placeholder="Road, treadmill, hills, weather…" oninput="runMetric('terrain',this.value)"></label>
 <label class="runLabel">Recovery & soreness<textarea id="runRecovery" rows="3" placeholder="Calves, Achilles, knees, energy, how the final kilometres felt…" oninput="runMetric('recovery',this.value)"></textarea></label>
 <div id="runProgress"></div><button id="runDoneBtn" onclick="toggleRunDone()">✓ Mark run / walk complete</button></div>
-<div class="card logCard" id="gymLogCard"><div class="row"><h3>💪 Workout log</h3><span class="muted">Actual sets · load · reps · RIR</span></div><label class="jumpLabel" for="exerciseJump">Jump to exercise <select id="exerciseJump" onchange="jumpToExercise(this.value)"><option value="">Choose an exercise</option></select></label><div id="sets"></div><button onclick="add()" id="addExerciseBtn">+ Add exercise</button><div id="addExercisePicker" class="addPicker" hidden><h3>Supplementary exercise</h3><p class="muted">Choose a suggested option for this day or add your own. Sets, reps and starting-load guidance will fill in automatically.</p><select id="addChoice" onchange="changeAddChoice()"></select><div id="addPreview" class="muted"></div><div id="customAdd" hidden><label>Exercise name<input id="customName" type="text" placeholder="Exercise name"></label><div class="runGrid"><label>Sets<input id="customSets" type="number" inputmode="numeric" min="1" max="20" value="3"></label><label>Minimum reps / time<input id="customMin" type="number" inputmode="numeric" min="1" value="8"></label><label>Maximum reps / time<input id="customMax" type="number" inputmode="numeric" min="1" value="12"></label><label>Starting-load note<input id="customLoad" type="text" placeholder="e.g. light / 12–18 kg"></label></div></div><div class="actionrow"><button class="primary" onclick="confirmAddExercise()">Add to workout</button><button onclick="closeAddExercise()">Cancel</button></div></div></div>
+<div class="card logCard" id="gymLogCard"><div class="row"><h3>💪 Workout log</h3><span class="muted">Actual sets · load · reps · RIR</span></div><div class="gymTools"><label class="jumpLabel" for="exerciseJump">Jump to exercise <select id="exerciseJump" onchange="jumpToExercise(this.value)"><option value="">Choose an exercise</option></select></label><button type="button" id="focusToggle" class="focusToggle" onclick="toggleFocusMode()" aria-pressed="false">Focus mode</button></div><div id="focusNav" class="focusNav" hidden><button type="button" onclick="stepFocus(-1)" aria-label="Previous exercise">← Previous</button><span id="focusStatus" aria-live="polite"></span><button type="button" onclick="stepFocus(1)" aria-label="Next exercise">Next →</button></div><div id="sets"></div><button onclick="add()" id="addExerciseBtn">+ Add exercise</button><div id="addExercisePicker" class="addPicker" hidden><h3>Supplementary exercise</h3><p class="muted">Choose a suggested option for this day or add your own. Sets, reps and starting-load guidance will fill in automatically.</p><select id="addChoice" onchange="changeAddChoice()"></select><div id="addPreview" class="muted"></div><div id="customAdd" hidden><label>Exercise name<input id="customName" type="text" placeholder="Exercise name"></label><div class="runGrid"><label>Sets<input id="customSets" type="number" inputmode="numeric" min="1" max="20" value="3"></label><label>Minimum reps / time<input id="customMin" type="number" inputmode="numeric" min="1" value="8"></label><label>Maximum reps / time<input id="customMax" type="number" inputmode="numeric" min="1" value="12"></label><label>Starting-load note<input id="customLoad" type="text" placeholder="e.g. light / 12–18 kg"></label></div></div><div class="actionrow"><button class="primary" onclick="confirmAddExercise()">Add to workout</button><button onclick="closeAddExercise()">Cancel</button></div></div></div>
 
 
 <figure class="sceneBand sceneBand--finish" id="finishSceneFrame"><svg id="finishScene" role="img" aria-label="Monday complete workout achievement artwork" xmlns="http://www.w3.org/2000/svg" viewBox="600 0 599 219" width="599" height="219" preserveAspectRatio="xMidYMid meet"><image href="./assets/cutphase-comic-v18.webp" x="0" y="0" width="1199" height="1312" preserveAspectRatio="none"/></svg></figure>
@@ -701,10 +716,63 @@ function shortSetSummary(e){
  const q=e?.quick||{};
  return [q.weight?String(q.weight)+" kg":"",q.reps?String(q.reps)+" reps":"",q.rir!==""&&q.rir!=null?String(q.rir)+" RIR":""].filter(Boolean).join(" · ")||(q.done?"Completed":"No sets recorded");
 }
+let focusModeEnabled=false,focusExerciseIndex=0;
+function focusExerciseCards(){
+ return Array.from($("sets")?.querySelectorAll(".exerciseCard")||[]).filter(card=>!!card.querySelector(".markDone"));
+}
+function renderFocusMode(){
+ const log=$("gymLogCard"),nav=$("focusNav"),toggle=$("focusToggle");
+ if(!log||!nav||!toggle)return;
+ const cards=focusExerciseCards();
+ if(focusExerciseIndex>=cards.length)focusExerciseIndex=Math.max(0,cards.length-1);
+ log.classList.toggle("focusMode",focusModeEnabled);
+ nav.hidden=!focusModeEnabled||!cards.length;
+ toggle.textContent=focusModeEnabled?"Show full list":"Focus mode";
+ toggle.setAttribute("aria-pressed",String(focusModeEnabled));
+ cards.forEach((card,i)=>card.classList.toggle("focusActive",focusModeEnabled&&i===focusExerciseIndex));
+ for(const group of log.querySelectorAll(".exerciseGroup")){
+  group.classList.toggle("focusHiddenGroup",focusModeEnabled&&!group.querySelector(".exerciseCard.focusActive"));
+ }
+ const selected=cards[focusExerciseIndex];
+ if(selected){
+  const extra=selected.closest(".legacyGroup");
+  if(extra&&focusModeEnabled)extra.open=true;
+ }
+ const label=$("focusStatus");
+ if(label&&focusModeEnabled&&selected){
+  const heading=selected.querySelector(".exTitle")?.textContent||"Exercise";
+  label.textContent=(focusExerciseIndex+1)+" / "+cards.length+" · "+heading;
+ }
+}
+function toggleFocusMode(){
+ focusModeEnabled=!focusModeEnabled;
+ if(focusModeEnabled){
+  const cards=focusExerciseCards(),firstIncomplete=cards.findIndex(card=>!card.querySelector(".markDone.primary"));
+  focusExerciseIndex=firstIncomplete<0?0:firstIncomplete;
+ }
+ renderFocusMode();
+ const selected=focusExerciseCards()[focusExerciseIndex];
+ if(focusModeEnabled&&selected)selected.scrollIntoView({behavior:"smooth",block:"start"});
+}
+function stepFocus(delta){
+ const cards=focusExerciseCards();if(!cards.length)return;
+ focusExerciseIndex=(focusExerciseIndex+delta+cards.length)%cards.length;
+ renderFocusMode();cards[focusExerciseIndex]?.scrollIntoView({behavior:"smooth",block:"start"});
+}
 function jumpToExercise(value){
  if(value==="")return;
  const el=document.getElementById("exercise-"+value);
- if(el){el.scrollIntoView({behavior:"smooth",block:"start"});const details=el.querySelector(".setEntryDetails");if(details)details.open=true}
+ if(el){
+  if(focusModeEnabled){
+   const n=focusExerciseCards().indexOf(el);
+   if(n>=0){focusExerciseIndex=n;renderFocusMode();}
+   else{focusModeEnabled=false;renderFocusMode();}
+  }
+  const extra=el.closest(".legacyGroup");if(extra)extra.open=true;
+  const extraAmrap=el.closest(".amrapLogDetails");if(extraAmrap)extraAmrap.open=true;
+  const details=el.querySelector(".setEntryDetails");if(details)details.open=true;
+  el.scrollIntoView({behavior:"smooth",block:"start"});
+ }
  const sel=$("exerciseJump");if(sel)sel.value="";
 }
 function applyPerformedName(i,reset=false){
@@ -783,7 +851,7 @@ function renderSets(){
  }).join("");
  const jump=$("exerciseJump");
  if(jump)jump.innerHTML='<option value="">Jump to any exercise…</option>'+items.filter(x=>!((day==="Friday")&&["Barbell push press","Barbell row","Burpee"].includes(w.ex[x.i].name))).map(x=>'<option value="'+x.i+'">'+escapeHtml(actualExerciseName(w.ex[x.i]))+'</option>').join("");
- renderCompletion();
+ renderCompletion();renderFocusMode();
 }
 function renderCompletion(){renderPlanCount()}
 
