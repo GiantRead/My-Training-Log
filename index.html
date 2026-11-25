@@ -638,7 +638,7 @@ const BLOCK_RUNS=[
 ["20–25 min easy + optional 4 relaxed strides","15–20 min easy","Race if scheduled and ready; otherwise 8–10 km easy"]
 ];
 function blockWeek(){return Math.max(1,Math.min(12,Math.floor(Number(localStorage.getItem("cutphase-block-week"))||1)))}
-function setBlockWeek(v){localStorage.setItem("cutphase-block-week",String(v));renderPlan()}
+function setBlockWeek(v){localStorage.setItem("cutphase-block-week",String(v));renderPlan();if(D[S.day][0]!=="Weekend")renderSets()}
 function blockGuidance(day,w){
  const light=[4,8,11,12].includes(w);
  if(day==="Tuesday"||day==="Thursday"||day==="Weekend"){
@@ -648,6 +648,16 @@ function blockGuidance(day,w){
  if(day==="Friday")return light?"Reduce working sets by about one third; no hard AMRAP. In race week omit heavy legs.":"Progress leg press reps first. Keep the 10-minute AMRAP at a repeatable effort, not failure; omit if it compromises Sunday. Compare only identical loads and movement standards.";
  if(day==="Wednesday")return light?"Reduce working sets by about one third; keep at least 3 reps in reserve. In race week omit heavy deadlifts and jumps.":"Deadlift with 2–3 reps in reserve and consistent setup; jumps remain low-rep and crisp. Stop if technique or landing quality worsens.";
  return light?"Reduce working sets by about one third, keep 3 reps in reserve, skip hard finishers.":"Heavy lifts: aim for 1–2 reps in reserve. Add reps before load; after two successful exposures at the top of the range, use the smallest available increment.";
+}
+function progressionHint(e,day){
+ if(e.unit!=="reps"||e.min===e.max||/jump|push-up|burpee|crunch|knee raise|rope|pull-up/i.test(e.name)||e.performedName)return "";
+ if([4,8,11,12].includes(blockWeek()))return "Lighter week: do not chase load increases.";
+ const sessions=S.history.filter(h=>h.day===day).slice(0,2);
+ const samples=sessions.map(h=>h.ex?.find(x=>x.name===e.name&&!x.performedName)).map(x=>(x?.data||[]).filter(t=>String(t.w??"").trim()&&String(t.r??"").trim()&&Number(t.w)>0&&Number(t.r)>0));
+ if(!samples[0]||samples[0].length<e.n)return "Log all working sets to unlock progression guidance.";
+ const good=a=>a.length>=e.n&&a.slice(0,e.n).every(t=>Number(t.r)>=e.max&&String(t.rir??"").trim()!==""&&Number(t.rir)>=1);
+ if(samples.length===2&&samples.every(good)&&Number(samples[0][0].w)>=Number(samples[1][0].w))return "Two successful sessions: consider the smallest available load increase; maintain technique and 1–2 RIR.";
+ return "Repeat the last appropriate load and build toward the top of the rep range; increase only after two successful sessions.";
 }
 function blockPanel(day){
  const w=blockWeek(),phase=w<=4?"Foundation":w<=8?"Build":w<=11?"Perform":"Taper / evaluate";
@@ -861,6 +871,7 @@ function renderSets(){
   if(item.kind==="legacy"&&(!next||next.kind!=="legacy"))suffix+='</details>';
   previousGroup=g?g[0]:"";previousKind=item.kind;
   const previous=last(actualExerciseName(e)),isRun=e.unit==="minutes",isRounds=e.unit==="rounds",targetUnit=isRun?"minutes":isRounds?"rounds":"reps";
+  const progression=item.kind==="planned"?progressionHint(e,day):"";
   const loadHint=e.loadHint?'<p class="plannedLoad">Target guidance: '+escapeHtml(e.loadHint)+'</p>':"";
   const isAmrapComponent=day==="Friday"&&item.kind==="planned"&&["Barbell push press","Barbell row","Burpee"].includes(e.name);
   if(isAmrapComponent&&e.name==="Barbell push press")prefix+='<details class="amrapLogDetails"><summary>Optional: AMRAP exercise details</summary><p class="muted">Your rounds are counted above. Individual entries are optional.</p>';
@@ -875,6 +886,7 @@ function renderSets(){
   return prefix+'<div class="exerciseCard'+(q.done?" isDone":"")+'" id="exercise-'+ei+'">'+
    '<div class="exerciseHeader"><div class="exHeading"><div class="exTitle">'+title+'</div><div class="prescribedNote">'+(e.performedName?"Planned: "+escapeHtml(e.name):"")+'</div><div class="exercisePrescription">'+e.n+' sets · '+e.min+'–'+e.max+' '+targetUnit+'</div></div>'+action+'</div>'+
    (previous?'<p class="exercisePrevious">Previous: '+escapeHtml(previous)+'</p>':"")+
+   (progression?'<p class="plannedLoad">Progression: '+escapeHtml(progression)+'</p>':"")+
    '<p class="exerciseProgress" id="progress-'+ei+'">'+escapeHtml(shortSetSummary(e))+'</p>'+
    '<details class="setEntryDetails" '+(q.done||e.name==="Battle ropes (40s work intervals)"?"":"open")+'><summary>Record actual sets · '+setCount+' rows</summary><div class="sets"><small>#</small><small>'+(isRun?"km":"kg")+'</small><small>'+(isRun?"min":isRounds?"rounds":"reps")+'</small><small>RIR</small>'+setsHtml+'</div>'+
    '<div class="setEntryActions"><button type="button" onclick="repeatExerciseLoad('+ei+',this)">↻ Repeat load</button><button type="button" class="addSetButton" onclick="addSet('+ei+',this)">＋ Add set</button></div>'+quickLegacy+'</details>'+
