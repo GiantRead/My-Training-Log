@@ -1,4 +1,4 @@
-const CACHE="mtl-v26-collapsed-set-entries";
+const CACHE="mtl-v27-mission-briefing";
 const ASSETS=["./","./index.html","./manifest.webmanifest","./assets/cutphase-comic-v18.webp","./assets/cutphase-v19/monday-clock.webp","./assets/cutphase-v19/tuesday-clock.webp","./assets/cutphase-v19/wednesday-clock.webp","./assets/cutphase-v19/thursday-clock.webp","./assets/cutphase-v19/friday-clock.webp","./assets/cutphase-v19/weekend-clock.webp"];
 
 self.addEventListener("install",event=>{

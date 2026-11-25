@@ -359,6 +359,32 @@ body.victoryOpen{overflow:hidden}
 #gymLogCard.focusMode .optionalHeader{display:none}
 #gymLogCard.focusMode .exerciseCard.focusActive{border:2px solid #65b9d9;background:#fff}
 @media(max-width:380px){.focusNav{grid-template-columns:82px minmax(0,1fr) 82px}.gymTools .focusToggle{min-width:86px;padding:6px}.focusNav button{font-size:11px}}
+
+/* Mission briefing: bold, full-width native disclosure, no extra navigation. */
+.missionPlanCard.instructionsCard{padding:0;border:1px solid #c6d7ea;border-radius:17px;overflow:hidden;box-shadow:0 5px 15px #18344f18;margin-top:12px;margin-bottom:14px}
+.missionPlanCard .planFold{margin:0;padding:0;border:0}
+.missionPlanCard .planFold>.missionPlanTrigger{position:relative;isolation:isolate;display:flex;align-items:center;justify-content:flex-start;gap:13px;min-height:106px;box-sizing:border-box;padding:16px 14px;margin:0;border:0;border-left:5px solid var(--dayAccent,#4cbcf2);background:linear-gradient(116deg,#142c47 0%,#0e2037 59%,#1a3853 100%);color:#fff;list-style:none;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;text-align:left}
+.missionPlanTrigger::-webkit-details-marker{display:none}
+.missionPlanTrigger::marker{content:""}
+.missionPlanTrigger:before{content:"";position:absolute;z-index:-1;inset:0;background:repeating-linear-gradient(125deg,transparent 0 17px,#e2f5ff08 18px 19px,transparent 20px 35px);pointer-events:none}
+.missionPlanTrigger:focus-visible{outline:3px solid #f5cd77;outline-offset:-5px}
+.missionPlanTrigger:active{filter:brightness(1.12)}
+.missionPlanEmblem{width:53px;height:57px;flex:0 0 53px;display:grid;place-items:center;border-radius:12px;border:1px solid #ffffff30;background:#ffffff0c;color:var(--dayAccent,#4cbcf2)}
+.missionPlanCopy{display:flex;min-width:0;flex:1;flex-direction:column;gap:5px}
+.missionPlanKicker{font-size:10px;font-weight:900;letter-spacing:1.65px;color:#c3e9fa}
+.missionPlanCopy strong{font-size:19px;font-weight:900;line-height:1.12;color:#fff;letter-spacing:-.35px}
+.missionPlanMeta{font-size:11px;font-weight:650;color:#d3e4f4;line-height:1.35}
+.missionPlanAction{display:flex;flex:0 0 auto;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:55px;min-height:55px;border:1px solid #ffffff40;border-radius:12px;background:var(--dayAccent,#4cbcf2);color:#102b38;font-size:10px;font-weight:950;letter-spacing:.8px}
+.missionPlanClose{display:none}
+.missionPlanAction svg{transition:transform .18s ease}
+.missionPlanCard .planFold[open] .missionPlanOpen{display:none}
+.missionPlanCard .planFold[open] .missionPlanClose{display:inline}
+.missionPlanCard .planFold[open] .missionPlanAction svg{transform:rotate(180deg)}
+.missionPlanCard #plan{padding:5px 12px 12px}
+.missionPlanCard #plan>.planGroup:first-child{background:#edf5fc!important;border-left-color:#3789b8!important}
+@media(max-width:370px){.missionPlanCard .planFold>.missionPlanTrigger{padding:14px 10px;gap:9px}.missionPlanEmblem{width:42px;flex-basis:42px;height:48px}.missionPlanEmblem svg{width:32px;height:32px}.missionPlanCopy strong{font-size:17px}.missionPlanAction{min-width:47px}}
+@media(prefers-reduced-motion:reduce){.missionPlanAction svg{transition:none}}
+
 </style></head><body>
 <header><div><b>Cut Phase</b><div class="muted">“Fall in love with the grind.”</div></div><div class="tabs" id="tabs"></div></header>
 <main>
@@ -368,7 +394,7 @@ body.victoryOpen{overflow:hidden}
 
 
 
-<div class="card instructionsCard"><details class="planFold" id="planDetails"><summary><strong>Workout plan &amp; instructions</strong><span class="muted">Tap to expand · workout log below</span></summary><div id="plan"></div></details></div>
+<div class="card instructionsCard missionPlanCard"><details class="planFold" id="planDetails"><summary class="missionPlanTrigger"><span class="missionPlanEmblem" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" width="40" height="40"><path d="M20 3 35 10v12c0 7-9 13-15 16C14 35 5 29 5 22V10L20 3Z" stroke="currentColor" stroke-width="1.6"/><path d="M23 8 12 22h7l-2 10 11-15h-7l2-9Z" fill="currentColor"/></svg></span><span class="missionPlanCopy"><span class="missionPlanKicker">MISSION BRIEFING</span><strong>Workout plan &amp;<br>instructions</strong><span id="missionPlanMeta" class="missionPlanMeta">Training block · daily game plan</span></span><span class="missionPlanAction" aria-hidden="true"><span class="missionPlanOpen">OPEN</span><span class="missionPlanClose">CLOSE</span><svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="m7 10 5 5 5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary><div id="plan"></div></details></div>
 <div class="card" id="mainTimerCard"><div class="row"><b>60-minute workout clock</b><span class="muted" id="clockState">Ready · 60-minute countdown</span></div><div class="clock" id="clock" aria-live="off">60:00</div><div class="clockButtons"><button class="primary" onclick="start()">Start</button><button onclick="stop()">Pause</button><button onclick="reset()">Reset</button></div><details class="timerHelp"><summary>About the countdown</summary><p class="muted">Elapsed time stays accurate across screen locks when reopened. iPhone web apps cannot reliably sound a background alarm.</p></details></div>
 <figure class="sceneBand sceneBand--clock" id="clockSceneFrame"><img id="clockScene" alt="Training artwork" decoding="async" loading="eager" width="1050" height="349"></figure>
 
@@ -666,6 +692,7 @@ function blockPanel(day){
 
 function renderPlan(){
  const d=D[S.day];
+ const meta=$("missionPlanMeta");if(meta)meta.textContent="Week "+blockWeek()+"/12 · "+d[2].length+" training steps";
  $("plan").innerHTML=blockPanel(d[0])+d[2].map((x,i)=>(
  '<div class="planGroup" data-type="'+planType(x[0])+'">'+
  '<div class="planHead"><span class="stepNumber">'+(i+1)+'</span><div class="stepText"><div class="planTitle">'+escapeHtml(x[0])+'</div></div></div>'+
