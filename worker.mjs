@@ -14,7 +14,7 @@ function redirect(cookie){return new Response(null,{status:303,headers:{...heade
 export default {
  async fetch(request,env){
   const secret=env.CUT_PHASE_PASSWORD;
-  if(typeof secret!=="string"||secret.length<24)return new Response("Cut Phase is locked until its administrator sets a strong password.",{status:503,headers});
+  if(typeof secret!=="string"||secret.length<4)return new Response("Cut Phase is locked until its administrator configures CUT_PHASE_PASSWORD (minimum 4 characters).",{status:503,headers});
   const url=new URL(request.url),k=await key(secret);
   if(url.pathname===LOGIN&&request.method==="POST"){
    if(request.headers.get("Origin")!==url.origin)return new Response("Forbidden",{status:403,headers});
