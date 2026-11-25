@@ -408,7 +408,7 @@ body.victoryOpen{overflow:hidden}
  </div>
 </div>
 <script>
-// CUT PHASE 2.0 · eight-week physique / half-marathon block.
+// CUT PHASE 2.0 · 12-week physique / half-marathon block.
 // No automatic load or distance increases: review actual performance each week.
 // Daily prescriptions are designed for approximately 60 minutes in a busy gym.
 // Exercise spec = [name, sets, min reps, max reps, starter guidance, optional unit].
@@ -622,9 +622,41 @@ function isStepDone(index){
  return !!w.planDone?.[section[0]];
 }
 // The plan shows the order and prescription; no duplicate checkboxes.
+// Cut Phase v24: manually selected progression week; never modifies saved workout records.
+const BLOCK_RUNS=[
+["30 min easy","20 min easy","8–9 km easy"],
+["35 min easy","20 min easy","9–10 km easy"],
+["35 min incl. 3 × 5 min comfortably hard, 2 min easy","20 min easy","10–11 km easy"],
+["25 min easy","15–20 min easy","8–9 km easy"],
+["35 min incl. 2 × 8 min comfortably hard, 3 min easy","20–25 min easy","11–12 km easy"],
+["35 min incl. 3 × 6 min comfortably hard, 2 min easy","25 min easy","12–13 km easy"],
+["35 min incl. 2 × 10 min comfortably hard, 3 min easy","25 min easy","13–14 km easy"],
+["25–30 min easy","20 min easy","10–11 km easy"],
+["35 min incl. 3 × 6 min near goal pace only if controlled","25 min easy","14–15 km easy"],
+["35 min incl. 2 × 10 min near goal pace only if controlled","20–25 min easy","15–17 km easy"],
+["25–30 min incl. 2 × 5 min near goal pace","20 min easy","10–12 km easy"],
+["20–25 min easy + optional 4 relaxed strides","15–20 min easy","Race if scheduled and ready; otherwise 8–10 km easy"]
+];
+function blockWeek(){return Math.max(1,Math.min(12,Math.floor(Number(localStorage.getItem("cutphase-block-week"))||1)))}
+function setBlockWeek(v){localStorage.setItem("cutphase-block-week",String(v));renderPlan()}
+function blockGuidance(day,w){
+ const light=[4,8,11,12].includes(w);
+ if(day==="Tuesday"||day==="Thursday"||day==="Weekend"){
+  const run=BLOCK_RUNS[w-1][["Tuesday","Thursday","Weekend"].indexOf(day)];
+  return run+". All running targets include warm-up and cool-down on midweek days. Start below target if recent mileage is lower; repeat a week if recovery is poor. Easy = conversational; goal pace ~5:41/km, not a mandatory training pace. "+(light?"Reduce accessory work and skip hard conditioning this week.":"On quality-run days, keep the functional circuit easy or omit it.");
+ }
+ if(day==="Friday")return light?"Reduce working sets by about one third; no hard AMRAP. In race week omit heavy legs.":"Progress leg press reps first. Keep the 10-minute AMRAP at a repeatable effort, not failure; omit if it compromises Sunday. Compare only identical loads and movement standards.";
+ if(day==="Wednesday")return light?"Reduce working sets by about one third; keep at least 3 reps in reserve. In race week omit heavy deadlifts and jumps.":"Deadlift with 2–3 reps in reserve and consistent setup; jumps remain low-rep and crisp. Stop if technique or landing quality worsens.";
+ return light?"Reduce working sets by about one third, keep 3 reps in reserve, skip hard finishers.":"Heavy lifts: aim for 1–2 reps in reserve. Add reps before load; after two successful exposures at the top of the range, use the smallest available increment.";
+}
+function blockPanel(day){
+ const w=blockWeek(),phase=w<=4?"Foundation":w<=8?"Build":w<=11?"Perform":"Taper / evaluate";
+ return '<div class="planGroup"><div class="planTitle">12-week performance block · '+phase+'</div><label for="blockWeekSelect">Training week </label><select id="blockWeekSelect" onchange="setBlockWeek(this.value)">'+Array.from({length:12},(_,i)=>'<option value="'+(i+1)+'" '+(w===i+1?'selected':'')+'>Week '+(i+1)+'</option>').join("")+'</select><p class="stepPrescription">'+escapeHtml(blockGuidance(day,w))+'</p><details class="stepTips"><summary>Progression and recovery rules</summary><p class="muted">Week-specific guidance overrides generic targets below. Weeks 4 and 8 are lighter; weeks 11–12 reduce fatigue. Do not advance automatically. Keep exercise logs accurate even when doing fewer sets. Increase only one running stressor at a time; avoid forcing distance if pain or persistent fatigue develops. Race date and readiness determine the taper.</p></details></div>';
+}
+
 function renderPlan(){
  const d=D[S.day];
- $("plan").innerHTML=d[2].map((x,i)=>(
+ $("plan").innerHTML=blockPanel(d[0])+d[2].map((x,i)=>(
  '<div class="planGroup" data-type="'+planType(x[0])+'">'+
  '<div class="planHead"><span class="stepNumber">'+(i+1)+'</span><div class="stepText"><div class="planTitle">'+escapeHtml(x[0])+'</div></div></div>'+
  '<p class="stepPrescription">'+escapeHtml(x[1])+'</p>'+
