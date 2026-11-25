@@ -735,7 +735,7 @@ function exerciseComment(i,v){let e=S.work[D[S.day][0]].ex[i];quick(e).comment=v
 function quickVal(i,k,v){let e=S.work[D[S.day][0]].ex[i];quick(e)[k]=v;save();const label=$("progress-"+i);if(label)label.textContent=shortSetSummary(e)}
 function markExercise(i,button){
  const e=S.work[D[S.day][0]].ex[i],q=quick(e);q.done=!q.done;save();
- if(button){button.classList.toggle("primary",q.done);button.textContent=q.done?"✓ Done":"Mark done";button.setAttribute("aria-pressed",String(q.done));const card=button.closest(".exerciseCard");card?.classList.toggle("isDone",q.done);const details=card?.querySelector(".setEntryDetails");if(details)details.open=!q.done;}
+ if(button){button.classList.toggle("primary",q.done);button.textContent=q.done?"✓ Done":"Mark done";button.setAttribute("aria-pressed",String(q.done));const card=button.closest(".exerciseCard");card?.classList.toggle("isDone",q.done);const details=card?.querySelector(".setEntryDetails");if(details&&q.done)details.open=false;}
  renderCompletion();
 }
 
@@ -888,7 +888,7 @@ function renderSets(){
    (previous?'<p class="exercisePrevious">Previous: '+escapeHtml(previous)+'</p>':"")+
    (progression?'<p class="plannedLoad">Progression: '+escapeHtml(progression)+'</p>':"")+
    '<p class="exerciseProgress" id="progress-'+ei+'">'+escapeHtml(shortSetSummary(e))+'</p>'+
-   '<details class="setEntryDetails" '+(q.done||e.name==="Battle ropes (40s work intervals)"?"":"open")+'><summary>Record actual sets · '+setCount+' rows</summary><div class="sets"><small>#</small><small>'+(isRun?"km":"kg")+'</small><small>'+(isRun?"min":isRounds?"rounds":"reps")+'</small><small>RIR</small>'+setsHtml+'</div>'+
+   '<details class="setEntryDetails"><summary>Record actual sets · '+setCount+' rows</summary><div class="sets"><small>#</small><small>'+(isRun?"km":"kg")+'</small><small>'+(isRun?"min":isRounds?"rounds":"reps")+'</small><small>RIR</small>'+setsHtml+'</div>'+
    '<div class="setEntryActions"><button type="button" onclick="repeatExerciseLoad('+ei+',this)">↻ Repeat load</button><button type="button" class="addSetButton" onclick="addSet('+ei+',this)">＋ Add set</button></div>'+quickLegacy+'</details>'+
    '<details class="exerciseSwap"><summary>↔ Swap exercise / equipment</summary><label>Actual movement (if different from plan)<input class="performedNameInput" type="text" maxlength="90" value="'+escapeHtml(e.performedName||"")+'" placeholder="e.g. DB biceps curl"></label><div class="swapActions"><button type="button" onclick="applyPerformedName('+ei+')">Use actual exercise</button><button type="button" onclick="applyPerformedName('+ei+',true)">Use planned</button></div><p class="muted">Original prescription and existing history stay intact.</p></details>'+
    '<details class="exerciseMore"><summary>Notes'+(notesSaved?" · saved":"")+'</summary><textarea rows="2" placeholder="Load changes, technique, interruptions…" oninput="exerciseComment('+ei+',this.value)">'+escapeHtml(q.comment||e.comment||"")+'</textarea>'+loadHint+'</details></div>'+suffix;
